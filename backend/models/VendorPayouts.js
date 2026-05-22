@@ -64,6 +64,6 @@ const vendorPayoutSchema = new mongoose.Schema(
     }
 );
 
-const VendorPayout = mongoose.model("VendorPayout",vendorPayoutSchema);
+const VendorPayout = mongoose.model("VendorPayout", vendorPayoutSchema);
 
-export default VendorPayout;
+export { VendorPayout };

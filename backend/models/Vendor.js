@@ -66,4 +66,4 @@ const vendorSchema = new mongoose.Schema(
 
 const Vendor = mongoose.model("Vendor", vendorSchema);
 
-export default Vendor;
+export { Vendor };
