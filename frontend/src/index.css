@@ -1,5 +1,18 @@
 @import "tailwindcss";
-
+@theme {
+  --color-ink: #0A0A0A;
+  --color-ink-soft: #525252;
+  --color-paper: #FAFAFA;
+  --color-line: #E5E5E5;
+  --color-accent: #D4FF00;
+  --font-display: "Space Grotesk", sans-serif;
+  --font-body: "Inter", sans-serif;
+}
+body {
+  font-family: var(--font-body);
+  color: var(--color-ink);
+  background: var(--color-paper);
+}
 a.active hr{
   display:block;
 }
