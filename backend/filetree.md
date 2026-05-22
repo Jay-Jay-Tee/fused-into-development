@@ -27,7 +27,10 @@
 │   │   ├── Refund.js               # Refund requests and statuses
 │   │   ├── Cart.js                 # Buyer cart items
 │   │   ├── Wishlist.js             # Buyer wishlist items
-│   │   ├── VendorPayouts.js         # Vendor payouts every month
+│   │   ├── DeliveryAgent.js        # Delivery agent specific information   [V2 feat]
+│   │   ├── AgentLocation.js        # Location of the agent                 [V2 feat]
+│   │   ├── Address.js              # Buyer's saved addresses
+│   │   ├── VendorPayouts.js        # Vendor payouts every month
 │   │   └── Payment.js              # Payment metadata and transaction refs
 │   │
 │   │
@@ -39,6 +42,7 @@
 │   │   ├── admin.routes.js         # Admin analytics/moderation routes
 │   │   ├── review.routes.js        # Review creation and retrieval
 │   │   ├── refund.routes.js        # Refund request handling
+│   │   ├── delivery.routes.js      # Delivery request handling             [V2 feat]
 │   │   └── payment.routes.js       # Razorpay order/payment verification
 │   │
 │   ├── services
@@ -46,6 +50,7 @@
 │   │   ├── paymentService.js       # Razorpay business/payment operations
 │   │   ├── inventoryService.js     # Stock checks and inventory updates
 │   │   ├── recommendationService.js# Recommendation generation logic
+│   │   ├── deliveryService.js      # delivery requests and checks logic       [V2 feat]
 │   │   └── authService.js          # JWT/token/password helper logic
 │   │
 │   ├── utils

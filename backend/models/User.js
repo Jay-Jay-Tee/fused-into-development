@@ -2,6 +2,8 @@ import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 import validator from 'validator';
 
+import addressSchema from './Address.js';
+
 const userSchema = new mongoose.Schema(
     {
         name: {
@@ -37,9 +39,10 @@ const userSchema = new mongoose.Schema(
         refreshToken: {
             type: String,
             select: false
-        }
+        },
+        addresses: [addressSchema]
     },
-    
+
     {
         timestamps: true
     }
@@ -48,7 +51,7 @@ const userSchema = new mongoose.Schema(
 userSchema.pre('save', async function (next) {
     if (!this.isModified('password')) {
         return next();
-    }   
+    }
 
     this.password = await bcrypt.hash(this.password, 10);
     next();

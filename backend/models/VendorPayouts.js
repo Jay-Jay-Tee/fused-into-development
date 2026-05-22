@@ -11,7 +11,7 @@ const monthlyPayoutSchema = new mongoose.Schema(
 
         year: {
             type: Number,
-            required: true
+            required: true,
         },
 
         totalRevenue: {
@@ -42,6 +42,12 @@ const monthlyPayoutSchema = new mongoose.Schema(
 
         paidAt: {
             type: Date
+        },
+
+        paymentinfo: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Payment",
+            required: true
         }
     },
     {

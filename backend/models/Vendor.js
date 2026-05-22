@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import addressSchema from "./Address.js";
 
 const vendorSchema = new mongoose.Schema(
     {
@@ -32,21 +33,7 @@ const vendorSchema = new mongoose.Schema(
             type: String
         },
 
-        address: {
-            type: String
-        },
-
-        city: {
-            type: String
-        },
-
-        state: {
-            type: String
-        },
-
-        pincode: {
-            type: String
-        },
+        addresses: [addressSchema],
 
         categories: [
             {
