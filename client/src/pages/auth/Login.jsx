@@ -1,14 +1,14 @@
-import {useState} from "react";
+import { useState } from "react";
 function Login() {
-  const [email,setEmail]=useState("");
-  const [password,setPassword]=useState("");
-  const handleSubmit=(e)=>{
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const handleSubmit = (e) => {
     e.preventDefault();
     if (!email || !password) {
       alert("Fill both email and password");
       return;
     }
-    console.log("Logging in with:", email,password);
+    console.log("Logging in with:", email, password);
   };
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 p-8">
@@ -20,7 +20,7 @@ function Login() {
             <input
               type="email"
               value={email}
-              onChange={(e)=>setEmail(e.target.value)}
+              onChange={(e) => setEmail(e.target.value)}
               className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:border-blue-500"
               placeholder="you@example.com"
             />
@@ -30,7 +30,7 @@ function Login() {
             <input
               type="password"
               value={password}
-              onChange={(e)=>setPassword(e.target.value)}
+              onChange={(e) => setPassword(e.target.value)}
               className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:border-blue-500"
               placeholder="Enter your password"
             />
