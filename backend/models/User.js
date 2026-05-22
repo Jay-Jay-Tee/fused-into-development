@@ -36,11 +36,31 @@ const userSchema = new mongoose.Schema(
             match: [/^\d{10}$/, 'Phone number must be 10 digits'],
             unique: true
         },
+        addresses: [addressSchema],
+        cart: [
+            {
+                product: {
+                    type: mongoose.Schema.Types.ObjectId,
+                    ref: 'Product',
+                    required: true
+                },
+                quantity: {
+                    type: Number,
+                    required: true,
+                    min: 1
+                }
+            }
+        ],
+        wishlist: [
+            {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'Product'
+            }
+        ],
         refreshToken: {
             type: String,
             select: false
-        },
-        addresses: [addressSchema]
+        }
     },
 
     {
