@@ -9,6 +9,7 @@ import Cart from './pages/Cart'
 import Login from './pages/Login'
 import PlaceOrder from './pages/PlaceOrder'
 import Navbar from './components/NavBar'
+import Orders from './pages/Orders'
 
 const App = () => {
   return (
@@ -19,11 +20,11 @@ const App = () => {
             <Route path='/collection' element={<Collection/>} />
             <Route path='/about' element={<About/>} />
             <Route path='/contact' element={<Contact/>} />
-            <React path='/product/:productId' element={<Product/>} />
-            <React path='/cart' element={<Cart/>} />
-            <React path='/login' element={<Login/>} />
-            <React path='/place-order' element={<PlaceOrder/>} />
-            <React path='/orders' element={<Orders/>} />
+            <Route path='/product/:productId' element={<Product/>} />
+            <Route path='/cart' element={<Cart/>} />
+            <Route path='/login' element={<Login/>} />
+            <Route path='/place-order' element={<PlaceOrder/>} />
+            <Route path='/orders' element={<Orders/>} />
         </Routes>
     </div>
 
