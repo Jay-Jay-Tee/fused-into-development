@@ -25,4 +25,4 @@ paymentSchema.index({ method: 1, transactionId: 1 }, { unique: true });
 
 const Payment = mongoose.model("Payment", paymentSchema);
 
-export default Payment;
+export { Payment };

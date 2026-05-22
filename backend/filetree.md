@@ -25,8 +25,6 @@
 │   │   ├── Review.js               # Product reviews and ratings
 │   │   ├── Category.js             # Product categories/subcategories
 │   │   ├── Refund.js               # Refund requests and statuses
-│   │   ├── Cart.js                 # Buyer cart items
-│   │   ├── Wishlist.js             # Buyer wishlist items
 │   │   ├── DeliveryAgent.js        # Delivery agent specific information   [V2 feat]
 │   │   ├── AgentLocation.js        # Location of the agent                 [V2 feat]
 │   │   ├── Address.js              # Buyer's saved addresses
