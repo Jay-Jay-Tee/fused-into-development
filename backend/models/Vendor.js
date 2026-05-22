@@ -1,0 +1,82 @@
+import mongoose from "mongoose";
+
+const vendorSchema = new mongoose.Schema(
+    {
+        user: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
+            required: true,
+            unique: true
+        },
+
+        storeName: {
+            type: String,
+            required: [true, "Store name is required"],
+            trim: true
+        },
+
+        storeDescription: {
+            type: String,
+            maxlength: [500, "Description too long"]
+        },
+
+        logo: {
+            type: String
+        },
+
+        bannerImage: {
+            type: String
+        },
+
+        phone: {
+            type: String
+        },
+
+        address: {
+            type: String
+        },
+
+        city: {
+            type: String
+        },
+
+        state: {
+            type: String
+        },
+
+        pincode: {
+            type: String
+        },
+
+        categories: [
+            {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: "Category"
+            }
+        ],
+
+        isApproved: {
+            type: Boolean,
+            default: false
+        },
+
+        averageRating: {
+            type: Number,
+            default: 0,
+            min: 0,
+            max: 5
+        },
+
+        payout: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "VendorPayout"
+        }
+    },
+    {
+        timestamps: true
+    }
+);
+
+const Vendor = mongoose.model("Vendor", vendorSchema);
+
+export default Vendor;
