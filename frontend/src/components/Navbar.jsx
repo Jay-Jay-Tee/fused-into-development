@@ -9,19 +9,19 @@ const Navbar=()=>{
             <ul className='hidden sm:flex gap-5 text-sm text-ink-soft'>
                 <NavLink to='/' className='flex flex-col items-center gap-1'>
                     <p>HOME</p>
-                    <hr className='w-2/4 border-none h-[1.5px] bg-ink hidden' />
+                    <hr className='w-2/4 border-none h-[1.5px] bg-navy hidden' />
                 </NavLink>
                 <NavLink to='/collection' className='flex flex-col items-center gap-1'>
                     <p>COLLECTION</p>
-                    <hr className='w-2/4 border-none h-[1.5px] bg-ink hidden' />
+                    <hr className='w-2/4 border-none h-[1.5px] bg-navy hidden' />
                 </NavLink>
                 <NavLink to='/about' className='flex flex-col items-center gap-1'>
                     <p>ABOUT</p>
-                    <hr className='w-2/4 border-none h-[1.5px] bg-ink hidden' />
+                    <hr className='w-2/4 border-none h-[1.5px] bg-navy hidden' />
                 </NavLink>
                 <NavLink to='/contact' className='flex flex-col items-center gap-1'>
                     <p>CONTACT</p>
-                    <hr className='w-2/4 border-none h-[1.5px] bg-ink hidden' />
+                    <hr className='w-2/4 border-none h-[1.5px] bg-navy hidden' />
                 </NavLink>
             </ul>
             <div className='flex items-center gap-6'>
@@ -38,7 +38,7 @@ const Navbar=()=>{
                 </div>
                 <Link to='/cart' className='relative'>
                     <img src={assets.cart_icon} className='w-5 min-w-5' alt="" />
-                    <p className='absolute right-[-5px] bottom-[-5px] w-4 text-center leading-4 bg-ink text-white aspect-square rounded-full text-[8px]'>10</p>
+                    <p className='absolute right-[-5px] bottom-[-5px] w-4 text-center leading-4 bg-brick text-white aspect-square rounded-full text-[8px]'>10</p>
                 </Link>
                 <img onClick={()=>setVisible(true)} src={assets.menu_icon} className='w-5 cursor-pointer sm:hidden' alt="" />
             </div>
