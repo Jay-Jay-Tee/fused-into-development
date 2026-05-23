@@ -8,6 +8,16 @@ const categorySchema = new mongoose.Schema(
             unique: true,
             trim: true
         },
+        slug: {
+            type: String,
+            required: [true, "Category slug is required"],
+            unique: true,
+            lowercase: true,
+            trim: true
+        },
+        icon: {
+            type: String
+        },
         parentCategory: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "Category",
