@@ -1,7 +1,7 @@
 import express from 'express';
 const router = express.Router();
 
-import { adminService }      from '../services/adminService.js';
+import { adminController }   from '../controller/adminController.js';
 import { asyncHandler }      from '../middleware/asyncHandler.js';
 import { auth }              from '../middleware/auth.js';
 import { role }              from '../middleware/role.js';
@@ -14,28 +14,28 @@ router.get(
     '/analytics',
     auth,
     role("admin"),
-    asyncHandler(adminService.getAnalytics)
+    asyncHandler(adminController.getAnalytics)
 )
 
 router.get(
     'vendors/pending',
     auth,
     role("admin"),
-    asyncHandler(adminService.getPendingVendors)
+    asyncHandler(adminController.getPendingVendors)
 )
 
 router.post(
     'categories',
     auth,
     role("admin"),
-    asyncHandler(adminService.addCategory)
+    asyncHandler(adminController.addCategory)
 )
 
 router.put(
     'commission',
     auth,
     role("admin"),
-    asyncHandler(adminService.updateCommission)
+    asyncHandler(adminController.updateCommission)
 )
 
 export { router as orderRoutes };
