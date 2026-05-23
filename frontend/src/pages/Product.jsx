@@ -77,11 +77,7 @@ const Product=()=>{
                         </div>
                         <p className='text-sm text-ink-soft'>{productData.stock} in stock</p>
                     </div>
-                    <button onClick={()=>{
-                        for (let i=0;i<quantity;i++){
-                            addToCart(productData._id, size);
-                        }
-                    }} className='bg-ink text-paper px-8 py-3 text-sm hover:bg-navy transition-colors'>
+                    <button onClick={()=>addToCart(productData._id, size, quantity)} className='bg-ink text-paper px-8 py-3 text-sm hover:bg-navy transition-colors'>
                         ADD TO CART
                     </button>
                     <hr className='mt-8 sm:w-4/5 border-line'/>

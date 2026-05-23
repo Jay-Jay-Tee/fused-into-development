@@ -9,22 +9,22 @@ const ShopContextProvider=(props)=>{
     const [showSearch,setShowSearch]=useState(false);
     const [cartItems,setCartItems]=useState({});
 
-    const addToCart=async(itemId,size)=>{
-        if (!size && products.find(p=>p._id===itemId)?.sizes?.length>0){
-            toast.error('Select product size');
-            return;
-        }
+    const addToCart=async(itemId,size,quantity=1)=>{
+       if (!size && products.find(p=>p._id===itemId)?.sizes?.length>0){
+           toast.error('Select product size');
+           return;
+        } 
         let cartData=structuredClone(cartItems);
         const key=size||'default';
-        if (cartData[itemId]){
-            if (cartData[itemId][key]){
-                cartData[itemId][key]+=1;
+            if (cartData[itemId]){
+                if (cartData[itemId][key]){
+                    cartData[itemId][key]+=quantity;
+                } else {
+                    cartData[itemId][key]=quantity;
+                }
             } else {
-                cartData[itemId][key]=1;
-            }
-        } else {
             cartData[itemId]={};
-            cartData[itemId][key]=1;
+            cartData[itemId][key]=quantity;
         }
         setCartItems(cartData);
         toast.success('Added to cart');

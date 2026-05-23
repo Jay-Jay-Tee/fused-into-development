@@ -8,6 +8,7 @@ import exchange_icon from "./exchange_icon.png";
 import quality_icon from "./quality_icon.png";
 import support_img from "./support_img.png";
 import cross_icon from "./cross_icon.png";
+import bin_icon from './bin_icon.png'
 export const assets = {
   logo,
   search_icon,
@@ -19,6 +20,7 @@ export const assets = {
   quality_icon,
   support_img,
   cross_icon,
+  bin_icon,
 };
 export const products = [
   {
