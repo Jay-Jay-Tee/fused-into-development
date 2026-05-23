@@ -6,7 +6,7 @@
 ├── src
 │   │
 │   ├── config
-│   │   ├── db.js                    # MongoDB connection setup (Mongoose)
+│   │   ├── db.js                   # MongoDB connection setup (Mongoose)
 │   │   ├── razorpay.js             # Razorpay client initialization
 │   │   └── cloudinary.js           # Cloudinary configuration
 │   │
@@ -40,16 +40,21 @@
 │   │   ├── admin.routes.js         # Admin analytics/moderation routes
 │   │   ├── review.routes.js        # Review creation and retrieval
 │   │   ├── refund.routes.js        # Refund request handling
+│   │   ├── ai.routes.js            # AI requests handling
 │   │   ├── delivery.routes.js      # Delivery request handling             [V2 feat]
 │   │   └── payment.routes.js       # Razorpay order/payment verification
 │   │
 │   ├── services
-│   │   ├── aiService.js            # Claude/OpenAI recommendation + AI logic
-│   │   ├── paymentService.js       # Razorpay business/payment operations
-│   │   ├── inventoryService.js     # Stock checks and inventory updates
-│   │   ├── recommendationService.js# Recommendation generation logic
+│   │   ├── authService.js          # JWT/token/password helper logic
+│   │   ├── productService.js       # product viewing, creating, editing logic
+│   │   ├── orderService.js         # Stock checks and inventory updates
+│   │   ├── vendorService.js        # Vendor related Services
+│   │   ├── adminService.js         # admin controls
+│   │   ├── reviewService.js        # Review creating, fetching, edit
+│   │   ├── refundService.js        # Refund handling logic, excluding payment
+│   │   ├── aiService.js            # Recommendation generation logic
 │   │   ├── deliveryService.js      # delivery requests and checks logic       [V2 feat]
-│   │   └── authService.js          # JWT/token/password helper logic
+│   │   └── paymentService.js       # Razorpay business/payment operations
 │   │
 │   ├── utils
 │   │   ├── paginate.js             # Pagination helper for APIs

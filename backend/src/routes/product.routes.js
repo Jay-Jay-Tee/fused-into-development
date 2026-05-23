@@ -1,7 +1,7 @@
 import express from 'express';
 const router = express.Router();
 
-import { productController } from '../controllers/productController.js';
+import { productService }    from '../services/productService.js';
 import { asyncHandler }      from '../middleware/asyncHandler.js';
 import { auth }              from '../middleware/auth.js';
 import { role }              from '../middleware/role.js';
@@ -9,9 +9,9 @@ import { role }              from '../middleware/role.js';
 // ----- PUBLIC ROUTES (no auth required) ------------------
 
 // get all products
-router.get('/', asyncHandler(productController.getProducts));
+router.get('/', asyncHandler(productService.getProducts));
 // get product by id
-router.get('/:id', asyncHandler(productController.getProductById));
+router.get('/:id', asyncHandler(productService.getProductById));
 
 // ----- PROTECTED ROUTES -----------------------------------
 
@@ -20,21 +20,21 @@ router.post(
   '/',
   auth,                       
   role('seller'),             
-  asyncHandler(productController.createProduct)
+  asyncHandler(productService.createProduct)
 );
 // update product by id
 router.put(
   '/:id',
   auth,
   role('seller'),
-  asyncHandler(productController.updateProduct)
+  asyncHandler(productService.updateProduct)
 );
 // delete product by id
 router.delete(
   '/:id',
   auth,
   role('seller'),
-  asyncHandler(productController.deleteProduct)
+  asyncHandler(productService.deleteProduct)
 );
 
 export { router as productRoutes };
