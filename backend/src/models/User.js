@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 import validator from 'validator';
 
-import addressSchema from './Address.js';
+import { addressSchema } from './Address.js';
 
 const userSchema = new mongoose.Schema(
     {
