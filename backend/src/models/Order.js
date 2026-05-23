@@ -83,10 +83,7 @@ const orderSchema = new mongoose.Schema(
             type: Number,
             required: true
         },
-        createdAt: {
-            type: Date,
-            default: Date.now
-        },
+        // createdAt and updatedAt are automatically added by timestamps: true
         deliveredAt: Date
     },
     {

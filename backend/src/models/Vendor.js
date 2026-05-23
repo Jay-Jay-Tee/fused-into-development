@@ -52,11 +52,6 @@ const vendorSchema = new mongoose.Schema(
             default: 0,
             min: 0,
             max: 5
-        },
-
-        payout: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "VendorPayout"
         }
     },
     {

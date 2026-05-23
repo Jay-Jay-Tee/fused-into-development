@@ -1,68 +1,38 @@
 import mongoose from "mongoose";
 
-const monthlyPayoutSchema = new mongoose.Schema(
+const vendorPayoutSchema = new mongoose.Schema(
     {
+        vendor: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Vendor",
+            required: true,
+            unique: true
+        },
         month: {
             type: Number,
             required: true,
             min: 1,
             max: 12
         },
-
         year: {
             type: Number,
-            required: true,
+            required: true
         },
-
-        totalRevenue: {
-            type: Number,
-            default: 0
-        },
-
-        commissionDeducted: {
-            type: Number,
-            default: 0
-        },
-
-        finalPayout: {
-            type: Number,
-            default: 0
-        },
-
-        totalOrders: {
-            type: Number,
-            default: 0
-        },
-
         status: {
             type: String,
-            enum: ["pending", "processed"],
-            default: "pending"
+            enum: ["pending", "paid"]
         },
-
-        paidAt: {
-            type: Date
-        },
-
-        paymentinfo: {
+        paymentInfo: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: "Payment",
-            required: true
+            ref: "Payment"
         }
-    },
-    {
-        _id: false
-    }
-);
-
-const vendorPayoutSchema = new mongoose.Schema(
-    {
-        payouts: [monthlyPayoutSchema]
     },
     {
         timestamps: true
     }
 );
+
+vendorPayoutSchema.index({ vendor: 1, month: 1, year: 1 }, { unique: true });
 
 const VendorPayout = mongoose.model("VendorPayout", vendorPayoutSchema);
 
