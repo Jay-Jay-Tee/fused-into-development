@@ -1,5 +1,7 @@
 import { getRecommendations as getRecommendationsFromAI, expandSearchQuery, suggestProductPrice } from '../services/aiService.js';
 
+
+// ---- POST /api/ai/recommendations ---------
 const getProductRecommendations = async (req, res) => {
     const { viewedProducts } = req.body;
 
@@ -14,7 +16,7 @@ const getProductRecommendations = async (req, res) => {
     });
 };
 
-// ── POST /api/ai/search ──────────────────────────────────────
+// --- POST /api/ai/search ----------------
 const expandSearch = async (req, res) => {
     const { query } = req.body;
 
@@ -33,8 +35,7 @@ const expandSearch = async (req, res) => {
     });
 };
 
-// ── POST /api/ai/price-suggest ───────────────────────────────
-
+//---- POST /api/ai/price-suggest ------------------------
 const getPriceSuggestion = async (req, res) => {
     const { productName, category } = req.body;
 
