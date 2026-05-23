@@ -1,4 +1,4 @@
-import React,{createContext,useState,useEffect}from 'react'
+import React,{createContext,useState,useMemo}from 'react'
 import {products} from '../assets/assets'
 import {toast} from 'react-toastify'
 export const ShopContext=createContext();
@@ -38,7 +38,9 @@ const ShopContextProvider=(props)=>{
                     if (cartItems[items][item]>0){
                         totalCount+=cartItems[items][item];
                     }
-                } catch(error){}
+                } catch(error){
+                    console.error(error);
+                }
             }
         }
         return totalCount;
@@ -59,13 +61,15 @@ const ShopContextProvider=(props)=>{
                     if (cartItems[items][item]>0){
                         totalAmount+=itemInfo.price*cartItems[items][item];
                     }
-                } catch(error){}
+                } catch(error){
+                    console.error(error);
+                }
             }
         }
         return totalAmount;
     }
 
-    const value={
+    const value=useMemo(()=>({
         products,
         currency,
         delivery_fee,
@@ -76,7 +80,7 @@ const ShopContextProvider=(props)=>{
         getCartCount,
         updateQuantity,
         getCartAmount,
-    }
+    }),[search,showSearch,cartItems]);
     return (
         <ShopContext.Provider value={value}>
             {props.children}
