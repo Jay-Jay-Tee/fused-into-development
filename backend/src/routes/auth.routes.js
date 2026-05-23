@@ -1,17 +1,17 @@
 import express from 'express';
 const router = express.Router();
 
-import { authService }      from '../services/authService.js';
+import { authController }    from '../controller/authController.js';
 import { asyncHandler }      from '../middleware/asyncHandler.js';
 
 // ----- PUBLIC ROUTES (no auth required) ------------------
 
-router.post("/register", asyncHandler(authService.register)); 
-router.post("/login", asyncHandler(authService.login));
-router.post("/refresh-token", asyncHandler(authService.refreshToken));
+router.post("/register", asyncHandler(authController.register)); 
+router.post("/login", asyncHandler(authController.login));
+router.post("/refresh-token", asyncHandler(authController.refreshToken));
 
 // maybe make in V2
-// router.post("/logout", asyncHandler(orderService.logout));  
+// router.post("/logout", asyncHandler(orderController.logout));  
 
 // ----- PROTECTED ROUTES -----------------------------------
 

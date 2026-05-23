@@ -1,7 +1,7 @@
 import express from 'express';
 const router = express.Router();
 
-import { orderService }      from '../services/orderService.js';
+import { orderController }   from '../controller/orderController.js';
 import { asyncHandler }      from '../middleware/asyncHandler.js';
 import { auth }              from '../middleware/auth.js';
 import { role }              from '../middleware/role.js';
@@ -14,35 +14,35 @@ router.post(
     '/',
     auth,
     role(["buyer"]),
-    asyncHandler(orderService.createOrder)
+    asyncHandler(orderController.createOrder)
 )
 
 router.get(
     '/my',
     auth,
     role(["buyer"]),
-    asyncHandler(orderService.getMyOrders)
+    asyncHandler(orderController.getMyOrders)
 )
 
 router.get(
     '/vendor',
     auth,
     role(["vendor"]),
-    asyncHandler(orderService.getVendorOrders)
+    asyncHandler(orderController.getVendorOrders)
 )
 
 router.get(
     '/:id',
     auth,
     role(["buyer", "vendor"]),
-    asyncHandler(orderService.getOrderById)
+    asyncHandler(orderController.getOrderById)
 )
 
 router.put(
     '/:id/status',
     auth,
     role(["vendor"]),
-    asyncHandler(orderService.updateOrderStatus)
+    asyncHandler(orderController.updateOrderStatus)
 )
 
 export { router as orderRoutes };

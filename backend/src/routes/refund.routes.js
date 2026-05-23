@@ -1,7 +1,7 @@
 import express from 'express';
 const router = express.Router();
 
-import { refundService }     from '../services/refundService.js';
+import { refundController }  from '../controller/refundController.js';
 import { asyncHandler }      from '../middleware/asyncHandler.js';
 import { auth }              from '../middleware/auth.js';
 import { role }              from '../middleware/role.js';
@@ -14,41 +14,41 @@ router.post(
     '/',
     auth,
     role("buyer"),
-    asyncHandler(refundService.raiseRefund)
+    asyncHandler(refundController.raiseRefund)
 )
 
 router.get(
     '/',
     auth,
     role("admin"),
-    asyncHandler(refundService.getAllRefunds)
+    asyncHandler(refundController.getAllRefunds)
 )
 
 router.get(
     '/my',
     auth,
     role("buyer"),
-    asyncHandler(refundService.getBuyerRefunds)
+    asyncHandler(refundController.getBuyerRefunds)
 )
 
 router.get(
     '/:id',
     auth,
     role("buyer", "admin"),
-    asyncHandler(refundService.getRefundById)   // get refund by ID should check role
+    asyncHandler(refundController.getRefundById)   // get refund by ID should check role
 )
 
 router.put(
     '/:id/approve',
     auth,
     role("admin"),
-    asyncHandler(refundService.approveRefund)
+    asyncHandler(refundController.approveRefund)
 )
 router.put(
     '/:id/reject',
     auth,
     role("admin"),
-    asyncHandler(refundService.rejectRefund)
+    asyncHandler(refundController.rejectRefund)
 )
 
 export { router as productRoutes };

@@ -1,19 +1,38 @@
-import OpenAI from 'openai'
+import OpenAI from 'openai';
+import { Order } from '../models/Order.js';
+import { Product } from '../models/Product.js';
 
 const client = new OpenAI({
   baseURL: 'https://openrouter.ai/api/v1',
 
   apiKey: process.env.OPENROUTER_API_KEY,
-})
+});
 
 //recommendation engine
 
 export const getRecommendations = async ({
   viewedProducts,
-  orderCategories,
-  catalogueSample,
+  userId
 }) => {
   try {
+    const pastOrders = await Order.find({ buyer: userId })
+      .limit(10)
+      .select('items.category')
+      .lean();
+
+    // map i to i.category, then as all i belongs to an order, map that array of i to its order
+    // then map that array of array of categories to a flatMap, then a set
+    const orderCategories = [...new Set(pastOrders.flatMap(o => o.items.map(i => i.category)))];
+
+    const catalogueSample = await Product.find({
+      isActive: true,
+      ...(orderCategories.length > 0 && { category: { $in: orderCategories } })
+    })
+      .sort({ rating: -1 })
+      .limit(50)
+      .select('_id name category price rating')
+      .lean();
+
     const prompt = `
 You are a recommendation engine for a hyperlocal multi-vendor ecommerce platform.
 
@@ -47,7 +66,7 @@ Format:
 No markdown.
 No explanation.
 No extra text.
-`
+`;
 
     const completion = await client.chat.completions.create({
       //this is best for now, maybe switch to be a better model or some other paid service for deployment
@@ -59,17 +78,15 @@ No extra text.
           content: prompt,
         },
       ],
-    })
+    });
 
-    return JSON.parse(
-      completion.choices[0].message.content
-    )
+    return JSON.parse(completion.choices[0].message.content);
   } catch (error) {
-    console.error('AI Recommendation Error:', error)
+    console.error('AI Recommendation Error:', error);
 
-    return []
+    return [];
   }
-}
+};
 
 //search expansion
 
@@ -80,7 +97,7 @@ The user searched for:
 "${query}"
 
 Return ONLY a JSON array of related search terms.
-`
+`;
 
     const completion = await client.chat.completions.create({
       model: 'openai/gpt-4o-mini',
@@ -91,26 +108,35 @@ Return ONLY a JSON array of related search terms.
           content: prompt,
         },
       ],
-    })
+    });
 
-    return JSON.parse(
-      completion.choices[0].message.content
-    )
+    return JSON.parse(completion.choices[0].message.content);
   } catch (error) {
-    console.error('AI Search Error:', error)
+    console.error('AI Search Error:', error);
 
-    return [query]
+    return [query];
   }
-}
+};
 
 //price suggestion
 
 export const suggestProductPrice = async ({
   productName,
-  category,
-  similarProducts,
+  category
 }) => {
+
+
   try {
+
+    const similarProducts = await Product.find({
+      isActive: true,
+      category: category
+    })
+      .sort({ rating: -1 })
+      .limit(20)
+      .select('_id name price')
+      .lean();
+
     const prompt = `
 Product:
 "${productName}"
@@ -128,7 +154,7 @@ Return ONLY:
   "recommended": number,
   "reason": "..."
 }
-`
+`;
 
     const completion = await client.chat.completions.create({
       model: 'openai/gpt-4o-mini',
@@ -139,14 +165,12 @@ Return ONLY:
           content: prompt,
         },
       ],
-    })
+    });
 
-    return JSON.parse(
-      completion.choices[0].message.content
-    )
+    return JSON.parse(completion.choices[0].message.content);
   } catch (error) {
-    console.error('AI Price Suggestion Error:', error)
+    console.error('AI Price Suggestion Error:', error);
 
-    return null
+    return null;
   }
-}
+};

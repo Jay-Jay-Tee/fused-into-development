@@ -1,13 +1,13 @@
 import express from 'express';
 const router = express.Router();
 
-import { paymentService }    from '../services/paymentService.js';
+import { paymentController } from '../controller/paymentController.js';
 import { asyncHandler }      from '../middleware/asyncHandler.js';
 import { auth }              from '../middleware/auth.js';
 import { role }              from '../middleware/role.js';
 
 // ----- PUBLIC ROUTES (no auth required) ------------------
-router.post('/webhook', asyncHandler(paymentService.handleWebhook));
+router.post('/webhook', asyncHandler(paymentController.handleWebhook));
 
 // ----- PROTECTED ROUTES -----------------------------------
 
@@ -16,32 +16,32 @@ router.post(
   '/create-order',
   auth,
   role('buyer'),
-  asyncHandler(paymentService.createOrder)
+  asyncHandler(paymentController.createOrder)
 );
 router.post(
   '/verify',
   auth,
   role('buyer'),
-  asyncHandler(paymentService.verifyPayment)
+  asyncHandler(paymentController.verifyPayment)
 );
 router.post(
   '/refund/:refundId',
   auth,
   role('admin'),
-  asyncHandler(paymentService.triggerRefund)
+  asyncHandler(paymentController.triggerRefund)
 );
 // see payment history for a buyer
 router.get(
   '/my',
   auth,
   role('buyer'),
-  asyncHandler(paymentService.getPaymentHistory)
+  asyncHandler(paymentController.getPaymentHistory)
 );
 router.get(
   '/order/:orderId',
   auth,
   role('buyer', 'admin', 'vendor'),
-  asyncHandler(paymentService.getPaymentHistoryById)
+  asyncHandler(paymentController.getPaymentHistoryById)
 );
 
 export { router as paymentRoutes };
