@@ -10,6 +10,7 @@ import { role }              from '../middleware/role.js';
 
 // ----- PROTECTED ROUTES -----------------------------------
 
+// returns total sales and 5 top vendors for now
 router.get(
     '/analytics',
     auth,
@@ -18,21 +19,21 @@ router.get(
 )
 
 router.get(
-    'vendors/pending',
+    '/vendors/pending',
     auth,
     role("admin"),
     asyncHandler(adminController.getPendingVendors)
 )
 
 router.post(
-    'categories',
+    '/categories',
     auth,
     role("admin"),
     asyncHandler(adminController.addCategory)
 )
 
 router.put(
-    'commission',
+    '/commission',
     auth,
     role("admin"),
     asyncHandler(adminController.updateCommission)
