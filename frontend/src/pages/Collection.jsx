@@ -158,7 +158,7 @@ const Collection = () => {
                 {totalPages>1 && (
                     <div className='flex justify-center items-center gap-2 mt-12'>
                         <button onClick={()=>setCurrentPage(p=>Math.max(p-1,1))} disabled={currentPage===1} className='px-4 py-2 border border-line text-sm disabled:opacity-40 hover:bg-ink hover:text-paper transition-colors'>Prev</button>
-                        {[...Array(totalPages)].map((_,i)=>(
+                        {[...new Array(totalPages)].map((_,i)=>(
                             <button key={i} onClick={()=>setCurrentPage(i+1)} className={`w-9 h-9 text-sm border border-line ${currentPage===i+1 ? 'bg-ink text-paper' : 'hover:bg-line'}`}>{i+1}</button>
                         ))}
                         <button onClick={()=>setCurrentPage(p=>Math.min(p+1,totalPages))} disabled={currentPage===totalPages} className='px-4 py-2 border border-line text-sm disabled:opacity-40 hover:bg-ink hover:text-paper transition-colors'>Next</button>
