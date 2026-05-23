@@ -1,11 +1,11 @@
 import React from 'react'
-import { View, Text } from 'react-native'
 import useToastStore from '../store/toastStore'
 
 const Toast = () => {
   const { visible, message, type } = useToastStore()
 
   if (!visible) return null
+
   //basic colour scheme might need to change based on overall look
   const backgroundColor =
     type === 'success'
@@ -15,29 +15,24 @@ const Toast = () => {
       : '#3b82f6'
 
   return (
-    <View
+    <div
       style={{
-        position: 'absolute',
-        top: 60,
-        alignSelf: 'center',
+        position: 'fixed',
+        top: '20px',
+        left: '50%',
+        transform: 'translateX(-50%)',
         backgroundColor,
-        paddingHorizontal: 20,
-        paddingVertical: 12,
-        borderRadius: 10,
+        padding: '12px 20px',
+        borderRadius: '10px',
         zIndex: 9999,
-        elevation: 10,
+        color: 'white',
+        fontWeight: '600',
         maxWidth: '90%',
+        boxShadow: '0 4px 10px rgba(0,0,0,0.2)',
       }}
     >
-      <Text
-        style={{
-          color: 'white',
-          fontWeight: '600',
-        }}
-      >
-        {message}
-      </Text>
-    </View>
+      {message}
+    </div>
   )
 }
 

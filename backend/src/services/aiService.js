@@ -15,24 +15,38 @@ export const getRecommendations = async ({
 }) => {
   try {
     const prompt = `
-You are a product recommendation engine for a hyperlocal e-commerce platform.
+You are a recommendation engine for a hyperlocal multi-vendor ecommerce platform.
 
-The buyer has recently viewed:
+The buyer recently viewed:
 ${JSON.stringify(viewedProducts)}
 
-Past order categories:
+The buyer previously ordered from these categories:
 ${JSON.stringify(orderCategories)}
 
 Available products:
 ${JSON.stringify(catalogueSample)}
 
-Return ONLY valid JSON array of 5 objects:
+Recommend EXACTLY 5 relevant products.
+
+Prioritize:
+- similar categories
+- complementary products
+- nearby/hyperlocal relevance if possible
+- products matching browsing intent
+
+Return ONLY valid JSON.
+
+Format:
 [
   {
-    "productId": "...",
-    "reason": "..."
+    "productId": "string",
+    "reason": "short sentence"
   }
 ]
+
+No markdown.
+No explanation.
+No extra text.
 `
 
     const completion = await client.chat.completions.create({

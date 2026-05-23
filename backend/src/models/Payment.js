@@ -8,12 +8,12 @@ const paymentSchema = new mongoose.Schema(
         },
         method: {
             type: String,
-            enum: ["bank_transfer", "paypal", "stripe", "razorpay"],
+            enum: ["bank_transfer", "razorpay"],
             required: true
         },
         transactionType: {
             type: String,
-            enum: ["incoming", "outgoing"],
+            enum: ["order", "refund", "payout"],
             required: true
         },
         transactionId: {
@@ -29,14 +29,11 @@ const paymentSchema = new mongoose.Schema(
             type: mongoose.Schema.Types.ObjectId,
             ref: "Refund"
         },
-        // payment is either from a buyer or to a vendor, but not both
-        vendor: {
+        // payment is either to/from a buyer or to a vendor or to delivery
+        user: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: "Vendor"
-        },
-        buyer: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "User"
+            ref: "User",
+            required: true
         }
     },
     {
@@ -47,14 +44,23 @@ paymentSchema.pre("validate", function (next) {
 
     const hasOrder = !!this.order;
     const hasRefund = !!this.refund;
-    const hasVendor = !!this.vendor;
-    const hasBuyer = !!this.buyer;
+    const hasPayout = this.transactionType === "payout";
 
-    if (hasOrder === hasRefund || hasVendor === hasBuyer)
+    if (hasOrder === hasRefund || hasPayout)
         return next(
             new Error("Both excusive fields populated, only one of order/refund and vendor/buyer allowed")
         );
-    
+    if (this.transactionType === "order" && !this.order) {
+        return next(
+            new Error("Order payment must have an order reference")
+        );
+    }
+    if (this.transactionType === "refund" && !this.refund) {
+        return next(
+            new Error("Refund payment must have a refund reference")
+        );
+    }
+
     next();
 });
 
