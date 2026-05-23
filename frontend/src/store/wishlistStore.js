@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
-import AsyncStorage from '@react-native-async-storage/async-storage'
+
 // same as cart store but wishlist implementation
 const useCartStore = create(
   persist(
@@ -40,8 +40,7 @@ const useCartStore = create(
       clearCart: () => set({ items: [] }),
     }),
     {
-      name: 'cart-storage',
-      storage: createJSONStorage(() => AsyncStorage),
+      name: 'cart-storage'
     }
   )
 )
