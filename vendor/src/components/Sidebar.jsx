@@ -20,7 +20,12 @@ const Sidebar = () => {
             <NavLink to='/earnings' className={({isActive}) => `flex items-center gap-3 border border-line border-r-0 px-3 py-2 rounded-l ${isActive ? 'bg-mustard text-ink' : ''}`}>
                 <p className='hidden md:block'>Earnings</p>
             </NavLink>
-
+            <NavLink to='/payouts' className={({isActive}) => `flex items-center gap-3 border border-line border-r-0 px-3 py-2 rounded-l ${isActive ? 'bg-mustard text-ink' : ''}`}>
+                <p className='hidden md:block'>Payouts</p>
+            </NavLink>
+            <NavLink to='/profile' className={({isActive}) => `flex items-center gap-3 border border-line border-r-0 px-3 py-2 rounded-l ${isActive ? 'bg-mustard text-ink' : ''}`}>
+                <p className='hidden md:block'>Profile</p>
+            </NavLink>
         </div>
     </div>
   )
