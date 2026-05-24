@@ -96,7 +96,32 @@ export const expandSearchQuery = async (query) => {
 The user searched for:
 "${query}"
 
-Return ONLY a JSON array of related search terms.
+Return ONLY a valid JSON array containing 6 to 8 ecommerce product search terms.
+
+Rules:
+- Include synonyms
+- Include common marketplace names
+- Include informal names buyers may use
+- Keep terms short
+- Include the original query
+- No explanations
+- No markdown
+- JSON array only
+
+Example:
+Input: "laptop bag"
+
+Output:
+[
+  "laptop bag",
+  "notebook bag",
+  "laptop backpack",
+  "computer bag",
+  "laptop sleeve",
+  "laptop carry case",
+  "laptop tote",
+  "laptop briefcase"
+]
 `;
 
     const completion = await client.chat.completions.create({
