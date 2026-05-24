@@ -1,10 +1,10 @@
-; import { Order } from "../models/Order.js"
+import { Order } from "../models/Order.js";
 import { VendorPayout } from "../models/VendorPayouts.js";
 import { Vendor } from "../models/Vendor.js";
 import { Category } from "../models/Category.js";
 
 // analytics service
-const getAnalyticsService = async ({ }) => {
+export const getAnalyticsService = async ({ }) => {
 
     // its unfortunately messed up 
     const totalSales = (await Order.aggregate([
@@ -36,12 +36,12 @@ const getAnalyticsService = async ({ }) => {
 };
 
 // pending vendors service
-const getPendingVendorsService = async ({ }) => {
+export const getPendingVendorsService = async ({ }) => {
     return (await Vendor.find({ isApproved: false }).lean());
 }
 
 // add new category
-const createCategoryService = async ({
+export const createCategoryService = async ({
     name,
     slug,
     icon,
@@ -78,7 +78,7 @@ const createCategoryService = async ({
 };
 
 // update commission for everyone
-const updateCommissionService = async ({
+export const updateCommissionService = async ({
     commissionPercent
 }) => {
     

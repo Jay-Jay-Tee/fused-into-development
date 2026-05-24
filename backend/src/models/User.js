@@ -12,6 +12,12 @@ const userSchema = new mongoose.Schema(
             match: [/^[a-zA-Z ]+$/, 'Name contains special characters or numbers']
 
         },
+        userName: {
+            type: String,
+            required: true,
+            unique: true,
+            match: [/^[a-zA-Z0-9\_]+$/, 'Name contains special characters or numbers']
+        },
         email: {
             type: String,
             required: [true, 'Please enter your email'],
@@ -37,29 +43,10 @@ const userSchema = new mongoose.Schema(
             unique: true
         },
         addresses: [addressSchema],
-        cart: [
-            {
-                product: {
-                    type: mongoose.Schema.Types.ObjectId,
-                    ref: 'Product',
-                    required: true
-                },
-                quantity: {
-                    type: Number,
-                    required: true,
-                    min: 1
-                }
-            }
-        ],
-        wishlist: [
-            {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: 'Product'
-            }
-        ],
-        refreshToken: {
-            type: String,
-            select: false
+
+        vendorApplication: {
+            status: { type: String, enum: ['none', 'pending', 'rejected'], default: 'none' },
+            rejectionNote: { type: String, default: null }
         }
     },
 

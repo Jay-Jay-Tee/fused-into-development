@@ -8,7 +8,7 @@ const client = new OpenAI({
   apiKey: process.env.OPENROUTER_API_KEY,
 });
 
-//recommendation engine
+//recommendation engine 
 
 export const getRecommendations = async ({
   viewedProducts,
@@ -80,7 +80,16 @@ No extra text.
       ],
     });
 
-    return JSON.parse(completion.choices[0].message.content);
+    const raw = completion.choices[0].message.content.trim();
+
+    const cleaned = raw
+      .replace(/```json/g, '')
+      .replace(/```/g, '')
+      .trim();
+
+    const parsed = JSON.parse(cleaned);
+
+    return parsed;
   } catch (error) {
     console.error('AI Recommendation Error:', error);
 
@@ -96,7 +105,32 @@ export const expandSearchQuery = async (query) => {
 The user searched for:
 "${query}"
 
-Return ONLY a JSON array of related search terms.
+Return ONLY a valid JSON array containing 6 to 8 ecommerce product search terms.
+
+Rules:
+- Include synonyms
+- Include common marketplace names
+- Include informal names buyers may use
+- Keep terms short
+- Include the original query
+- No explanations
+- No markdown
+- JSON array only
+
+Example:
+Input: "laptop bag"
+
+Output:
+[
+  "laptop bag",
+  "notebook bag",
+  "laptop backpack",
+  "computer bag",
+  "laptop sleeve",
+  "laptop carry case",
+  "laptop tote",
+  "laptop briefcase"
+]
 `;
 
     const completion = await client.chat.completions.create({
@@ -109,8 +143,17 @@ Return ONLY a JSON array of related search terms.
         },
       ],
     });
+    
+    const raw = completion.choices[0].message.content.trim();
 
-    return JSON.parse(completion.choices[0].message.content);
+    const cleaned = raw
+      .replace(/```json/g, '')
+      .replace(/```/g, '')
+      .trim();
+
+    const parsed = JSON.parse(cleaned);
+
+    return [...new Set(parsed)];
   } catch (error) {
     console.error('AI Search Error:', error);
 
@@ -138,22 +181,44 @@ export const suggestProductPrice = async ({
       .lean();
 
     const prompt = `
-Product:
+You are an AI pricing assistant for a hyperlocal multi-vendor ecommerce marketplace in India.
+
+The seller wants to list this product:
+
+Product Name:
 "${productName}"
 
 Category:
 "${category}"
 
-Similar products:
+Similar products already on the platform:
 ${JSON.stringify(similarProducts)}
 
-Return ONLY:
+Your task:
+- Analyze comparable products
+- Estimate a realistic market price range in INR
+- Avoid extreme or unrealistic values
+- Base pricing mainly on the provided similar products
+- Consider typical ecommerce buyer expectations
+- Recommend a competitive but profitable selling price
+
+Return ONLY valid JSON.
+
+Format:
 {
   "min": number,
   "max": number,
   "recommended": number,
-  "reason": "..."
+  "reason": "short explanation"
 }
+
+Rules:
+- recommended must be between min and max
+- min must be less than max
+- Prices must be realistic Indian Rupee values
+- reason must be one short sentence
+- No markdown
+- No explanation outside JSON
 `;
 
     const completion = await client.chat.completions.create({
@@ -167,7 +232,16 @@ Return ONLY:
       ],
     });
 
-    return JSON.parse(completion.choices[0].message.content);
+    const raw = completion.choices[0].message.content.trim();
+
+    const cleaned = raw
+      .replace(/```json/g, '')
+      .replace(/```/g, '')
+      .trim();
+
+    const parsed = JSON.parse(cleaned);
+
+    return parsed;
   } catch (error) {
     console.error('AI Price Suggestion Error:', error);
 

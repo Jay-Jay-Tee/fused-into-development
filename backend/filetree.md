@@ -56,10 +56,21 @@
 │   │   ├── deliveryService.js      # delivery requests and checks logic       [V2 feat]
 │   │   └── paymentService.js       # Razorpay business/payment operations
 │   │
+│   ├── controller
+│   │   ├── authController.js       
+│   │   ├── productController.js    
+│   │   ├── orderController.js      
+│   │   ├── vendorController.js     
+│   │   ├── adminController.js      
+│   │   ├── reviewController.js     
+│   │   ├── refundController.js     
+│   │   ├── aiController.js         
+│   │   ├── deliveryController.js   
+│   │   └── paymentController.js    
+│   │
 │   ├── utils
 │   │   ├── paginate.js             # Pagination helper for APIs
 │   │   ├── seedData.js             # Inserts demo/mock database data
-│   │   ├── generateToken.js        # JWT creation helper
 │   │   └── calculateCommission.js  # Vendor/platform commission calculator
 │   │
 │   ├── app.js                      # Express app + middleware + route mounting
