@@ -2,6 +2,8 @@ import { Order } from "../models/Order.js";
 import { VendorPayout } from "../models/VendorPayouts.js";
 import { Vendor } from "../models/Vendor.js";
 import { Category } from "../models/Category.js";
+import { calculateCommission } from "../utils/calculateCommission.js";
+import { Payment } from "../models/Payment.js";
 
 // analytics service
 export const getAnalyticsService = async ({ }) => {
@@ -11,25 +13,46 @@ export const getAnalyticsService = async ({ }) => {
         {
             $group: {
                 _id: null,
-                total: { $sum: "$price" }
+                total: { $sum: "$totalAmount" }
             }
         }
     ]))[0]?.total || 0;
 
-    const topVendors = (await VendorPayout.aggregate([
+const topVendors = await VendorPayout.aggregate([
         {
-            $group: {
-                _id: "$vendor",
-                total: { $sum: "$paymentInfo.amount" }
+            $lookup: {
+                from:         "payments",
+                localField:   "paymentInfo",
+                foreignField: "_id",
+                as:           "payment"
             }
         },
+        { $unwind: "$payment" },
         {
-            $sort: { total: -1 }
+            $group: {
+                _id:   "$vendor",
+                total: { $sum: "$payment.amount" }
+            }
         },
+        { $sort:  { total: -1 } },
+        { $limit: 5 },
         {
-            $limit: 5
+            $lookup: {
+                from:         "vendors",
+                localField:   "_id",
+                foreignField: "_id",
+                as:           "vendorInfo"
+            }
+        },
+        { $unwind: "$vendorInfo" },
+        {
+            $project: {
+                total:     1,
+                storeName: "$vendorInfo.storeName",
+                logo:      "$vendorInfo.logo"
+            }
         }
-    ])) || [];
+    ]) || [];
 
     // more stuff to return added later
     return { totalSales, topVendors };
@@ -38,7 +61,7 @@ export const getAnalyticsService = async ({ }) => {
 // pending vendors service
 export const getPendingVendorsService = async ({ }) => {
     return await Vendor.find({ isApproved: false })
-        .populate("user", "name email")
+        .populate("user", "name email phone")
         .populate("categories")
         .lean();
 }
@@ -92,4 +115,62 @@ export const updateCommissionService = async ({
     })
     ).modifiedCount;
     return updatedCount;
+};
+
+// disburse payout for a vendor for a given month/year
+export const disbursePayoutService = async ({ vendorId, month, year }) => {
+    const payout = await calculateCommission({ vendorId, month, year });
+ 
+    if (payout.status === "paid") {
+        throw Object.assign(
+            new Error("Payout for this period has already been disbursed"),
+            { statusCode: 409 }
+        );
+    }
+ 
+    if (payout.totalRevenue === 0) {
+        throw Object.assign(
+            new Error("No revenue to disburse for this period"),
+            { statusCode: 400 }
+        );
+    }
+ 
+    const netAmount = Number.parseFloat((payout.totalRevenue - payout.commissionDeducted).toFixed(2));
+ 
+    const vendor = await Vendor.findById(vendorId).select("user");
+ 
+    const payment = await Payment.create({
+        user:            vendor.user,
+        amount:          netAmount,
+        method:          "bank_transfer",
+        transactionType: "payout",
+        transactionId:   `payout_${vendorId}_${month}_${year}_${Date.now()}`,
+        status:          "paid",
+    });
+ 
+    await VendorPayout.findByIdAndUpdate(payout._id, {
+        $set: {
+            status:      "paid",
+            paymentInfo: payment._id,
+        },
+    });
+ 
+    return {
+        message:   "Payout disbursed successfully",
+        netAmount,
+        paymentId: payment._id,
+    };
+};
+ 
+// get all payouts, filterable by vendor or status
+export const getPayoutsService = async ({ vendorId, status }) => {
+    const filter = {};
+    if (vendorId) filter.vendor = vendorId;
+    if (status)   filter.status = status;
+ 
+    return await VendorPayout.find(filter)
+        .populate("vendor", "storeName")
+        .populate("paymentInfo", "amount status transactionId")
+        .sort({ year: -1, month: -1 })
+        .lean();
 };

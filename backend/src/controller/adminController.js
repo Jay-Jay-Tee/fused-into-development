@@ -1,4 +1,4 @@
-import { getAnalyticsService, getPendingVendorsService, createCategoryService, updateCommissionService } from "../services/adminService";
+import { getAnalyticsService, getPendingVendorsService, createCategoryService, updateCommissionService } from "../services/adminService.js";
 
 const getAnalytics = async (req, res) => {
     const data = await getAnalyticsService();

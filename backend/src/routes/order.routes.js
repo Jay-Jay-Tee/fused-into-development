@@ -13,35 +13,35 @@ import { role }              from '../middleware/role.js';
 router.post(
     '/',
     auth,
-    role(["buyer"]),
+    role("buyer"),
     asyncHandler(orderController.createOrder)
 )
 
 router.get(
     '/my',
     auth,
-    role(["buyer"]),
+    role("buyer"),
     asyncHandler(orderController.getMyOrders)
 )
 
 router.get(
     '/vendor',
     auth,
-    role(["vendor"]),
+    role("vendor"),
     asyncHandler(orderController.getVendorOrders)
 )
 
 router.get(
     '/:id',
     auth,
-    role(["buyer", "vendor"]),
+    role("buyer", "vendor"),
     asyncHandler(orderController.getOrderById)
 )
 
 router.put(
     '/:id/status',
     auth,
-    role(["vendor"]),
+    role("vendor"),
     asyncHandler(orderController.updateOrderStatus)
 )
 

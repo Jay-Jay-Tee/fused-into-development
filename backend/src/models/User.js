@@ -1,5 +1,4 @@
 import mongoose from 'mongoose';
-import bcrypt from 'bcryptjs';
 import validator from 'validator';
 
 import { addressSchema } from './Address.js';
@@ -26,6 +25,7 @@ const userSchema = new mongoose.Schema(
             lowercase: true,
             trim: true
         },
+        // stores hashed password, never plaintext
         password: {
             type: String,
             required: [true, 'passsword is required'],
@@ -34,7 +34,8 @@ const userSchema = new mongoose.Schema(
         role: {
             type: String,
             enum: ['buyer', 'admin', 'vendor', 'delivery'],
-            required: [true, 'Please select a role']
+            required: [true, 'Please select a role'],
+            default: 'buyer'
         },
         phone: {
             type: String,
@@ -54,19 +55,6 @@ const userSchema = new mongoose.Schema(
         timestamps: true
     }
 );
-
-userSchema.pre('save', async function (next) {
-    if (!this.isModified('password')) {
-        return next();
-    }
-
-    this.password = await bcrypt.hash(this.password, 10);
-    next();
-});
-
-userSchema.methods.comparePassword = async function (candidatePassword) {
-    return await bcrypt.compare(candidatePassword, this.password);
-};
 
 const User = mongoose.model('User', userSchema);
 

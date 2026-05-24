@@ -1,36 +1,158 @@
 import { Order } from "../models/Order.js";
+import { Product } from "../models/Product.js";
+import { paginate } from "../utils/paginate.js";
 
-export const createOrderService = async ({orderData}) => {
-    const order = await Order.create(orderData);
-    return order;
-};
 
-export const getMyOrdersService = async ({buyerId}) => {
-    return await Order.find({ buyer: buyerId }).populate('items.product');
-};
+export const createOrderService = async ({ userId, items, shippingAddress }) => {
 
-export const getVendorOrdersService = async ({vendorId}) => {
-    return await Order.find({ "items.vendor": vendorId })
-    .populate('items.product')
-    .populate('buyer', 'name email')
-    .lean();
-};
+    // Validate stock and fetch current prices for all items in one query.
+    const productIds = items.map(i => i.product);
+    const products = await Product.find({ _id: { $in: productIds }, isActive: true });
 
-export const getOrderByIdService = async ({orderId}) => {
-    return await Order.findById(orderId)
-    .populate('items.product')
-    .populate('buyer', 'name email')
-    .lean();
-};
+    // Build a map for O(1) lookup per item.
+    const productMap = Object.fromEntries(products.map(p => [p._id.toString(), p]));
 
-export const updateOrderStatusService = async ({orderId, status}) => {
-    const order = await Order.findById(orderId);
-    if (!order) {
-        throw new Error("Order not found");
+    let subtotal = 0;
+    const orderItems = [];
+
+    for (const item of items) {
+        const product = productMap[item.product.toString()];
+
+        if (!product)
+            throw new Error(`Product not found: ${item.product}`);
+
+        if (product.stock < item.quantity) 
+            throw new Error(`Insufficient stock for: ${product.name}`);
+
+        subtotal += product.price * item.quantity;
+
+        orderItems.push({
+            product: product._id,
+            vendor: product.vendor,
+            name: product.name,
+            image: product.images?.[0] || null,
+            quantity: item.quantity,
+            price: product.price,         // snapshot price at time of order
+        });
     }
 
-    order.status = status;
-    await order.save();
-    return order;
-}
+    // flat delivery fee - can be made dynamic later
+    // in V2, when delivery partner is added, this will be calculated based on distance and package dimensions/weight
+    const deliveryFee = 0;
+    const totalAmount = subtotal + deliveryFee;
 
+    const order = await Order.create({
+        buyer: userId,
+        items: orderItems,
+        shippingAddress,
+        subtotal,
+        deliveryFee,
+        totalAmount,
+        orderStatus: "pending",
+    });
+
+    return order.toObject();
+};
+
+export const getMyOrdersService = async ({ userId, query }) => {
+    const { skip, limit, page } = paginate(query);
+
+    const [orders, total] = await Promise.all([
+        Order.find({ buyer: userId })
+            .skip(skip)
+            .limit(limit)
+            .populate("items.product", "name images")
+            .populate("payment", "status transactionType")
+            .sort({ createdAt: -1 })
+            .lean(),
+        Order.countDocuments({ buyer: userId }),
+    ]);
+
+    return {
+        orders,
+        pagination: { total, page, pages: Math.ceil(total / limit) },
+    };
+};
+
+// ── getVendorOrdersService ────────────────────────────────────
+// Returns all orders that contain at least one item from this vendor.
+export const getVendorOrdersService = async ({ vendorId, query }) => {
+    const { skip, limit, page } = paginate(query);
+
+    const filter = { "items.vendor": vendorId };
+
+    const [orders, total] = await Promise.all([
+        Order.find(filter)
+            .skip(skip)
+            .limit(limit)
+            .populate("items.product", "name images")
+            .populate("buyer", "name email")
+            .sort({ createdAt: -1 })
+            .lean(),
+        Order.countDocuments(filter),
+    ]);
+
+    return {
+        orders,
+        pagination: { total, page, pages: Math.ceil(total / limit) },
+    };
+};
+
+// ── getOrderByIdService ───────────────────────────────────────
+// Returns a single order. Caller is responsible for auth checks
+// (buyer owns it, or vendor has items in it) before calling this.
+export const getOrderByIdService = async ({ orderId }) => {
+    const order = await Order.findById(orderId)
+        .populate("items.product", "name images price")
+        .populate("buyer", "name email")
+        .populate("payment", "status transactionType amount")
+        .lean();
+
+    if (!order) {
+        throw Object.assign(new Error("Order not found"), { statusCode: 404 });
+    }
+
+    return order;
+};
+
+// ── updateOrderStatusService ──────────────────────────────────
+// Vendor updates the status of an order.
+// Valid progression: pending → confirmed → shipped → delivered.
+// Cancelled can be set from pending or confirmed only.
+export const updateOrderStatusService = async ({ orderId, status, vendorId }) => {
+    const order = await Order.findById(orderId);
+
+    if (!order) {
+        throw Object.assign(new Error("Order not found"), { statusCode: 404 });
+    }
+
+    // Ensure at least one item in this order belongs to the requesting vendor.
+    const vendorHasItem = order.items.some(
+        item => item.vendor.toString() === vendorId.toString()
+    );
+
+    if (!vendorHasItem) {
+        throw Object.assign(new Error("Not authorised to update this order"), { statusCode: 403 });
+    }
+
+    const validTransitions = {
+        pending:   ["confirmed", "cancelled"],
+        confirmed: ["shipped", "cancelled"],
+        shipped:   ["delivered"],
+        delivered: [],
+        cancelled: [],
+    };
+
+    if (!validTransitions[order.orderStatus]?.includes(status)) {
+        throw Object.assign(
+            new Error(`Cannot transition from ${order.orderStatus} to ${status}`),
+            { statusCode: 400 }
+        );
+    }
+
+    order.orderStatus = status;
+    if (status === "delivered") order.deliveredAt = new Date();
+    await order.save();
+
+    return order.toObject();
+};
