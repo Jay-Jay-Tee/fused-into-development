@@ -1,19 +1,53 @@
-// Product controller functions will be implemented here
+import {
+    getProductsService,
+    getProductByIdService,
+    createProductService,
+    updateProductService,
+    deleteProductService,
+} from "../services/productService.js";
+
+const getProducts = async (req, res) => {
+    const data = await getProductsService(req.query);
+    return res.status(200).json(data);
+};
+
+const getProductById = async (req, res) => {
+    const data = await getProductByIdService({ productId: req.params.id });
+    return res.status(200).json(data);
+};
+
+const createProduct = async (req, res) => {
+    const images = req.files
+        ? Object.values(req.files).flat().map(f => f.path)
+        : [];
+    const data = await createProductService({
+        userId: req.user.id,
+        productData: { ...req.body, images },
+    });
+    return res.status(201).json(data);
+};
+
+const updateProduct = async (req, res) => {
+    const data = await updateProductService({
+        userId: req.user.id,
+        productId: req.params.id,
+        updateData: req.body,
+    });
+    return res.status(200).json(data);
+};
+
+const deleteProduct = async (req, res) => {
+    const data = await deleteProductService({
+        userId: req.user.id,
+        productId: req.params.id,
+    });
+    return res.status(200).json(data);
+};
 
 export const productController = {
-    getProducts: async (req, res) => {
-        res.status(501).json({ message: "Not implemented" });
-    },
-    getProductById: async (req, res) => {
-        res.status(501).json({ message: "Not implemented" });
-    },
-    createProduct: async (req, res) => {
-        res.status(501).json({ message: "Not implemented" });
-    },
-    updateProduct: async (req, res) => {
-        res.status(501).json({ message: "Not implemented" });
-    },
-    deleteProduct: async (req, res) => {
-        res.status(501).json({ message: "Not implemented" });
-    },
+    getProducts,
+    getProductById,
+    createProduct,
+    updateProduct,
+    deleteProduct,
 };

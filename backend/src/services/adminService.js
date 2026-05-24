@@ -6,7 +6,7 @@ import { calculateCommission } from "../utils/calculateCommission.js";
 import { Payment } from "../models/Payment.js";
 
 // analytics service
-export const getAnalyticsService = async ({ }) => {
+export const getAnalyticsService = async () => {
 
     // its unfortunately messed up 
     const totalSales = (await Order.aggregate([
@@ -59,7 +59,7 @@ const topVendors = await VendorPayout.aggregate([
 };
 
 // pending vendors service
-export const getPendingVendorsService = async ({ }) => {
+export const getPendingVendorsService = async () => {
     return await Vendor.find({ isApproved: false })
         .populate("user", "name email phone")
         .populate("categories")

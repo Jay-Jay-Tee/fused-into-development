@@ -39,4 +39,18 @@ router.put(
     asyncHandler(adminController.updateCommission)
 );
 
+router.post(
+    '/payouts/disburse',
+    auth,
+    role("admin"),
+    asyncHandler(adminController.disbursePayout)
+);
+
+router.get(
+    '/payouts',
+    auth,
+    role("admin"),
+    asyncHandler(adminController.getPayouts)
+);
+
 export { router as adminRoutes };
