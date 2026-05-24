@@ -6,6 +6,7 @@ import ProductItem from '../components/ProductItem'
 import { useRef } from 'react';
 import useDebounce from '../hooks/useDebounce';
 import { expandSearchQuery } from '../api/ai';
+import ProductCardSkeleton from '../components/ProductCardSkeleton';
 
 const Collection = () => {
     const {products, search, showSearch} = useContext(ShopContext);
@@ -23,6 +24,7 @@ const Collection = () => {
     const [priceRange, setPriceRange] = useState(10000);
     const [minRating, setMinRating] = useState(0);
     const [currentPage, setCurrentPage] = useState(1);
+    const [loading, setLoading] = useState(true);
     const productsPerPage = 8;
     const toggleCategory=(e)=>{
         if (category.includes(e.target.value)){
@@ -143,6 +145,14 @@ const Collection = () => {
         }
     }
 
+    useEffect(() => {
+
+        if (products.length > 0) {
+            setLoading(false);
+        }
+
+    }, [products]);
+
     useEffect(()=>{
         applyFilter();
     },[
@@ -226,13 +236,20 @@ const Collection = () => {
                     Showing {filterProducts.length===0 ? 0 : indexOfFirst+1}-{Math.min(indexOfLast,filterProducts.length)} of {filterProducts.length} products
                 </p>
                 <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 gap-y-6'>
+
                     {
-                        currentProducts.map((item,index)=>(
-                            <ProductItem key={index} id={item._id} image={item.image[0]} name={item.name} price={item.price} vendor={item.vendor} location={item.location}/>
-                        ))
+                        loading
+                            ? [...Array(8)].map((_, index) => (
+                                <ProductCardSkeleton key={index} />
+                            ))
+                            : currentProducts.map((item, index) => (
+                                <ProductItem key={index} id={item._id} image={item.image[0]} name={item.name} price={item.price} vendor={item.vendor} location={item.location}
+                                />
+                            ))
                     }
+
                 </div>
-                {filterProducts.length===0 && (
+                {!loading && filterProducts.length===0 && (
                     <div className='text-center py-20 text-ink-soft'>
                         <p>No products match your filters.</p>
                     </div>
