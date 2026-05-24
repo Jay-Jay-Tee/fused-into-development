@@ -43,29 +43,10 @@ const userSchema = new mongoose.Schema(
             unique: true
         },
         addresses: [addressSchema],
-        cart: [
-            {
-                product: {
-                    type: mongoose.Schema.Types.ObjectId,
-                    ref: 'Product',
-                    required: true
-                },
-                quantity: {
-                    type: Number,
-                    required: true,
-                    min: 1
-                }
-            }
-        ],
-        wishlist: [
-            {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: 'Product'
-            }
-        ],
-        refreshToken: {
-            type: String,
-            select: false
+
+        vendorApplication: {
+            status: { type: String, enum: ['none', 'pending', 'rejected'], default: 'none' },
+            rejectionNote: { type: String, default: null }
         }
     },
 

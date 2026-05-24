@@ -71,7 +71,6 @@
 │   ├── utils
 │   │   ├── paginate.js             # Pagination helper for APIs
 │   │   ├── seedData.js             # Inserts demo/mock database data
-│   │   ├── generateToken.js        # JWT creation helper
 │   │   └── calculateCommission.js  # Vendor/platform commission calculator
 │   │
 │   ├── app.js                      # Express app + middleware + route mounting
