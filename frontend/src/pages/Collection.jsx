@@ -3,9 +3,18 @@ import { ShopContext } from '../context/ShopContext'
 import { assets } from '../assets/assets'
 import Title from '../components/Title'
 import ProductItem from '../components/ProductItem'
+import { useRef } from 'react';
+import useDebounce from '../hooks/useDebounce';
+import { expandSearchQuery } from '../api/ai';
+import ProductCardSkeleton from '../components/ProductCardSkeleton';
 
 const Collection = () => {
     const {products, search, showSearch} = useContext(ShopContext);
+    //delay
+    const debouncedSearch = useDebounce(search, 400);
+    const [expandedTerms, setExpandedTerms] = useState([]);
+    //cache to avoid repeated api acalled
+    const searchCache = useRef(new Map());
     const [showFilter, setShowFilter] = useState(false);
     const [filterProducts, setFilterProducts] = useState([]);
     const [category, setCategory] = useState([]);
@@ -15,6 +24,7 @@ const Collection = () => {
     const [priceRange, setPriceRange] = useState(10000);
     const [minRating, setMinRating] = useState(0);
     const [currentPage, setCurrentPage] = useState(1);
+    const [loading, setLoading] = useState(true);
     const productsPerPage = 8;
     const toggleCategory=(e)=>{
         if (category.includes(e.target.value)){
@@ -30,15 +40,79 @@ const Collection = () => {
             setSubCategory(prev=>[...prev,e.target.value])
         }
     }
+
+    useEffect(() => {
+
+        const getExpandedTerms = async () => {
+
+            // reset if search cleared
+            if (!showSearch || debouncedSearch.trim().length < 3) {
+                setExpandedTerms([]);
+                return;
+            }
+
+            const normalizedQuery = debouncedSearch.trim().toLowerCase();
+
+            // cache hit
+            if (searchCache.current.has(normalizedQuery)) {
+                setExpandedTerms(
+                    searchCache.current.get(normalizedQuery)
+                );
+                return;
+            }
+
+            try {
+
+                const terms = await expandSearchQuery(normalizedQuery);
+
+                const uniqueTerms = [
+                    normalizedQuery,
+                    ...terms
+                ];
+
+                const deduped = [...new Set(uniqueTerms)];
+
+                searchCache.current.set(
+                    normalizedQuery,
+                    deduped
+                );
+
+                setExpandedTerms(deduped);
+
+            } catch (error) {
+
+                console.error('AI Search Expansion Error:', error);
+
+                setExpandedTerms([normalizedQuery]);
+            }
+        };
+
+        getExpandedTerms();
+
+    }, [debouncedSearch, showSearch]);
+
     const applyFilter=()=>{
         let productsCopy = products.slice();
-        if (showSearch&&search){
-            productsCopy=productsCopy.filter(item=>
-                item.name.toLowerCase().includes(search.toLowerCase()) ||
-                item.vendor.toLowerCase().includes(search.toLowerCase()) ||
-                item.location.toLowerCase().includes(search.toLowerCase())
-            )
-        }
+            if (showSearch && search.trim() !== '') {
+
+            const activeTerms =
+                expandedTerms.length > 0
+                    ? expandedTerms
+                    : [search.toLowerCase()];
+
+            productsCopy = productsCopy.filter(item => {
+
+                const searchableText = `
+                    ${item.name}
+                    ${item.vendor}
+                    ${item.location}
+                `.toLowerCase();
+
+                return activeTerms.some(term =>
+                    searchableText.includes(term.toLowerCase())
+                );
+            });
+            }
         if(category.length>0){
             productsCopy=productsCopy.filter(item=> category.includes(item.category));
         }
@@ -71,9 +145,27 @@ const Collection = () => {
         }
     }
 
+    useEffect(() => {
+
+        if (products.length > 0) {
+            setLoading(false);
+        }
+
+    }, [products]);
+
     useEffect(()=>{
         applyFilter();
-    },[category, subCategory, location, priceRange, minRating, search, showSearch, products])
+    },[
+        category,
+        subCategory,
+        location,
+        priceRange,
+        minRating,
+        search,
+        showSearch,
+        products,
+        expandedTerms
+    ])
     useEffect(()=>{
         sortProduct();
     },[sortType])
@@ -144,13 +236,20 @@ const Collection = () => {
                     Showing {filterProducts.length===0 ? 0 : indexOfFirst+1}-{Math.min(indexOfLast,filterProducts.length)} of {filterProducts.length} products
                 </p>
                 <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 gap-y-6'>
+
                     {
-                        currentProducts.map((item,index)=>(
-                            <ProductItem key={index} id={item._id} image={item.image[0]} name={item.name} price={item.price} vendor={item.vendor} location={item.location}/>
-                        ))
+                        loading
+                            ? [...Array(8)].map((_, index) => (
+                                <ProductCardSkeleton key={index} />
+                            ))
+                            : currentProducts.map((item, index) => (
+                                <ProductItem key={index} id={item._id} image={item.image[0]} name={item.name} price={item.price} vendor={item.vendor} location={item.location}
+                                />
+                            ))
                     }
+
                 </div>
-                {filterProducts.length===0 && (
+                {!loading && filterProducts.length===0 && (
                     <div className='text-center py-20 text-ink-soft'>
                         <p>No products match your filters.</p>
                     </div>

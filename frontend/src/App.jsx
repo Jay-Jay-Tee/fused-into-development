@@ -13,7 +13,7 @@ import PlaceOrder from './pages/PlaceOrder'
 import Navbar from './components/NavBar'
 import Orders from './pages/Orders'
 import SearchBar from './components/SearchBar'
-
+import NotFound from './pages/NotFound';
 
 const App = () => {
   return (
@@ -31,6 +31,7 @@ const App = () => {
             <Route path='/login' element={<Login/>} />
             <Route path='/place-order' element={<PlaceOrder/>} />
             <Route path='/orders' element={<Orders/>} />
+            <Route path="*" element={<NotFound />} />
         </Routes>
     </div>
 
