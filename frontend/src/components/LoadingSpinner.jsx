@@ -1,28 +1,11 @@
 import React from 'react'
-import { View, ActivityIndicator, Text } from 'react-native'
-//using default react spinner can be changed to a better one later
+
 const LoadingSpinner = ({ text = 'Loading...' }) => {
   return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        padding: 20,
-      }}
-    >
-      <ActivityIndicator size="large" color="#3b82f6" />
-
-      <Text
-        style={{
-          marginTop: 12,
-          fontSize: 16,
-          color: '#6b7280',
-        }}
-      >
-        {text}
-      </Text>
-    </View>
+    <div className='flex flex-col items-center justify-center p-5'>
+      <div className='w-8 h-8 border-2 border-line border-t-navy rounded-full animate-spin'></div>
+      <p className='mt-3 text-sm text-ink-soft'>{text}</p>
+    </div>
   )
 }
 

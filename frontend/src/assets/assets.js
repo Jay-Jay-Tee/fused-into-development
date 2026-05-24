@@ -83,7 +83,7 @@ export const products = [
     name: "Ceramic pour-over set",
     description:
       "Hand-thrown ceramic dripper with matching server. Fits standard #2 filters.",
-    price: 1899,
+    price: 189900,
     image: ["https://picsum.photos/seed/p004/600/800"],
     category: "Home",
     subCategory: "Kitchen",
