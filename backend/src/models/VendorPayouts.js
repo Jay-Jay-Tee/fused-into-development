@@ -6,7 +6,6 @@ const vendorPayoutSchema = new mongoose.Schema(
             type: mongoose.Schema.Types.ObjectId,
             ref: "Vendor",
             required: true,
-            unique: true
         },
         month: {
             type: Number,
@@ -20,11 +19,24 @@ const vendorPayoutSchema = new mongoose.Schema(
         },
         status: {
             type: String,
-            enum: ["pending", "paid"]
+            enum: ["pending", "paid"],
+            default: "pending"
         },
         paymentInfo: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "Payment"
+        },
+        totalRevenue: {
+            type: Number,
+            default: 0
+        },
+        commissionDeducted: {
+            type: Number,
+            default: 0
+        },
+        totalOrders: {
+            type: Number,
+            default: 0
         }
     },
     {
