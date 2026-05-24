@@ -39,4 +39,4 @@ router.put(
     asyncHandler(adminController.updateCommission)
 );
 
-export { router as orderRoutes };
+export { router as adminRoutes };
