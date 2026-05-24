@@ -40,7 +40,7 @@ const useCartStore = create(
       clearCart: () => set({ items: [] }),
     }),
     {
-      name: 'cart-storage'
+      name: 'wishlist-storage'
     }
   )
 )
