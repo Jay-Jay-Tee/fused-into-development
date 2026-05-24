@@ -91,7 +91,7 @@ export const seedData = async () => {
         {
             name: "Wireless Mouse",
             description: "Ergonomic wireless mouse with long battery life",
-            price: 599,
+            price: 59900,
             stock: 50,
             vendor: vendor1._id,
             category: electronics._id,
@@ -100,7 +100,7 @@ export const seedData = async () => {
         {
             name: "USB-C Hub",
             description: "7-in-1 USB-C hub with HDMI and card reader",
-            price: 1299,
+            price: 129900,
             stock: 30,
             vendor: vendor1._id,
             category: electronics._id,
@@ -109,7 +109,7 @@ export const seedData = async () => {
         {
             name: "Clean Code",
             description: "A handbook of agile software craftsmanship by Robert C. Martin",
-            price: 499,
+            price: 49950,
             stock: 20,
             vendor: vendor2._id,
             category: books._id,
