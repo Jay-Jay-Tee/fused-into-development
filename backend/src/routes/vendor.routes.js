@@ -1,7 +1,7 @@
 import express from 'express';
 const router = express.Router();
 
-import { vendorController } from '../controllers/vendorController.js';
+import { vendorController } from '../controller/vendorController.js';
 import { asyncHandler } from '../middleware/asyncHandler.js';
 import { auth } from '../middleware/auth.js';
 import { role } from '../middleware/role.js';

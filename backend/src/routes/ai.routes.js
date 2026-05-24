@@ -8,7 +8,7 @@ import { role }              from '../middleware/role.js';
 
 // ----- PUBLIC ROUTES (no auth required) ------------------
 
-router.post('/search', asyncHandler(aiController.expandSearch))
+router.post('/search', asyncHandler(aiController.expandSearch));
 
 // ----- PROTECTED ROUTES -----------------------------------
 
@@ -17,13 +17,13 @@ router.post(
     auth,
     role("buyer"),
     asyncHandler(aiController.getRecommendations)
-)
+);
 
 router.post(
     '/price-suggest',
     auth,
     role("vendor"),
     asyncHandler(aiController.suggestProductPrice)
-)
+);
 
 export { router as aiRoutes };

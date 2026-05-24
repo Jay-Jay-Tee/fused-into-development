@@ -66,4 +66,8 @@ const getPriceSuggestion = async (req, res) => {
     });
 };
 
-export { getProductRecommendations as getRecommendations, expandSearch, getPriceSuggestion };
+export const aiController = {
+    getRecommendations: getProductRecommendations,
+    expandSearch,
+    suggestProductPrice: getPriceSuggestion
+};

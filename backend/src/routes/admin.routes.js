@@ -16,27 +16,27 @@ router.get(
     auth,
     role("admin"),
     asyncHandler(adminController.getAnalytics)
-)
+);
 
 router.get(
     '/vendors/pending',
     auth,
     role("admin"),
     asyncHandler(adminController.getPendingVendors)
-)
+);
 
 router.post(
     '/categories',
     auth,
     role("admin"),
     asyncHandler(adminController.addCategory)
-)
+);
 
 router.put(
     '/commission',
     auth,
     role("admin"),
     asyncHandler(adminController.updateCommission)
-)
+);
 
 export { router as orderRoutes };

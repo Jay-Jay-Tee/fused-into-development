@@ -15,40 +15,40 @@ router.post(
     auth,
     role("buyer"),
     asyncHandler(refundController.raiseRefund)
-)
+);
 
 router.get(
     '/',
     auth,
     role("admin"),
     asyncHandler(refundController.getAllRefunds)
-)
+);
 
 router.get(
     '/my',
     auth,
     role("buyer"),
     asyncHandler(refundController.getBuyerRefunds)
-)
+);
 
 router.get(
     '/:id',
     auth,
     role("buyer", "admin"),
-    asyncHandler(refundController.getRefundById)   // get refund by ID should check role
-)
+    asyncHandler(refundController.getRefundById)
+);
 
 router.put(
     '/:id/approve',
     auth,
     role("admin"),
     asyncHandler(refundController.approveRefund)
-)
+);
 router.put(
     '/:id/reject',
     auth,
     role("admin"),
     asyncHandler(refundController.rejectRefund)
-)
+);
 
-export { router as productRoutes };
+export { router as refundRoutes };

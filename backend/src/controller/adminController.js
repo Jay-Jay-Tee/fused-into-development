@@ -23,4 +23,9 @@ const updateCommission = async (req, res) => {
     return res.status(200).json(data);
 };
 
-export {getAnalytics, getPendingVendors, addCategory, updateCommission};
+export const adminController = {
+    getAnalytics,
+    getPendingVendors,
+    addCategory,
+    updateCommission
+};

@@ -31,3 +31,11 @@ const updateOrderStatus = async (req, res) => {
     const order = await updateOrderStatusService({ orderId, status });
     return res.status(200).json(order);
 }
+
+export const orderController = {
+    createOrder,
+    getMyOrders,
+    getVendorOrders,
+    getOrderById,
+    updateOrderStatus
+};

@@ -18,4 +18,8 @@ const login = async (req, res) => {
     return res.status(200).json(data);
 };
 
-export { register, refreshToken, login };
+export const authController = {
+    register,
+    refreshToken,
+    login
+};
