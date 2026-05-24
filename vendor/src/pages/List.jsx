@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { products } from '../assets/assets'
 import { toast } from 'react-toastify'
+import { formatINR } from '../utils/money'
 
 const List = () => {
 
@@ -33,7 +34,7 @@ const List = () => {
                         <img className='w-12' src={item.image[0]} alt=""/>
                         <p>{item.name}</p>
                         <p className='hidden md:block'>{item.category}</p>
-                        <p className='hidden md:block'>₹{item.price}</p>
+                        <p className='hidden md:block'>{formatINR(item.price)}</p>
                         <div className='hidden md:flex items-center gap-2'>
                             <p>{item.stock}</p>
                             {item.stock <= lowStockThreshold && (

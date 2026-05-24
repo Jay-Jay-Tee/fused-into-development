@@ -2,8 +2,8 @@ import React, { useContext } from 'react'
 import { ShopContext } from '../context/ShopContext'
 import { Link } from 'react-router-dom'
 import { formatINR } from '../utils/money'
+
 const ProductItem=({id,image,name,price,vendor,location})=>{
-    const {currency}=useContext(ShopContext);
     return (
         <Link to={`/product/${id}`} className='text-ink cursor-pointer group'>
             <div className='overflow-hidden bg-line aspect-[3/4]'>

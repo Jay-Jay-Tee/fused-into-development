@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { toast } from 'react-toastify'
+import { formatINR } from '../utils/money'
 
 const RefundQueue = () => {
 
@@ -78,7 +79,7 @@ const RefundQueue = () => {
         <div>
             <div className='flex items-center justify-between mb-6'>
                 <h3 className='font-medium'>Refund Queue</h3>
-                <p className='text-sm text-ink-soft'>{refunds.length} pending · ₹{totalAmount.toLocaleString('en-IN')} at risk</p>
+                <p className='text-sm text-ink-soft'>{refunds.length} pending · {formatINR(totalAmount)} at risk</p>
             </div>
 
             <div className='flex flex-col gap-4'>
@@ -99,7 +100,7 @@ const RefundQueue = () => {
                             </div>
                             <div className='text-right md:min-w-[140px]'>
                                 <p className='text-xs text-ink-soft tracking-wider'>REFUND AMOUNT</p>
-                                <p className='text-2xl font-medium'>₹{r.amount.toLocaleString('en-IN')}</p>
+                                <p className='text-2xl font-medium'>{formatINR(r.amount)}</p>
                             </div>
                         </div>
 

@@ -1,10 +1,11 @@
 import React, { useContext } from 'react'
 import { ShopContext } from '../context/ShopContext'
 import Title from '../components/Title'
+import { formatINR } from '../utils/money'
 
 const Orders = () => {
 
-    const {products, currency} = useContext(ShopContext);
+    const {products} = useContext(ShopContext);
     // Backend wiring later - for now showing recent products as orders
     const orderHistory=products.slice(0,5).map((product,i)=>({
         ...product,
@@ -40,7 +41,7 @@ const Orders = () => {
                                 <p className='sm:text-base font-medium text-ink'>{item.name}</p>
                                 <p className='text-xs text-ink-soft mt-1'>Sold by {item.vendor} · 📍 {item.location}</p>
                                 <div className='flex items-center gap-3 mt-2 text-ink-soft'>
-                                    <p>{currency}{item.price}</p>
+                                    <p>{formatINR(item.price)}</p>
                                     <p>Quantity: {item.orderQuantity}</p>
                                     <p>Payment: {item.paymentMethod}</p>
                                 </div>

@@ -4,9 +4,10 @@ import { assets } from '../assets/assets'
 import Title from '../components/Title'
 import CartTotal from '../components/CartTotal'
 import { useNavigate } from 'react-router-dom'
+import { formatINR } from '../utils/money'
 
 const Cart = () => {
-    const {products,currency,cartItems,updateQuantity}=useContext(ShopContext);
+    const {products,cartItems,updateQuantity}=useContext(ShopContext);
     const [cartData,setCartData]=useState([]);
     const navigate=useNavigate();
     useEffect(()=>{
@@ -65,7 +66,7 @@ const Cart = () => {
                                             <div>
                                                 <p className='text-sm sm:text-lg font-medium'>{item.product.name}</p>
                                                 <div className='flex items-center gap-5 mt-2'>
-                                                    <p className='text-sm'>{currency}{item.product.price}</p>
+                                                    <p className='text-sm'>{formatINR(item.product.price)}</p>
                                                     {item.size !== 'default' && (
                                                         <p className='px-2 sm:px-3 py-0.5 border border-line bg-paper text-xs'>{item.size}</p>
                                                     )}
