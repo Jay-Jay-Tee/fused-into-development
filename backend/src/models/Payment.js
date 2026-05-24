@@ -53,9 +53,14 @@ paymentSchema.pre("validate", function (next) {
     const hasPayout = this.transactionType === "payout";
 
     // both order and refund populated, or neither populated (but not payout)
-    if ((hasOrder === hasRefund && hasOrder) || hasPayout )
+    if (hasOrder && hasRefund)
         return next(
-            new Error("Both excusive fields populated, only one of order/refund and vendor/buyer allowed")
+            new Error("Payment cannot reference both an order and a refund")
+        );
+
+    if (hasPayout && (hasOrder || hasRefund))
+        return next(
+            new Error("Payout payment should not reference an order or refund")
         );
     if (this.transactionType === "order" && !this.order) {
         return next(
