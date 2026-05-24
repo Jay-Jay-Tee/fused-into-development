@@ -3,10 +3,11 @@ import { useParams } from 'react-router-dom'
 import { ShopContext } from '../context/ShopContext'
 import { assets } from '../assets/assets'
 import RelatedProducts from '../components/RelatedProducts'
+import { formatINR } from '../utils/money'
 
 const Product=()=>{
     const {productId} = useParams();
-    const {products, currency, addToCart} = useContext(ShopContext);
+    const {products, addToCart} = useContext(ShopContext);
     const [productData, setProductData] = useState(false);
     const [image, setImage] = useState('');
     const [size, setSize] = useState('');
@@ -46,7 +47,7 @@ const Product=()=>{
                         <p className='text-mustard'>★★★★★</p>
                         <p className='pl-2'>{productData.rating} ({Math.floor(productData.rating*23)} reviews)</p>
                     </div>
-                    <p className='mt-5 text-3xl font-medium'>{currency}{productData.price}</p>
+                    <p className='mt-5 text-3xl font-medium'>{formatINR(productData.price)}</p>
                     <p className='mt-5 text-ink-soft md:w-4/5'>{productData.description}</p>
                     <div className='mt-6 border border-line p-4 flex items-center justify-between'>
                         <div>

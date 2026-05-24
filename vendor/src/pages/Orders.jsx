@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { mockOrders } from '../assets/assets'
 import { assets } from '../assets/assets'
 import { toast } from 'react-toastify'
+import { formatINR } from '../utils/money'
 
 const Orders = () => {
 
@@ -57,7 +58,7 @@ const Orders = () => {
                             <p>Date: {new Date(order.date).toLocaleDateString()}</p>
                         </div>
 
-                        <p className='text-sm sm:text-[15px] font-medium text-ink'>₹{order.amount}</p>
+                        <p className='text-sm sm:text-[15px] font-medium text-ink'>{formatINR(order.amount)}</p>
 
                         <select onChange={(e)=>statusHandler(e, order._id)} value={order.status} className='p-2 font-semibold border border-line bg-paper outline-none focus:border-navy'>
                             <option value='Order Placed'>Order Placed</option>
