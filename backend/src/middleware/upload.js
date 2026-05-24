@@ -1,13 +1,25 @@
 import multer from 'multer';
+import path from 'path';
+import fs from 'fs';
 
-const storage = multer.memoryStorage();
+const uploadDir = 'uploads/';
+if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir);
 
-// mult follows callback of form (err, acceptFile) 
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, uploadDir);
+    },
+    filename: (req, file, cb) => {
+        const ext = path.extname(file.originalname);
+        cb(null, `${Date.now()}-${Math.round(Math.random() * 1e6)}${ext}`);
+    },
+});
+
 const fileFilter = (req, file, multerCallback) => {
     const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/webp'];
 
     if (allowedMimeTypes.includes(file.mimetype)) {
-        multerCallback(null, true); // accept
+        multerCallback(null, true);
     } else {
         const err = new Error('Only JPEG, PNG, and WebP images are allowed');
         err.statusCode = 400;
@@ -15,30 +27,19 @@ const fileFilter = (req, file, multerCallback) => {
     }
 };
 
-// ----- Multer instance ------------------------------------
 const upload = multer({
     storage,
     fileFilter,
     limits: {
-        fileSize: 5 * 1024 * 1024, // 5MB per file
+        fileSize: 5 * 1024 * 1024,
     },
 });
 
-// ----- Exported middleware variants -------------------
-
-
-// Usage: router.post('/logo', auth, uploadSingle, controller)
-const uploadSingle = upload.single('image');
-
-
-// Usage: router.post('/', auth, uploadMultiple, controller)
+const uploadSingle   = upload.single('image');
 const uploadMultiple = upload.array('images', 5);
-
-
-// Then in the controller: req.files['logo'][0], req.files['banner'][0]
-const uploadFields = upload.fields([
-    { name: 'logo',   maxCount: 1 },
-    { name: 'banner', maxCount: 1 },
+const uploadFields   = upload.fields([
+    { name: 'logo',        maxCount: 1 },
+    { name: 'bannerImage', maxCount: 1 },
 ]);
 
 export { uploadSingle, uploadMultiple, uploadFields };

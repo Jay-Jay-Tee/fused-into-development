@@ -28,7 +28,7 @@ export const getRecommendations = async ({
       isActive: true,
       ...(orderCategories.length > 0 && { category: { $in: orderCategories } })
     })
-      .sort({ rating: -1 })
+      .sort({ averageRating: -1 })
       .limit(50)
       .select('_id name category price rating')
       .lean();
@@ -175,7 +175,7 @@ export const suggestProductPrice = async ({
       isActive: true,
       category: category
     })
-      .sort({ rating: -1 })
+      .sort({ averageRating: -1 })
       .limit(20)
       .select('_id name price')
       .lean();

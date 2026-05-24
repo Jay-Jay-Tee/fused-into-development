@@ -3,7 +3,7 @@ const role = (...allowedRoles) => {
     return (req, res, next) => {
         if (!req.user) {
             const err = new Error('Authentication required before role check');
-            err.statusCodeCode = 401;
+            err.statusCode = 401;
             return next(err);
         }
 

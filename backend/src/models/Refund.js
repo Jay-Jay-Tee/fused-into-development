@@ -31,6 +31,10 @@ const refundSchema = new mongoose.Schema(
             ref: "User",
             required: true
         },
+        adminNote: {
+            type: String,
+            default: null
+        },
         resolvedAt: Date
     },
     {

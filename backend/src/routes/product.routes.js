@@ -5,6 +5,7 @@ import { productController } from '../controller/productController.js';
 import { asyncHandler }      from '../middleware/asyncHandler.js';
 import { auth }              from '../middleware/auth.js';
 import { role }              from '../middleware/role.js';
+import { uploadMultiple }    from '../middleware/upload.js';
 
 // ----- PUBLIC ROUTES (no auth required) ------------------
 
@@ -18,8 +19,9 @@ router.get('/:id', asyncHandler(productController.getProductById));
 // add product
 router.post(
   '/',
-  auth,                       
-  role('vendor'),             
+  auth,
+  role('vendor'),
+  uploadMultiple,
   asyncHandler(productController.createProduct)
 );
 // update product by id
