@@ -7,15 +7,15 @@ import { auth } from '../middleware/auth.js';
 import { role } from '../middleware/role.js';
 import { uploadFields } from '../middleware/upload.js';
 
-// ----- PUBLIC ROUTES (no auth required) ------------------
-
-// Does NOT return sensitive fields like commission rate or addresses.
-router.get(
-    '/:id',
-    asyncHandler(vendorController.getVendorProfile)
-);
-
 // ----- PROTECTED ROUTES -----------------------------------
+
+// this one is to know if they've been made a vendor yet, so auth needed is that of a buyer
+router.get(
+    '/application/status',
+    auth,
+    role('buyer'),
+    asyncHandler(vendorController.getApplicationStatus)
+);
 
 router.get(
     '/me',
@@ -54,18 +54,21 @@ router.put(
     asyncHandler(vendorController.rejectVendor)
 );
 
-// this one is to know if they've been made a vendor yet, so auth needed is that of a buyer
-router.get(
-    '/application/status',
-    auth,
-    role('buyer'),
-    asyncHandler(vendorController.getApplicationStatus)
-);
 router.put(
     '/:id/commission',
     auth,
     role('admin'),
     asyncHandler(vendorController.updateVendorCommission)
 );
+
+// ----- PUBLIC ROUTES (no auth required) ------------------
+
+// Does NOT return sensitive fields like commission rate or addresses.
+
+router.get(
+    '/:id',
+    asyncHandler(vendorController.getVendorProfile)
+);
+
 
 export { router as vendorRoutes };

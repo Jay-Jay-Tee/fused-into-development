@@ -1,12 +1,12 @@
 import { getAnalyticsService, getPendingVendorsService, createCategoryService, updateCommissionService } from "../services/adminService.js";
 
 const getAnalytics = async (req, res) => {
-    const data = await getAnalyticsService();
+    const data = await getAnalyticsService({});
     return res.status(200).json(data);
 };
 
 const getPendingVendors = async (req, res) => {
-    const data = await getPendingVendorsService();
+    const data = await getPendingVendorsService({});
     return res.status(200).json(data);
 };
 

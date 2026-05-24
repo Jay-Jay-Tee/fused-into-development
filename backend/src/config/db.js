@@ -8,4 +8,4 @@ const connectDB = async () => {
   console.log(`MongoDB connected: ${conn.connection.host}`);    // apparently good practice
 };
 
-module.exports = connectDB;
+export { connectDB };

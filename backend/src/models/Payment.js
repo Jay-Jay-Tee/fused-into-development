@@ -52,7 +52,8 @@ paymentSchema.pre("validate", function (next) {
     const hasRefund = !!this.refund;
     const hasPayout = this.transactionType === "payout";
 
-    if (hasOrder === hasRefund || hasPayout)
+    // both order and refund populated, or neither populated (but not payout)
+    if ((hasOrder === hasRefund && hasOrder) || hasPayout )
         return next(
             new Error("Both excusive fields populated, only one of order/refund and vendor/buyer allowed")
         );

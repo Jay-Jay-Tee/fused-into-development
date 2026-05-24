@@ -19,21 +19,21 @@ router.get('/:id', asyncHandler(productController.getProductById));
 router.post(
   '/',
   auth,                       
-  role('seller'),             
+  role('vendor'),             
   asyncHandler(productController.createProduct)
 );
 // update product by id
 router.put(
   '/:id',
   auth,
-  role('seller'),
+  role('vendor'),
   asyncHandler(productController.updateProduct)
 );
 // delete product by id
 router.delete(
   '/:id',
   auth,
-  role('seller'),
+  role('vendor'),
   asyncHandler(productController.deleteProduct)
 );
 

@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import addressSchema from "./Address.js";
+import { addressSchema } from "./Address.js";
 
 const vendorSchema = new mongoose.Schema(
     {

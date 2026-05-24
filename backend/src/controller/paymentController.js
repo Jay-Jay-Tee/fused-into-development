@@ -100,10 +100,14 @@ const handleWebhook = async (req, res) => {
         });
     }
 
+    // Extract OrderId from receipt (format: "order_<objectId>")
+    const receipt = payload.payment?.entity?.receipt;
+    const orderId = receipt?.startsWith("order_") ? receipt.slice(6) : receipt;
+
     const data = await handleWebhookService({
         eventType: event,
         paymentId: payload.payment?.entity?.id,
-        orderId: payload.payment?.entity?.receipt,
+        orderId,
         amount: payload.payment?.entity?.amount,
         razorpaySignature,
         webhookBody: JSON.stringify(req.body),
