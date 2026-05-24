@@ -13,9 +13,6 @@ export const vendorController = {
     updateVendorProfile: async (req, res) => {
         res.status(501).json({ message: "Not implemented" });
     },
-    getPendingVendors: async (req, res) => {
-        res.status(501).json({ message: "Not implemented" });
-    },
     approveVendor: async (req, res) => {
         res.status(501).json({ message: "Not implemented" });
     },

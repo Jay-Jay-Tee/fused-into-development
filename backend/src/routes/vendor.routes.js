@@ -40,15 +40,6 @@ router.put(
     asyncHandler(vendorController.updateVendorProfile)
 );
 
-// ─── ADMIN ROUTES ─────────────────────────────────────────────
-
-router.get(
-    '/pending',
-    auth,
-    role('admin'),
-    asyncHandler(vendorController.getPendingVendors)
-);
-
 router.put(
     '/:id/approve',
     auth,

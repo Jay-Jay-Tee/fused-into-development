@@ -69,9 +69,6 @@ export const verifyPaymentService = async ({
         return { message: "Already verified" };
     }
 
-    // HMAC signature verification.
-    // Razorpay signs razorpayOrderId|razorpayPaymentId with the key secret.
-    // We recompute and compare — if they don't match, the request is forged.
     const body = razorpayOrderId + "|" + razorpayPaymentId;
     const expectedSignature = crypto
         .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
@@ -94,9 +91,26 @@ export const verifyPaymentService = async ({
         status: "paid",
     });
 
-    order.payment = payment._id;
-    order.orderStatus = "confirmed";
-    await order.save();
+    // Atomic update — only succeeds if order is still pending.
+    // Prevents double-processing if webhook fires at the same time.
+    const updated = await Order.findOneAndUpdate(
+        { _id: orderId, orderStatus: "pending" },
+        { $set: { orderStatus: "confirmed", payment: payment._id } },
+        { new: true }
+    );
+
+    if (!updated) {
+        return { message: "Already processed" };
+    }
+
+    await Product.bulkWrite(
+        updated.items.map(item => ({
+            updateOne: {
+                filter: { _id: item.product },
+                update: { $inc: { stock: -item.quantity } },
+            },
+        }))
+    );
 
     return { success: true, payment };
 };
@@ -131,8 +145,8 @@ export const triggerRefundService = async ({ refundId }) => {
         throw err;
     }
 
-    // Initiate refund via Razorpay against the original payment's transactionId.
-    // Amount is in paise.
+    // initiate refund via Razorpay using original payment's transactionId
+    // amount is in paise
     const razorpayRefund = await razorpay.payments.refund(
         originalPayment.transactionId,
         { amount: refund.refundAmount }
@@ -149,7 +163,7 @@ export const triggerRefundService = async ({ refundId }) => {
         status: "paid",
     });
 
-    // Mark the refund as resolved and record when it was settled.
+    // mark refund as resolved and record when it was settled.
     refund.status = "resolved";
     refund.resolvedAt = new Date();
     await refund.save();
@@ -157,9 +171,6 @@ export const triggerRefundService = async ({ refundId }) => {
     return { success: true, payment };
 };
 
-// ── getPaymentsByOrderService ─────────────────────────────────
-// Returns all Payment documents linked to a specific order.
-// Includes both the original purchase and any refund payments.
 export const getPaymentsByOrderService = async ({ orderId }) => {
     const directPayments = await Payment.find({ order: orderId }).lean();
 
@@ -174,8 +185,6 @@ export const getPaymentsByOrderService = async ({ orderId }) => {
     return [...directPayments, ...filteredRefundPayments];
 };
 
-// ── getMyPaymentsService ──────────────────────────────────────
-// Returns all Payment documents for the logged-in buyer.
 export const getMyPaymentsService = async ({ userId }) => {
     return await Payment.find({ user: userId })
         .sort({ createdAt: -1 })
@@ -192,7 +201,6 @@ export const handleWebhookService = async ({
     razorpaySignature,
     webhookBody,
 }) => {
-    // HMAC signature verification for webhook security.
     const expectedSignature = crypto
         .createHmac("sha256", process.env.RAZORPAY_WEBHOOK_SECRET)
         .update(webhookBody)
@@ -204,13 +212,11 @@ export const handleWebhookService = async ({
         throw err;
     }
 
-    // Only process payment.captured events.
     if (eventType !== "payment.captured") {
         return { message: "Event type not processed" };
     }
 
-    // Find order by Razorpay payment ID.
-    const order = await Order.findOne({ "payment.transactionId": paymentId });
+    const order = await Order.findById(orderId);
 
     if (!order) {
         const err = new Error("Order not found for this payment");
@@ -218,12 +224,11 @@ export const handleWebhookService = async ({
         throw err;
     }
 
-    // If already confirmed, skip (idempotent).
     if (order.orderStatus === "confirmed") {
         return { message: "Order already confirmed" };
     }
 
-    // Create Payment document if one doesn't exist.
+    // Check if Payment document already exists, /verify may have created it first.
     let payment = await Payment.findOne({ transactionId: paymentId });
 
     if (!payment) {
@@ -238,10 +243,25 @@ export const handleWebhookService = async ({
         });
     }
 
-    // Update order status to confirmed.
-    order.payment = payment._id;
-    order.orderStatus = "confirmed";
-    await order.save();
+    // only update if order is still pending
+    const updated = await Order.findOneAndUpdate(
+        { _id: orderId, orderStatus: "pending" },
+        { $set: { orderStatus: "confirmed", payment: payment._id } },
+        { new: true }
+    );
+
+    if (!updated) {
+        return { message: "Already processed" };
+    }
+
+    await Product.bulkWrite(
+        updated.items.map(item => ({
+            updateOne: {
+                filter: { _id: item.product },
+                update: { $inc: { stock: -item.quantity } },
+            },
+        }))
+    );
 
     return { success: true, payment };
 };

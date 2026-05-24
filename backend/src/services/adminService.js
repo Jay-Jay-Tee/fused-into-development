@@ -11,7 +11,7 @@ export const getAnalyticsService = async ({ }) => {
         {
             $group: {
                 _id: null,
-                total: { $sum: "$price" }
+                total: { $sum: "$totalAmount" }
             }
         }
     ]))[0]?.total || 0;
@@ -38,7 +38,7 @@ export const getAnalyticsService = async ({ }) => {
 // pending vendors service
 export const getPendingVendorsService = async ({ }) => {
     return await Vendor.find({ isApproved: false })
-        .populate("user", "name email")
+        .populate("user", "name email phone")
         .populate("categories")
         .lean();
 }
