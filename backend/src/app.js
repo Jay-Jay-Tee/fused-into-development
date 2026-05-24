@@ -3,6 +3,7 @@ import cors from 'cors';
 import morgan from 'morgan';
 
 import { adminRoutes }   from './routes/admin.routes.js';
+import { aiRoutes }      from './routes/ai.routes.js';
 import { authRoutes }    from './routes/auth.routes.js';
 import { orderRoutes }   from './routes/order.routes.js';
 import { paymentRoutes } from './routes/payment.routes.js';
@@ -36,6 +37,7 @@ app.use('/api/products', productRoutes);
 app.use('/api/refunds',  refundRoutes);
 app.use('/api/reviews',  reviewRoutes);
 app.use('/api/vendors',  vendorRoutes);
+app.use('/api/ai',       aiRoutes);
 
 // ─── 404 HANDLER ─────────────────────────────────────────────
 
