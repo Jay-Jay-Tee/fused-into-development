@@ -2,11 +2,81 @@ import React, { useState, useEffect } from 'react'
 import { toast } from 'react-toastify'
 import { formatINR } from '../utils/money'
 
+const RefundCard = ({ refund, onApprove, onReject }) => {
+    const [isRejecting, setIsRejecting] = useState(false);
+    const [adminNote, setAdminNote] = useState('');
+
+    const handleReject = () => {
+        if (!adminNote.trim()){
+            toast.error('Add a note for rejection');
+            return;
+        }
+        onReject(refund._id, adminNote);
+    }
+
+    return (
+        <div className='border border-line bg-paper p-5 md:p-6'>
+
+            <div className='flex flex-col md:flex-row gap-4 md:gap-6 mb-4'>
+                <img src={refund.itemImage} className='w-20 h-20 object-cover border border-line' alt=""/>
+                <div className='flex-1'>
+                    <div className='flex flex-col md:flex-row md:items-start md:justify-between gap-2 mb-2'>
+                        <p className='font-medium'>{refund.itemName}</p>
+                        <p className='text-xs text-ink-soft'>Requested {refund.requestedAt}</p>
+                    </div>
+                    <p className='text-xs text-ink-soft mb-3'>Qty {refund.quantity} · Order #{refund.orderId}</p>
+                    <p className='text-sm bg-paper border-l-2 border-mustard pl-3 py-1'>
+                        {refund.reason}
+                    </p>
+                </div>
+                <div className='text-right md:min-w-[140px]'>
+                    <p className='text-xs text-ink-soft tracking-wider'>REFUND AMOUNT</p>
+                    <p className='text-2xl font-medium'>{formatINR(refund.amount)}</p>
+                </div>
+            </div>
+
+            <div className='grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-ink-soft mb-5 pt-3 border-t border-line'>
+                <p><span>Buyer:</span> <span className='text-ink'>{refund.buyerName}</span></p>
+                <p><span>Contact:</span> <span className='text-ink'>{refund.buyerEmail}</span></p>
+            </div>
+
+            {isRejecting ? (
+                <div className='flex flex-col gap-2'>
+                    <p className='text-xs text-ink-soft tracking-wider'>REJECTION NOTE</p>
+                    <textarea
+                        value={adminNote}
+                        onChange={(e)=>setAdminNote(e.target.value)}
+                        rows={2}
+                        placeholder='Visible to the buyer. Explain why their refund was rejected.'
+                        className='px-3 py-2 border border-line outline-none focus:border-navy bg-paper text-sm'
+                    />
+                    <div className='flex gap-2 mt-2'>
+                        <button onClick={handleReject} className='px-4 py-2 bg-brick text-paper text-sm hover:bg-ink transition-colors'>
+                            Confirm reject
+                        </button>
+                        <button onClick={()=>{setIsRejecting(false); setAdminNote('')}} className='px-4 py-2 border border-line text-sm hover:bg-line transition-colors'>
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            ) : (
+                <div className='flex gap-2'>
+                    <button onClick={()=>onApprove(refund._id)} className='px-5 py-2 bg-ink text-paper text-sm hover:bg-navy transition-colors'>
+                        Approve refund
+                    </button>
+                    <button onClick={()=>setIsRejecting(true)} className='px-5 py-2 border border-brick text-brick text-sm hover:bg-brick hover:text-paper transition-colors'>
+                        Reject
+                    </button>
+                </div>
+            )}
+
+        </div>
+    )
+}
+
 const RefundQueue = () => {
 
     const [refunds, setRefunds] = useState([]);
-    const [rejectingId, setRejectingId] = useState(null);
-    const [adminNote, setAdminNote] = useState('');
 
     const fetchRefunds = async () => {
         // Backend wiring later
@@ -51,22 +121,17 @@ const RefundQueue = () => {
         setRefunds(mockRefunds);
     }
 
-    const approveRefund = async (id) => {
+    const approveRefund = (id) => {
         // Backend wiring later
         setRefunds(prev => prev.filter(r => r._id !== id));
         toast.success('Refund approved');
     }
 
-    const rejectRefund = async (id) => {
-        if (!adminNote.trim()){
-            toast.error('Add a note for rejection');
-            return;
-        }
-        // Backend wiring later
+    const rejectRefund = (id, adminNote) => {
+        // Backend wiring later - adminNote will be sent to backend
+        console.log('Rejecting', id, 'with note:', adminNote);
         setRefunds(prev => prev.filter(r => r._id !== id));
         toast.success('Refund rejected');
-        setRejectingId(null);
-        setAdminNote('');
     }
 
     useEffect(()=>{
@@ -84,62 +149,7 @@ const RefundQueue = () => {
 
             <div className='flex flex-col gap-4'>
                 {refunds.map((r) => (
-                    <div key={r._id} className='border border-line bg-paper p-5 md:p-6'>
-
-                        <div className='flex flex-col md:flex-row gap-4 md:gap-6 mb-4'>
-                            <img src={r.itemImage} className='w-20 h-20 object-cover border border-line' alt=""/>
-                            <div className='flex-1'>
-                                <div className='flex flex-col md:flex-row md:items-start md:justify-between gap-2 mb-2'>
-                                    <p className='font-medium'>{r.itemName}</p>
-                                    <p className='text-xs text-ink-soft'>Requested {r.requestedAt}</p>
-                                </div>
-                                <p className='text-xs text-ink-soft mb-3'>Qty {r.quantity} · Order #{r.orderId}</p>
-                                <p className='text-sm bg-paper border-l-2 border-mustard pl-3 py-1'>
-                                    {r.reason}
-                                </p>
-                            </div>
-                            <div className='text-right md:min-w-[140px]'>
-                                <p className='text-xs text-ink-soft tracking-wider'>REFUND AMOUNT</p>
-                                <p className='text-2xl font-medium'>{formatINR(r.amount)}</p>
-                            </div>
-                        </div>
-
-                        <div className='grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-ink-soft mb-5 pt-3 border-t border-line'>
-                            <p><span>Buyer:</span> <span className='text-ink'>{r.buyerName}</span></p>
-                            <p><span>Contact:</span> <span className='text-ink'>{r.buyerEmail}</span></p>
-                        </div>
-
-                        {rejectingId === r._id ? (
-                            <div className='flex flex-col gap-2'>
-                                <p className='text-xs text-ink-soft tracking-wider'>REJECTION NOTE</p>
-                                <textarea
-                                    value={adminNote}
-                                    onChange={(e)=>setAdminNote(e.target.value)}
-                                    rows={2}
-                                    placeholder='Visible to the buyer. Explain why their refund was rejected.'
-                                    className='px-3 py-2 border border-line outline-none focus:border-navy bg-paper text-sm'
-                                />
-                                <div className='flex gap-2 mt-2'>
-                                    <button onClick={()=>rejectRefund(r._id)} className='px-4 py-2 bg-brick text-paper text-sm hover:bg-ink transition-colors'>
-                                        Confirm reject
-                                    </button>
-                                    <button onClick={()=>{setRejectingId(null); setAdminNote('')}} className='px-4 py-2 border border-line text-sm hover:bg-line transition-colors'>
-                                        Cancel
-                                    </button>
-                                </div>
-                            </div>
-                        ) : (
-                            <div className='flex gap-2'>
-                                <button onClick={()=>approveRefund(r._id)} className='px-5 py-2 bg-ink text-paper text-sm hover:bg-navy transition-colors'>
-                                    Approve refund
-                                </button>
-                                <button onClick={()=>setRejectingId(r._id)} className='px-5 py-2 border border-brick text-brick text-sm hover:bg-brick hover:text-paper transition-colors'>
-                                    Reject
-                                </button>
-                            </div>
-                        )}
-
-                    </div>
+                    <RefundCard key={r._id} refund={r} onApprove={approveRefund} onReject={rejectRefund}/>
                 ))}
 
                 {refunds.length === 0 && (
