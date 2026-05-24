@@ -12,6 +12,12 @@ const userSchema = new mongoose.Schema(
             match: [/^[a-zA-Z ]+$/, 'Name contains special characters or numbers']
 
         },
+        userName: {
+            type: String,
+            required: true,
+            unique: true,
+            match: [/^[a-zA-Z0-9\_]+$/, 'Name contains special characters or numbers']
+        },
         email: {
             type: String,
             required: [true, 'Please enter your email'],
