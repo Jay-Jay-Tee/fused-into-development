@@ -16,4 +16,4 @@ router.post("/refresh-token", asyncHandler(authController.refreshToken));
 // ----- PROTECTED ROUTES -----------------------------------
 
 
-export { router as orderRoutes };
+export { router as authRoutes };

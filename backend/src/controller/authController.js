@@ -1,10 +1,10 @@
 import { loginService, refreshTokenService, registerService } from "../services/authService.js";
 
 const register = async (req, res) => {
-    const { userName, email, password } = req.body;
-    if (!email && !userName)
+    const { name, userName, email, phone, password } = req.body;
+    if (!name || !userName || !email || !phone || !password)
         throw new Error("Insufficient auth info");
-    const data = await registerService({ userName, email, password });
+    const data = await registerService({ name, userName, email, phone, password });
     return res.status(200).json(data);
 };
 
