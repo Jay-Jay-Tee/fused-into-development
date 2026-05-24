@@ -32,7 +32,7 @@ export const products = [
     name: "Cotton handloom kurta",
     description:
       "Handwoven cotton kurta from a Bengaluru-based weaver. Breathable, mid-weight, runs true to size.",
-    price: 1299,
+    price: 129900,
     image: ["https://picsum.photos/seed/p001/600/800"],
     category: "Clothing",
     subCategory: "Topwear",
@@ -49,7 +49,7 @@ export const products = [
     name: "Brass desk lamp",
     description:
       "Minimal brass desk lamp with adjustable arm. E27 bulb, warm light recommended.",
-    price: 2499,
+    price: 249900,
     image: ["https://picsum.photos/seed/p002/600/800"],
     category: "Home",
     subCategory: "Lighting",
@@ -66,7 +66,7 @@ export const products = [
     name: "Leather wallet, slim",
     description:
       "Full-grain leather bifold. Six card slots, two cash compartments. Ages well.",
-    price: 1799,
+    price: 179900,
     image: ["https://picsum.photos/seed/p003/600/800"],
     category: "Accessories",
     subCategory: "Wallets",
@@ -100,7 +100,7 @@ export const products = [
     name: "Khadi cotton shirt",
     description:
       "Loose-fit khadi shirt in indigo. Sand-washed for softness, gets better after every wash.",
-    price: 1599,
+    price: 159900,
     image: ["https://picsum.photos/seed/p005/600/800"],
     category: "Clothing",
     subCategory: "Topwear",
@@ -117,7 +117,7 @@ export const products = [
     name: "Cane reading chair",
     description:
       "Solid teak frame with hand-woven cane back and seat. Holds up to 110kg.",
-    price: 8999,
+    price: 899900,
     image: ["https://picsum.photos/seed/p006/600/800"],
     category: "Home",
     subCategory: "Furniture",
@@ -134,7 +134,7 @@ export const products = [
     name: "Block-printed dupatta",
     description:
       "Hand block-printed on mulmul cotton. 2.5m length, light enough for summer.",
-    price: 899,
+    price: 89900,
     image: ["https://picsum.photos/seed/p007/600/800"],
     category: "Clothing",
     subCategory: "Accessories",
@@ -151,7 +151,7 @@ export const products = [
     name: "Terracotta planter, large",
     description:
       "Unglazed terracotta, 12 inch diameter. Drainage hole, saucer included.",
-    price: 549,
+    price: 54900,
     image: ["https://picsum.photos/seed/p008/600/800"],
     category: "Home",
     subCategory: "Garden",
@@ -168,7 +168,7 @@ export const products = [
     name: "Hand-stitched journal",
     description:
       "120 pages, 80gsm cream paper. Lay-flat binding, vegan leather cover.",
-    price: 699,
+    price: 69900,
     image: ["https://picsum.photos/seed/p009/600/800"],
     category: "Stationery",
     subCategory: "Journals",
@@ -185,7 +185,7 @@ export const products = [
     name: "Wool overshirt",
     description:
       "Mid-weight wool overshirt, slightly oversized. Two chest pockets, horn buttons.",
-    price: 3499,
+    price: 349900,
     image: ["https://picsum.photos/seed/p010/600/800"],
     category: "Clothing",
     subCategory: "Topwear",
@@ -202,7 +202,7 @@ export const products = [
     name: "Linen tote bag",
     description:
       "Heavyweight linen, reinforced handles. Holds a 13-inch laptop and groceries.",
-    price: 799,
+    price: 79900,
     image: ["https://picsum.photos/seed/p011/600/800"],
     category: "Accessories",
     subCategory: "Bags",
@@ -219,7 +219,7 @@ export const products = [
     name: "Copper water bottle",
     description:
       "750ml pure copper bottle. Hand-hammered finish, leak-proof cap.",
-    price: 999,
+    price: 99900,
     image: ["https://picsum.photos/seed/p012/600/800"],
     category: "Home",
     subCategory: "Kitchen",

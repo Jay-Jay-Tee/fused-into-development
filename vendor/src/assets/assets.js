@@ -14,7 +14,7 @@ export const products = [
         name: 'Cotton handloom kurta',
         image: ['https://picsum.photos/seed/v001/300/400'],
         category: 'Clothing',
-        price: 1299,
+        price: 129900,
         stock: 24,
     },
     {
@@ -22,7 +22,7 @@ export const products = [
         name: 'Brass desk lamp',
         image: ['https://picsum.photos/seed/v002/300/400'],
         category: 'Home',
-        price: 2499,
+        price: 249900,
         stock: 3,
     },
     {
@@ -30,7 +30,7 @@ export const products = [
         name: 'Leather wallet, slim',
         image: ['https://picsum.photos/seed/v003/300/400'],
         category: 'Accessories',
-        price: 1799,
+        price: 179900,
         stock: 31,
     },
     {
@@ -38,7 +38,7 @@ export const products = [
         name: 'Ceramic pour-over set',
         image: ['https://picsum.photos/seed/v004/300/400'],
         category: 'Home',
-        price: 1899,
+        price: 189900,
         stock: 1,
     },
     {
@@ -46,7 +46,7 @@ export const products = [
         name: 'Khadi cotton shirt',
         image: ['https://picsum.photos/seed/v005/300/400'],
         category: 'Clothing',
-        price: 1599,
+        price: 159900,
         stock: 18,
     },
 ]
@@ -58,7 +58,7 @@ export const mockOrders = [
             { name: 'Cotton handloom kurta', quantity: 2, size: 'M' },
             { name: 'Leather wallet, slim', quantity: 1, size: 'default' },
         ],
-        amount: 4397,
+        amount: 439700,
         address: {
             firstName: 'Aarav',
             lastName: 'Mehta',
@@ -79,7 +79,7 @@ export const mockOrders = [
         items: [
             { name: 'Brass desk lamp', quantity: 1, size: 'default' },
         ],
-        amount: 2548,
+        amount: 254800,
         address: {
             firstName: 'Riya',
             lastName: 'Sharma',
@@ -101,7 +101,7 @@ export const mockOrders = [
             { name: 'Ceramic pour-over set', quantity: 1, size: 'default' },
             { name: 'Khadi cotton shirt', quantity: 1, size: 'L' },
         ],
-        amount: 3547,
+        amount: 354700,
         address: {
             firstName: 'Karan',
             lastName: 'Iyer',
