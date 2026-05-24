@@ -37,7 +37,10 @@ export const getAnalyticsService = async ({ }) => {
 
 // pending vendors service
 export const getPendingVendorsService = async ({ }) => {
-    return (await Vendor.find({ isApproved: false }).lean());
+    return await Vendor.find({ isApproved: false })
+        .populate("user", "name email")
+        .populate("categories")
+        .lean();
 }
 
 // add new category
@@ -81,10 +84,10 @@ export const createCategoryService = async ({
 export const updateCommissionService = async ({
     commissionPercent
 }) => {
-    
+
     const updatedCount = (await Vendor.updateMany({}, {
         $set: {
-            commission : commissionPercent
+            commission: commissionPercent
         }
     })
     ).modifiedCount;
