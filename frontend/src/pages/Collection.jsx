@@ -1,9 +1,8 @@
-import React, { useContext, useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState, useRef } from 'react'
 import { ShopContext } from '../context/ShopContext'
 import { assets } from '../assets/assets'
 import Title from '../components/Title'
 import ProductItem from '../components/ProductItem'
-import { useRef } from 'react';
 import useDebounce from '../hooks/useDebounce';
 import { expandSearchQuery } from '../api/ai';
 import ProductCardSkeleton from '../components/ProductCardSkeleton';
