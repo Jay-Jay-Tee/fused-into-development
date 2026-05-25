@@ -12,6 +12,8 @@ import { productRoutes }    from './routes/product.routes.js';
 import { refundRoutes }     from './routes/refund.routes.js';
 import { reviewRoutes }     from './routes/review.routes.js';
 import { vendorRoutes }     from './routes/vendor.routes.js';
+import { cartRoutes }       from './routes/cart.routes.js';
+import { wishlistRoutes }   from './routes/wishlist.routes.js';
 
 import { errorHandler }  from './middleware/error.js';
 import { AppError } from './utils/appError.js';
@@ -52,6 +54,8 @@ app.use('/api/products',    productRoutes);
 app.use('/api/refunds',     refundRoutes);
 app.use('/api/reviews',     reviewRoutes);
 app.use('/api/vendors',     vendorRoutes);
+app.use('/api/cart',        cartRoutes);
+app.use('/api/wishlist',    wishlistRoutes);
 
 // ------------ 404 HANDLER -----------------------------
 
