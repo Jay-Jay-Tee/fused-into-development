@@ -1,6 +1,7 @@
 import multer from 'multer';
-import path from 'path';
-import fs from 'fs';
+import path from 'node:path';
+import fs from 'node:fs';
+import { AppError } from '../utils/appError.js';
 
 const uploadDir = 'uploads/';
 if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir);
@@ -21,8 +22,7 @@ const fileFilter = (req, file, multerCallback) => {
     if (allowedMimeTypes.includes(file.mimetype)) {
         multerCallback(null, true);
     } else {
-        const err = new Error('Only JPEG, PNG, and WebP images are allowed');
-        err.statusCode = 400;
+        const err = new AppError('Only JPEG, PNG, and WebP images are allowed', 400);
         multerCallback(err);
     }
 };

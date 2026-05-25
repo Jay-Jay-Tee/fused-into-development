@@ -1,5 +1,6 @@
 import { Vendor } from "../models/Vendor.js";
 import { User } from "../models/User.js";
+import { AppError } from "../utils/appError.js";
 
 
 export const getVendorProfileService = async ({ vendorId }) => {
@@ -8,9 +9,8 @@ export const getVendorProfileService = async ({ vendorId }) => {
         .select("-commission -addresses")   // exclude sensitive fields
         .lean();
 
-    if (!vendor) {
-        throw Object.assign(new Error("Vendor not found"), { statusCode: 404 });
-    }
+    if (!vendor)
+        throw new AppError("Vendor not found", 404);
 
     return vendor;
 };
@@ -20,9 +20,8 @@ export const getMyVendorProfileService = async ({ userId }) => {
         .populate("categories", "name slug")
         .lean();
 
-    if (!vendor) {
-        throw Object.assign(new Error("Vendor profile not found"), { statusCode: 404 });
-    }
+    if (!vendor)
+        throw new AppError("Vendor profile not found", 404);
 
     return vendor;
 };
@@ -32,12 +31,8 @@ export const getMyVendorProfileService = async ({ userId }) => {
 export const registerVendorService = async ({ userId, vendorData, logo, bannerImage }) => {
     const existingVendor = await Vendor.findOne({ user: userId });
 
-    if (existingVendor) {
-        throw Object.assign(
-            new Error("You already have a pending or active vendor application"),
-            { statusCode: 409 }
-        );
-    }
+    if (existingVendor)
+        throw new AppError("Vendor profile already exists for this user", 400);
 
     const vendor = await Vendor.create({
         ...vendorData,
@@ -60,7 +55,7 @@ export const updateVendorProfileService = async ({ userId, updateData, logo, ban
     const vendor = await Vendor.findOne({ user: userId });
 
     if (!vendor)
-        throw new Error("Vendor profile not found");
+        throw new AppError("Vendor profile not found", 404);
 
     Object.assign(vendor, updateData);
     if (logo)        vendor.logo        = logo;
@@ -74,10 +69,10 @@ export const approveVendorService = async ({ vendorId }) => {
     const vendor = await Vendor.findById(vendorId);
 
     if (!vendor)
-        throw new Error("Vendor not found");
+        throw new AppError("Vendor not found", 404);
 
     if (vendor.isApproved)
-        throw new Error("Vendor is already approved");
+        throw new AppError("Vendor is already approved", 400);
 
     vendor.isApproved = true;
     await vendor.save();
@@ -92,8 +87,7 @@ export const rejectVendorService = async ({ vendorId, reason }) => {
     const vendor = await Vendor.findById(vendorId);
 
     if (!vendor)
-        throw new Error("Vendor not found");
-
+        throw new AppError("Vendor not found", 404);
     const userId = vendor.user;
 
     await Vendor.findByIdAndDelete(vendorId);
@@ -109,9 +103,8 @@ export const rejectVendorService = async ({ vendorId, reason }) => {
 export const updateVendorCommissionService = async ({ vendorId, commissionPercent }) => {
     const vendor = await Vendor.findById(vendorId);
 
-    if (!vendor) {
-        throw Object.assign(new Error("Vendor not found"), { statusCode: 404 });
-    }
+    if (!vendor)
+        throw new AppError("Vendor not found", 404);
 
     vendor.commission = commissionPercent;
     await vendor.save();
@@ -124,9 +117,8 @@ export const getApplicationStatusService = async ({ userId }) => {
         .select("vendorApplication")
         .lean();
 
-    if (!user) {
-        throw Object.assign(new Error("User not found"), { statusCode: 404 });
-    }
+    if (!user)
+        throw new AppError("User not found", 404);
 
     return user.vendorApplication;
 };

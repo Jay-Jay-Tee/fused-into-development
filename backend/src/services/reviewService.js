@@ -3,11 +3,13 @@ import { Order } from "../models/Order.js";
 import { Product } from "../models/Product.js";
 import { Vendor } from "../models/Vendor.js";
 
+import { AppError } from "../utils/appError.js";
+
 export const createProductReviewService = async ({ userId, productId, rating, comment }) => {
     const product = await Product.findById(productId);
 
     if (!product)
-        throw new Error("Product not found");
+        throw new AppError("Product not found", 404);
 
     // must have a delivered order containing this product.
     const eligibleOrder = await Order.findOne({
@@ -17,7 +19,7 @@ export const createProductReviewService = async ({ userId, productId, rating, co
     });
 
     if (!eligibleOrder)
-        throw new Error("You can only review products from delivered orders");
+        throw new AppError("You can only review products from delivered orders", 400);
 
     // Prevent duplicate reviews for the same product by the same buyer.
     const existingReview = await Review.findOne({
@@ -27,7 +29,7 @@ export const createProductReviewService = async ({ userId, productId, rating, co
     });
 
     if (existingReview)
-        throw new Error("You have already reviewed this product");
+        throw new AppError("You have already reviewed this product", 400);
 
     const review = await Review.create({
         reviewer: userId,
@@ -57,7 +59,7 @@ export const createVendorReviewService = async ({ userId, vendorId, rating, comm
     const vendor = await Vendor.findById(vendorId);
 
     if (!vendor)
-        throw new Error("Vendor not found");
+        throw new AppError("Vendor not found", 404);
 
     const eligibleOrder = await Order.findOne({
         buyer: userId,
@@ -66,7 +68,7 @@ export const createVendorReviewService = async ({ userId, vendorId, rating, comm
     });
 
     if (!eligibleOrder)
-        throw new Error("You can only review vendors from delivered orders");
+        throw new AppError("You can only review vendors from delivered orders", 400);
 
     const existingReview = await Review.findOne({
         reviewer: userId,
@@ -75,7 +77,7 @@ export const createVendorReviewService = async ({ userId, vendorId, rating, comm
     });
 
     if (existingReview)
-        throw new Error("You have already reviewed this vendor");
+        throw new AppError("You have already reviewed this vendor", 400);
 
     const review = await Review.create({
         reviewer: userId,

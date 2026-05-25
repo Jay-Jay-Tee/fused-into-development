@@ -1,6 +1,7 @@
 import { Product } from "../models/Product.js";
 import { Vendor } from "../models/Vendor.js";
 import { paginate } from "../utils/paginate.js";
+import { AppError } from "../utils/appError.js";
 
 export const getProductsService = async (query) => {
     const { page, limit, skip } = paginate(query);
@@ -44,9 +45,8 @@ export const getProductByIdService = async ({ productId }) => {
         .populate("category", "name slug")
         .lean();
 
-    if (!product) {
-        throw Object.assign(new Error("Product not found"), { statusCode: 404 });
-    }
+    if (!product)
+        throw new AppError("Product not found", 404);
 
     return product;
 };
@@ -59,11 +59,11 @@ export const createProductService = async ({ userId, productData }) => {
     const vendor = await Vendor.findOne({ user: userId });
 
     if (!vendor) {
-        throw new Error("Vendor profile not found");
+        throw new AppError("Vendor profile not found", 404);
     }
 
     if (!vendor.isApproved) {
-        throw new Error("Vendor account is not approved yet");
+        throw new AppError("Vendor account is not approved yet", 403);
     }
 
     const product = await Product.create({
@@ -80,17 +80,17 @@ export const updateProductService = async ({ userId, productId, updateData }) =>
     const vendor = await Vendor.findOne({ user: userId });
 
     if (!vendor) {
-        throw new Error("Vendor profile not found");
+        throw new AppError("Vendor profile not found", 404);
     }
 
     const product = await Product.findById(productId);
 
     if (!product) {
-        throw new Error("Product not found");
+        throw new AppError("Product not found", 404);
     }
 
     if (product.vendor.toString() !== vendor._id.toString()) {
-        throw new Error("Not authorised to edit this product");
+        throw new AppError("Not authorised to edit this product", 403);
     }
 
     // Apply only the fields passed in - don't overwrite everything.
@@ -104,17 +104,17 @@ export const deleteProductService = async ({ userId, productId }) => {
     const vendor = await Vendor.findOne({ user: userId });
 
     if (!vendor) {
-        throw Object.assign(new Error("Vendor profile not found"), { statusCode: 404 });
+        throw new AppError("Vendor profile not found", 404);
     }
 
     const product = await Product.findById(productId);
 
     if (!product) {
-        throw Object.assign(new Error("Product not found"), { statusCode: 404 });
+        throw new AppError("Product not found", 404);
     }
 
     if (product.vendor.toString() !== vendor._id.toString()) {
-        throw Object.assign(new Error("Not authorised to delete this product"), { statusCode: 403 });
+        throw new AppError("Not authorised to delete this product", 403);
     }
 
     product.isActive = false;

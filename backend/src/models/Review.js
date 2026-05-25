@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { AppError } from "../utils/appError.js";
 
 const reviewSchema = new mongoose.Schema(
     {
@@ -52,12 +53,12 @@ reviewSchema.pre("validate", function (next) {
 
     if (this.reviewType === "product" && !hasProduct)
         return next(
-            new Error("Product review requires product field")
+            new AppError("Product review requires product field", 400)
         );
 
     if (this.reviewType === "vendor" && !hasVendor)
         return next(
-            new Error("Vendor review requires vendor field")
+            new AppError("Vendor review requires vendor field", 400)
         );
 
     next();

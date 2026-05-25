@@ -1,9 +1,10 @@
-import { Order } from "../models/Order.js";
-import { VendorPayout } from "../models/VendorPayouts.js";
-import { Vendor } from "../models/Vendor.js";
-import { Category } from "../models/Category.js";
-import { calculateCommission } from "../utils/calculateCommission.js";
-import { Payment } from "../models/Payment.js";
+import { Order }                from "../models/Order.js";
+import { VendorPayout }         from "../models/VendorPayouts.js";
+import { Vendor }               from "../models/Vendor.js";
+import { Category }             from "../models/Category.js";
+import { calculateCommission }  from "../utils/calculateCommission.js";
+import { Payment }              from "../models/Payment.js";
+import { AppError }             from "../utils/appError.js";
 
 // analytics service
 export const getAnalyticsService = async () => {
@@ -76,7 +77,7 @@ export const createCategoryService = async ({
 }) => {
 
     if (!name || !slug) {
-        throw new Error("Name and slug are required");
+        throw new AppError("Name and slug are required", 400);
     }
 
     // check if category already exists
@@ -88,7 +89,7 @@ export const createCategoryService = async ({
     });
 
     if (existingCategory) {
-        throw new Error("Category already exists");
+        throw new AppError("Category with the same name or slug already exists", 409);
     }
 
     // create category
@@ -119,26 +120,21 @@ export const updateCommissionService = async ({
 
 // disburse payout for a vendor for a given month/year
 export const disbursePayoutService = async ({ vendorId, month, year }) => {
-    const payout = await calculateCommission({ vendorId, month, year });
- 
-    if (payout.status === "paid") {
-        throw Object.assign(
-            new Error("Payout for this period has already been disbursed"),
-            { statusCode: 409 }
-        );
+
+    const existingPayout = await VendorPayout.findOne({ vendor: vendorId, month, year });
+    if (existingPayout?.status === "paid") {
+        throw new AppError("Payout for this period has already been disbursed", 400);
     }
- 
+
+    const payout = await calculateCommission({ vendorId, month, year });
+
     if (payout.totalRevenue === 0) {
-        throw Object.assign(
-            new Error("No revenue to disburse for this period"),
-            { statusCode: 400 }
-        );
+        throw new AppError("No revenue to disburse for this period", 400);
     }
  
     const netAmount = Number.parseFloat((payout.totalRevenue - payout.commissionDeducted).toFixed(2));
- 
     const vendor = await Vendor.findById(vendorId).select("user");
- 
+
     const payment = await Payment.create({
         user:            vendor.user,
         amount:          netAmount,

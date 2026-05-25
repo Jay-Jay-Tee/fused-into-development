@@ -1,24 +1,25 @@
 import { Refund } from "../models/Refund.js";
 import { Order } from "../models/Order.js";
+import { AppError } from "../utils/appError.js";
 
 
 export const createRefundService = async ({ userId, orderId, itemId, reason }) => {
     const order = await Order.findById(orderId);
 
     if (!order)
-        throw new Error("Order not found");
+        throw new AppError("Order not found", 404);
 
     if (order.buyer.toString() !== userId)
-        throw new Error("Not authorised for this order");
+        throw new AppError("Not authorised for this order", 403);
 
     if (order.orderStatus !== "delivered")
-        throw new Error("Refunds can only be raised for delivered orders");
+        throw new AppError("Refunds can only be raised for delivered orders", 403);
 
     // Find the specific item within the order by matching product id.
     const item = order.items.find(i => i.product.toString() === itemId);
 
     if (!item) 
-        throw new Error("Item not found in this order");
+        throw new AppError("Item not found in this order", 404);
 
     // check no existing pending/approved refund for this item in this order
     const existingRefund = await Refund.findOne({
@@ -28,7 +29,7 @@ export const createRefundService = async ({ userId, orderId, itemId, reason }) =
     });
 
     if (existingRefund)
-        throw new Error("A refund request already exists for this item")
+        throw new AppError("A refund request already exists for this item", 409)
 
     // refundAmount is price * quantity from the order snapshot, for now
     const refundAmount = item.price * item.quantity;
@@ -69,9 +70,8 @@ export const getRefundByIdService = async ({ refundId }) => {
         .populate("order", "orderStatus totalAmount")
         .lean();
 
-    if (!refund) {
-        throw Object.assign(new Error("Refund request not found"), { statusCode: 404 });
-    }
+    if (!refund)
+        throw new AppError("Refund request not found", 404);
 
     return refund;
 };
@@ -84,10 +84,10 @@ export const approveRefundService = async ({ refundId, adminNote }) => {
     const refund = await Refund.findById(refundId);
 
     if (!refund) 
-        throw new Error("Refund request not found");
+        throw new AppError("Refund request not found", 404);
 
     if (refund.status !== "pending") 
-        throw new Error(`Refund is already ${refund.status}`);
+        throw new AppError(`Refund is already ${refund.status}`, 400);
     
     refund.status = "approved";
     if (adminNote) refund.adminNote = adminNote;
@@ -100,10 +100,10 @@ export const rejectRefundService = async ({ refundId, adminNote }) => {
     const refund = await Refund.findById(refundId);
 
     if (!refund) 
-        throw new Error("Refund request not found");
+        throw new AppError("Refund request not found", 404);
 
     if (refund.status !== "pending")
-        throw new Error(`Refund is already ${refund.status}`);
+        throw new AppError(`Refund is already ${refund.status}`, 400);
 
     refund.status = "rejected";
     if (adminNote) refund.adminNote = adminNote;

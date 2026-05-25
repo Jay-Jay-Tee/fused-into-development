@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import { User } from "../models/User.js";
+import { AppError } from "../utils/appError.js";
 
 // ---- registerService --------------------------
 
@@ -36,7 +37,7 @@ export const registerService = async ({ name, userName, email, phone, password }
 // Returns both access token (15m) and refresh token (7d).
 export const loginService = async ({ email, userName, password }) => {
     if (!email && !userName) {
-        throw new Error("Email or username is required");
+        throw new AppError("Email or username is required", 401);
     }
 
     // $or requires an array of condition objects, not raw values.
@@ -47,13 +48,13 @@ export const loginService = async ({ email, userName, password }) => {
     const user = await User.findOne(query).select("+password");
 
     if (!user) {
-        throw new Error("No account found with those credentials");
+        throw new AppError("No account found with those credentials", 401);
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
-        throw new Error("Incorrect username / pasword");
+        throw new AppError("Incorrect username / password", 401);
     }
 
     const accessToken = jwt.sign(
@@ -88,7 +89,7 @@ export const refreshTokenService = async ({ refreshToken }) => {
     try {
         decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
     } catch {
-        throw Object.assign(new Error("Refresh token is invalid or expired"), { statusCode: 401 });
+        throw new AppError("Refresh token is invalid or expired", 401);
     }
 
     const accessToken = jwt.sign(

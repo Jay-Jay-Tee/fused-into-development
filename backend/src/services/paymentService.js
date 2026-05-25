@@ -4,6 +4,7 @@ import { Product } from "../models/Product.js";
 import { Order } from "../models/Order.js";
 import { Payment } from "../models/Payment.js";
 import { Refund } from "../models/Refund.js";
+import { AppError } from "../utils/appError.js";
 
 const razorpay = new Razorpay({
     key_id: process.env.RAZORPAY_KEY_ID,
@@ -14,23 +15,17 @@ export const createPaymentOrderService = async ({ orderId, userId }) => {
     const order = await Order.findById(orderId).populate("payment");
 
     if (!order) {
-        const err = new Error("Order not found");
-        err.statusCode = 404;
-        throw err;
+         throw new AppError("Order not found", 404);
     }
 
     // Only the buyer who placed the order can pay for it.
     if (order.buyer.toString() !== userId) {
-        const err = new Error("Not authorized for this order");
-        err.statusCode = 403;
-        throw err;
+         throw new AppError("Not authorized for this order", 403);
     }
 
     // If a Payment document exists and is already paid, reject.
     if (order.payment?.status === "paid") {
-        const err = new Error("Order already paid");
-        err.statusCode = 409;
-        throw err;
+         throw new AppError("Order already paid", 409);
     }
 
     const razorpayOrder = await razorpay.orders.create({
@@ -60,9 +55,7 @@ export const verifyPaymentService = async ({
     const order = await Order.findById(orderId).populate("payment");
 
     if (!order) {
-        const err = new Error("Order not found");
-        err.statusCode = 404;
-        throw err;
+         throw new AppError("Order not found", 404);
     }
 
     if (order.orderStatus === "confirmed") {
@@ -76,9 +69,7 @@ export const verifyPaymentService = async ({
         .digest("hex");
 
     if (expectedSignature !== razorpaySignature) {
-        const err = new Error("Invalid payment signature");
-        err.statusCode = 401;
-        throw err;
+         throw new AppError("Invalid payment signature", 401);
     }
 
     const payment = await Payment.create({
@@ -126,23 +117,17 @@ export const triggerRefundService = async ({ refundId }) => {
     });
 
     if (!refund) {
-        const err = new Error("Refund request not found");
-        err.statusCode = 404;
-        throw err;
+         throw new AppError("Refund request not found", 404);
     }
 
     if (refund.status !== "approved") {
-        const err = new Error("Refund must be approved before triggering payment");
-        err.statusCode = 400;
-        throw err;
+         throw new AppError("Refund must be approved before triggering payment", 400);
     }
 
     const originalPayment = refund.order.payment;
 
     if (originalPayment?.status !== "paid") {
-        const err = new Error("Original payment not found or not paid");
-        err.statusCode = 400;
-        throw err;
+         throw new AppError("Original payment not found or not paid", 400);
     }
 
     // initiate refund via Razorpay using original payment's transactionId
@@ -206,11 +191,8 @@ export const handleWebhookService = async ({
         .update(webhookBody)
         .digest("hex");
 
-    if (expectedSignature !== razorpaySignature) {
-        const err = new Error("Invalid webhook signature");
-        err.statusCode = 401;
-        throw err;
-    }
+    if (expectedSignature !== razorpaySignature)
+        throw new AppError("Invalid webhook signature", 401);
 
     if (eventType !== "payment.captured") {
         return { message: "Event type not processed" };
@@ -218,11 +200,8 @@ export const handleWebhookService = async ({
 
     const order = await Order.findById(orderId);
 
-    if (!order) {
-        const err = new Error("Order not found for this payment");
-        err.statusCode = 404;
-        throw err;
-    }
+    if (!order)
+        throw new AppError("Order not found for this payment", 404);
 
     if (order.orderStatus === "confirmed") {
         return { message: "Order already confirmed" };
