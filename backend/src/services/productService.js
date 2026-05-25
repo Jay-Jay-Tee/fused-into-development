@@ -124,7 +124,7 @@ export const deleteProductService = async ({ userId, productId }) => {
 };
 
 export const getMyProductsService = async ({ userId }) => {
-    const products = await Product.find({ vendor: userId, isActive: true })
+    const products = await Product.find({ vendor: userId })
         .populate("vendor", "storeName averageRating")
         .populate("category", "name slug")
         .lean();
