@@ -33,8 +33,9 @@ const Navbar=()=>{
                     <img onClick={()=>navigate('/login')} className='w-5 cursor-pointer' src={assets.profile_icon} alt="" />
                     <div className='group-hover:block hidden absolute dropdown-menu right-0 pt-4'>
                         <div className='flex flex-col gap-2 w-36 py-3 px-5 bg-white border border-line text-ink-soft rounded'>
-                            <p className='cursor-pointer hover:text-ink'>My profile</p>
-                            <p className='cursor-pointer hover:text-ink'>Orders</p>
+                            <p onClick={()=>navigate('/profile')} className='cursor-pointer hover:text-ink'>My profile</p>
+                            <p onClick={()=>navigate('/orders')} className='cursor-pointer hover:text-ink'>Orders</p>
+                            <p onClick={()=>navigate('/wishlist')} className='cursor-pointer hover:text-ink'>Wishlist</p>
                             <p className='cursor-pointer hover:text-ink'>Logout</p>
                         </div>
                     </div>
