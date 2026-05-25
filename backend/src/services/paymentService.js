@@ -54,9 +54,11 @@ export const verifyPaymentService = async ({
 }) => {
     const order = await Order.findById(orderId).populate("payment");
 
-    if (!order) {
-         throw new AppError("Order not found", 404);
-    }
+    if (!order) 
+        throw new AppError("Order not found", 404);
+    
+    if(order.buyer.toString() !== userId)
+        throw new AppError("Unauthorised attempt at verification", 401);
 
     if (order.orderStatus === "confirmed") {
         return { message: "Already verified" };

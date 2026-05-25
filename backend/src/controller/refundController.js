@@ -40,7 +40,8 @@ const approveRefund = async (req, res) => {
 };
 
 const rejectRefund = async (req, res) => {
-    const data = await rejectRefundService({ refundId: req.params.id });
+    const { adminNote } = req.body;
+    const data = await rejectRefundService({ refundId: req.params.id, adminNote });
     return res.status(200).json(data);
 };
 

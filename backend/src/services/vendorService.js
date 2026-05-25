@@ -75,6 +75,10 @@ export const approveVendorService = async ({ vendorId }) => {
         throw new AppError("Vendor is already approved", 400);
 
     vendor.isApproved = true;
+    await User.findByIdAndUpdate(vendor.user, {
+        role: "vendor",
+        "vendorApplication.status": "approved",   // this is missing from approveVendorService
+    });
     await vendor.save();
 
     // Upgrade the user's role so they gain access to vendor-only routes immediately.

@@ -46,7 +46,7 @@ const userSchema = new mongoose.Schema(
         addresses: [addressSchema],
 
         vendorApplication: {
-            status: { type: String, enum: ['none', 'pending', 'rejected'], default: 'none' },
+            status: { type: String, enum: ['none', 'approved', 'pending', 'rejected'], default: 'none' },
             rejectionNote: { type: String, default: null }
         }
     },

@@ -74,7 +74,6 @@ export const getMyOrdersService = async ({ userId, query }) => {
     };
 };
 
-// ── getVendorOrdersService ────────────────────────────────────
 // Returns all orders that contain at least one item from this vendor.
 export const getVendorOrdersService = async ({ vendorId, query }) => {
     const { skip, limit, page } = paginate(query);
@@ -98,26 +97,32 @@ export const getVendorOrdersService = async ({ vendorId, query }) => {
     };
 };
 
-// ── getOrderByIdService ───────────────────────────────────────
-// Returns a single order. Caller is responsible for auth checks
 // (buyer owns it, or vendor has items in it) before calling this.
-export const getOrderByIdService = async ({ orderId }) => {
+export const getOrderByIdService = async ({ userId, orderId }) => {
     const order = await Order.findById(orderId)
         .populate("items.product", "name images price")
         .populate("buyer", "name email")
         .populate("payment", "status transactionType amount")
         .lean();
 
-    if (!order) {
+    if (!order)
         throw new AppError("Order not found", 404);
-    }
+
+    const isBuyer     = order.buyer._id.toString() === userId;
+    const vendorItems = order.items.filter(item => item.vendor.toString() === userId);
+    const isVendor    = vendorItems.length > 0;
+
+    if (!isBuyer && !isVendor)
+        throw new AppError("Order does not belong to user", 403);
+
+    if (isVendor && !isBuyer)
+        return { ...order, items: vendorItems };
 
     return order;
 };
 
-// ── updateOrderStatusService ──────────────────────────────────
 // Vendor updates the status of an order.
-// Valid progression: pending → confirmed → shipped → delivered.
+// Valid progression: pending -> confirmed -> shipped -> delivered.
 // Cancelled can be set from pending or confirmed only.
 export const updateOrderStatusService = async ({ orderId, status, vendorId }) => {
     const order = await Order.findById(orderId);
