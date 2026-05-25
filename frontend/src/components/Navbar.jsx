@@ -1,14 +1,16 @@
 import React, {useState,useContext} from 'react'
 import {assets} from '../assets/assets'
-import {Link,NavLink,useNavigate} from 'react-router-dom'
+import {Link,NavLink,useNavigate,useLocation} from 'react-router-dom'
 import { ShopContext } from '../context/ShopContext'
 const Navbar=()=>{
     const [visible,setVisible]=useState(false);
     const {setShowSearch,getCartCount}=useContext(ShopContext);
     const navigate=useNavigate();
+    const location=useLocation();
+    const onCollection=location.pathname.includes('collection');
     return (
         <div className='flex items-center justify-between py-5 font-medium'>
-            <img src={assets.logo} className='w-36' alt="" />
+            <img src={assets.logo} className='w-28' alt="" />
             <ul className='hidden sm:flex gap-5 text-sm text-ink-soft'>
                 <NavLink to='/' className='flex flex-col items-center gap-1'>
                     <p>HOME</p>
@@ -28,7 +30,7 @@ const Navbar=()=>{
                 </NavLink>
             </ul>
             <div className='flex items-center gap-6'>
-                <img onClick={()=>setShowSearch(true)} src={assets.search_icon} className='w-5 cursor-pointer' alt=""/>
+                <img onClick={()=>{ if(!onCollection) navigate('/collection'); setShowSearch(true); }} src={assets.search_icon} className='w-5 cursor-pointer' alt=""/>
                 <div className='group relative'>
                     <img onClick={()=>navigate('/login')} className='w-5 cursor-pointer' src={assets.profile_icon} alt="" />
                     <div className='group-hover:block hidden absolute dropdown-menu right-0 pt-4'>
