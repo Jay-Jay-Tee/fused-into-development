@@ -3,6 +3,7 @@ import Navbar from './components/Navbar'
 import Sidebar from './components/Sidebar'
 import { Routes, Route, useLocation, Navigate } from 'react-router-dom'
 import Add from './pages/Add'
+import Edit from './pages/Edit'
 import List from './pages/List'
 import Orders from './pages/Orders'
 import Earnings from './pages/Earnings'
@@ -33,6 +34,7 @@ const App = () => {
             <Route path='/pending' element={<Pending/>}/>
             <Route path='/' element={<Navigate to='/add' replace/>}/>
             <Route path='/add' element={<Add/>}/>
+            <Route path='/edit/:id' element={<Edit/>}/>
             <Route path='/list' element={<List/>}/>
             <Route path='/orders' element={<Orders/>}/>
             <Route path='/earnings' element={<Earnings/>}/>

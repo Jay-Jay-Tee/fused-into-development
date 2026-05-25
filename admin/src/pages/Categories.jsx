@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react'
+import axios from 'axios'
 import { toast } from 'react-toastify'
+
+const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
 
 const Categories = () => {
 
@@ -9,107 +12,121 @@ const Categories = () => {
     const [newSubCategory, setNewSubCategory] = useState('');
 
     const fetchCategories = async () => {
-        // Backend wiring later
-        const mockCategories = [
-            {
-                _id: 'c001',
-                name: 'Clothing',
-                slug: 'clothing',
-                productCount: 4,
-                subcategories: [
-                    { _id: 'sc001', name: 'Topwear', productCount: 3 },
-                    { _id: 'sc002', name: 'Accessories', productCount: 1 },
-                ]
-            },
-            {
-                _id: 'c002',
-                name: 'Home',
-                slug: 'home',
-                productCount: 5,
-                subcategories: [
-                    { _id: 'sc003', name: 'Lighting', productCount: 1 },
-                    { _id: 'sc004', name: 'Kitchen', productCount: 2 },
-                    { _id: 'sc005', name: 'Furniture', productCount: 1 },
-                    { _id: 'sc006', name: 'Garden', productCount: 1 },
-                ]
-            },
-            {
-                _id: 'c003',
-                name: 'Accessories',
-                slug: 'accessories',
-                productCount: 2,
-                subcategories: [
-                    { _id: 'sc007', name: 'Wallets', productCount: 1 },
-                    { _id: 'sc008', name: 'Bags', productCount: 1 },
-                ]
-            },
-            {
-                _id: 'c004',
-                name: 'Stationery',
-                slug: 'stationery',
-                productCount: 1,
-                subcategories: [
-                    { _id: 'sc009', name: 'Journals', productCount: 1 },
-                ]
-            },
-        ];
-        setCategories(mockCategories);
+        try {
+            const res = await axios.get(`${API}/categories`);
+            const all = res.data;
+            const parents = all.filter(c => !c.parentCategory);
+            const children = all.filter(c => c.parentCategory);
+            const tree = parents.map(p => ({
+                _id: p._id,
+                name: p.name,
+                slug: p.slug,
+                productCount: 0,
+                subcategories: children
+                    .filter(c => c.parentCategory?.toString() === p._id?.toString() || c.parentCategory === p._id)
+                    .map(c => ({ _id: c._id, name: c.name, productCount: 0 })),
+            }));
+            setCategories(tree);
+        } catch (err) {
+            toast.error('Failed to load categories');
+        }
     }
 
-    const addCategory = (e) => {
+    const addCategory = async (e) => {
         e.preventDefault();
         if (!newCategory.trim()) return;
-        // Backend wiring later
-        const newCat = {
-            _id: `c_new_${Date.now()}`,
-            name: newCategory.trim(),
-            slug: newCategory.trim().toLowerCase().replace(/\s+/g, '-'),
-            productCount: 0,
-            subcategories: [],
-        };
-        setCategories(prev => [...prev, newCat]);
-        setNewCategory('');
-        toast.success('Category added');
+        const token = localStorage.getItem('token');
+        const slug = newCategory.trim().toLowerCase().replace(/\s+/g, '-');
+        try {
+            const res = await axios.post(`${API}/admin/categories`, {
+                name: newCategory.trim(),
+                slug,
+                isActive: true,
+            }, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            const created = res.data;
+            setCategories(prev => [...prev, {
+                _id: created._id,
+                name: created.name,
+                slug: created.slug,
+                productCount: 0,
+                subcategories: [],
+            }]);
+            setNewCategory('');
+            toast.success('Category added');
+        } catch (err) {
+            toast.error(err.response?.data?.message || 'Failed to add category');
+        }
     }
 
-    const deleteCategory = (id) => {
+    const deleteCategory = async (id) => {
         const cat = categories.find(c => c._id === id);
         if (cat.productCount > 0){
             toast.error(`Can't delete — ${cat.productCount} product(s) in this category`);
             return;
         }
-        // Backend wiring later
-        setCategories(prev => prev.filter(c => c._id !== id));
-        toast.success('Category deleted');
+        const token = localStorage.getItem('token');
+        try {
+            await axios.delete(`${API}/admin/categories/${id}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            setCategories(prev => prev.filter(c => c._id !== id));
+            toast.success('Category deleted');
+        } catch (err) {
+            toast.error(err.response?.data?.message || 'Failed to delete category');
+        }
     }
 
-    const addSubCategory = (e, parentId) => {
+    const addSubCategory = async (e, parentId) => {
         e.preventDefault();
         if (!newSubCategory.trim()) return;
-        // Backend wiring later
-        setCategories(prev => prev.map(c =>
-            c._id === parentId
-                ? { ...c, subcategories: [...c.subcategories, { _id: `sc_new_${Date.now()}`, name: newSubCategory.trim(), productCount: 0 }] }
-                : c
-        ));
-        setNewSubCategory('');
-        setAddingSubTo(null);
-        toast.success('Subcategory added');
+        const token = localStorage.getItem('token');
+        const slug = newSubCategory.trim().toLowerCase().replace(/\s+/g, '-');
+        try {
+            const res = await axios.post(`${API}/admin/categories`, {
+                name: newSubCategory.trim(),
+                slug,
+                parentCategory: parentId,
+                isActive: true,
+            }, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            const created = res.data;
+            setCategories(prev => prev.map(c =>
+                c._id === parentId
+                    ? { ...c, subcategories: [...c.subcategories, { _id: created._id, name: created.name, productCount: 0 }] }
+                    : c
+            ));
+            setNewSubCategory('');
+            setAddingSubTo(null);
+            toast.success('Subcategory added');
+        } catch (err) {
+            toast.error(err.response?.data?.message || 'Failed to add subcategory');
+        }
     }
 
-    const deleteSubCategory = (parentId, subId) => {
+    const deleteSubCategory = async (parentId, subId) => {
         const cat = categories.find(c => c._id === parentId);
         const sub = cat.subcategories.find(s => s._id === subId);
         if (sub.productCount > 0){
             toast.error(`Can't delete — ${sub.productCount} product(s) in this subcategory`);
             return;
         }
-        setCategories(prev => prev.map(c =>
-            c._id === parentId
-                ? { ...c, subcategories: c.subcategories.filter(s => s._id !== subId) }
-                : c
-        ));
-        toast.success('Subcategory deleted');
+        const token = localStorage.getItem('token');
+        try {
+            await axios.delete(`${API}/admin/categories/${subId}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            setCategories(prev => prev.map(c =>
+                c._id === parentId
+                    ? { ...c, subcategories: c.subcategories.filter(s => s._id !== subId) }
+                    : c
+            ));
+            toast.success('Subcategory deleted');
+        } catch (err) {
+            toast.error(err.response?.data?.message || 'Failed to delete subcategory');
+        }
     }
 
     useEffect(()=>{

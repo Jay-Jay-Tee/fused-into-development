@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { products } from '../assets/assets'
 import { toast } from 'react-toastify'
 import { formatINR } from '../utils/money'
 
 const List = () => {
 
+    const navigate = useNavigate();
     const [list, setList] = useState([]);
     const lowStockThreshold = 5;
     const fetchList = async () => {
@@ -41,7 +43,10 @@ const List = () => {
                                 <span className='text-[10px] bg-brick text-paper px-1.5 py-0.5 rounded'>LOW</span>
                             )}
                         </div>
-                        <p onClick={()=>removeProduct(item._id)} className='text-right md:text-center cursor-pointer text-lg hover:text-brick transition-colors'>×</p>
+                        <div className='flex items-center justify-center gap-3'>
+                            <p onClick={()=>navigate(`/edit/${item._id}`)} className='text-xs text-navy cursor-pointer hover:underline'>Edit</p>
+                            <p onClick={()=>removeProduct(item._id)} className='cursor-pointer text-lg hover:text-brick transition-colors'>×</p>
+                        </div>
                     </div>
                 ))}
                 {list.length === 0 && (

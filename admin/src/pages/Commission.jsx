@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react'
+import axios from 'axios'
 import { toast } from 'react-toastify'
+
+const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
 
 const Commission = () => {
 
@@ -19,14 +22,21 @@ const Commission = () => {
         ]);
     }
 
-    const saveDefault = () => {
+    const saveDefault = async () => {
         if (defaultRate < 0 || defaultRate > 50){
             toast.error('Rate must be between 0 and 50');
             return;
         }
-        // Backend wiring later
-        setSavedDefault(defaultRate);
-        toast.success('Default rate saved');
+        const token = localStorage.getItem('token');
+        try {
+            await axios.put(`${API}/admin/commission`, { commissionPercent: defaultRate }, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            setSavedDefault(defaultRate);
+            toast.success('Default rate saved');
+        } catch (err) {
+            toast.error(err.response?.data?.message || 'Failed to save rate');
+        }
     }
 
     const updateCategoryRate = (id, newRate) => {

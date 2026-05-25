@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react'
+import axios from 'axios'
 import { toast } from 'react-toastify'
 import { formatINR } from '../utils/money'
+
+const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
 
 const RefundCard = ({ refund, onApprove, onReject }) => {
     const [isRejecting, setIsRejecting] = useState(false);
@@ -79,59 +82,53 @@ const RefundQueue = () => {
     const [refunds, setRefunds] = useState([]);
 
     const fetchRefunds = async () => {
-        // Backend wiring later
-        const mockRefunds = [
-            {
-                _id: 'r001',
-                buyerName: 'Riya Sharma',
-                buyerEmail: 'riya.sharma@gmail.com',
-                orderId: 'o228',
-                itemName: 'Brass desk lamp',
-                itemImage: 'https://picsum.photos/seed/v002/300/400',
-                quantity: 1,
-                amount: 249900,
-                reason: 'Product arrived damaged. Top of the lamp has a dent near the bulb socket.',
-                requestedAt: 'May 22, 2026',
-            },
-            {
-                _id: 'r002',
-                buyerName: 'Aarav Mehta',
-                buyerEmail: 'aarav.m@yahoo.com',
-                orderId: 'o241',
-                itemName: 'Cotton handloom kurta',
-                itemImage: 'https://picsum.photos/seed/v001/300/400',
-                quantity: 2,
-                amount: 259800,
-                reason: 'Wrong size delivered. Ordered M but received XL.',
-                requestedAt: 'May 23, 2026',
-            },
-            {
-                _id: 'r003',
-                buyerName: 'Karan Iyer',
-                buyerEmail: 'k.iyer@outlook.com',
-                orderId: 'o252',
-                itemName: 'Khadi cotton shirt',
-                itemImage: 'https://picsum.photos/seed/v005/300/400',
-                quantity: 1,
-                amount: 159900,
-                reason: 'Changed my mind, no longer need it.',
-                requestedAt: 'May 24, 2026',
-            },
-        ];
-        setRefunds(mockRefunds);
+        const token = localStorage.getItem('token');
+        try {
+            const res = await axios.get(`${API}/refunds`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            const mapped = res.data.map(r => ({
+                _id: r._id,
+                buyerName: r.buyer?.name || 'Unknown',
+                buyerEmail: r.buyer?.email || '',
+                orderId: r.order?._id || r.order,
+                itemName: r.item?.name || '',
+                itemImage: r.item?.image || '',
+                quantity: r.item?.quantity || 1,
+                amount: r.refundAmount,
+                reason: r.reason,
+                requestedAt: r.createdAt ? new Date(r.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '',
+            }));
+            setRefunds(mapped);
+        } catch (err) {
+            toast.error('Failed to load refunds');
+        }
     }
 
-    const approveRefund = (id) => {
-        // Backend wiring later
-        setRefunds(prev => prev.filter(r => r._id !== id));
-        toast.success('Refund approved');
+    const approveRefund = async (id) => {
+        const token = localStorage.getItem('token');
+        try {
+            await axios.put(`${API}/refunds/${id}/approve`, {}, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            setRefunds(prev => prev.filter(r => r._id !== id));
+            toast.success('Refund approved');
+        } catch (err) {
+            toast.error(err.response?.data?.message || 'Failed to approve refund');
+        }
     }
 
-    const rejectRefund = (id, adminNote) => {
-        // Backend wiring later - adminNote will be sent to backend
-        console.log('Rejecting', id, 'with note:', adminNote);
-        setRefunds(prev => prev.filter(r => r._id !== id));
-        toast.success('Refund rejected');
+    const rejectRefund = async (id, adminNote) => {
+        const token = localStorage.getItem('token');
+        try {
+            await axios.put(`${API}/refunds/${id}/reject`, { adminNote }, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            setRefunds(prev => prev.filter(r => r._id !== id));
+            toast.success('Refund rejected');
+        } catch (err) {
+            toast.error(err.response?.data?.message || 'Failed to reject refund');
+        }
     }
 
     useEffect(()=>{

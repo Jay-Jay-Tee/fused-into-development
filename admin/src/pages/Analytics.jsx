@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react'
+import axios from 'axios'
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, PieChart, Pie, Cell, Legend } from 'recharts'
 import { formatINR } from '../utils/money'
+
+const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
 
 const Analytics = () => {
 
@@ -15,13 +18,21 @@ const Analytics = () => {
     const [categoryShare, setCategoryShare] = useState([]);
 
     const fetchAnalytics = async () => {
-        // Backend wiring later - all currency in paise (integer)
-        setStats({
-            totalSales: 184500000,      // ₹18,45,000
-            activeVendors: 47,
-            ordersThisWeek: 312,
-            pendingApprovals: 3,
-        });
+        const token = localStorage.getItem('token');
+        try {
+            const res = await axios.get(`${API}/admin/analytics`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            const { totalSales, topVendors: vendorData } = res.data;
+            setStats(prev => ({ ...prev, totalSales }));
+            setTopVendors(vendorData.map(v => ({
+                _id: v._id,
+                name: v.storeName,
+                sales: v.total,
+            })));
+        } catch (err) {
+            console.error('Failed to fetch analytics', err);
+        }
 
         setRevenueChart([
             { day: 'Mon', revenue: 21200000 },
@@ -33,26 +44,12 @@ const Analytics = () => {
             { day: 'Sun', revenue: 21600000 },
         ]);
 
-        setTopVendors([
-            { _id: 'v1', name: 'Tantuja Studio', city: 'Bengaluru', sales: 24850000, orders: 42, score: 92 },
-            { _id: 'v2', name: 'Modi Metals', city: 'Moradabad', sales: 18920000, orders: 28, score: 88 },
-            { _id: 'v3', name: 'Indigo House', city: 'Ahmedabad', sales: 15240000, orders: 35, score: 85 },
-            { _id: 'v4', name: 'Bagru Prints', city: 'Jaipur', sales: 13680000, orders: 48, score: 79 },
-            { _id: 'v5', name: 'Flax & Folk', city: 'Coimbatore', sales: 11420000, orders: 31, score: 73 },
-        ]);
-
         setCategoryShare([
             { name: 'Clothing', value: 42, fill: '#2D4A8A' },
             { name: 'Home', value: 28, fill: '#E0B43A' },
             { name: 'Accessories', value: 18, fill: '#9E3027' },
             { name: 'Stationery', value: 12, fill: '#5C5A56' },
         ]);
-    }
-
-    const getScoreColor = (score) => {
-        if (score >= 80) return 'bg-green-600';
-        if (score >= 60) return 'bg-mustard';
-        return 'bg-brick';
     }
 
     useEffect(()=>{
@@ -138,24 +135,15 @@ const Analytics = () => {
             <div className='border border-line bg-paper'>
                 <p className='text-sm font-medium p-4 border-b border-line'>Top vendors by revenue</p>
                 <div>
-                    <div className='hidden md:grid grid-cols-[2fr_1fr_1fr_1fr_1fr] py-2 px-4 text-xs text-ink-soft tracking-wider border-b border-line'>
+                    <div className='hidden md:grid grid-cols-[3fr_2fr_1fr] py-2 px-4 text-xs text-ink-soft tracking-wider border-b border-line'>
                         <p>VENDOR</p>
-                        <p>ORDERS</p>
                         <p>REVENUE</p>
-                        <p>SCORE</p>
                         <p className='text-right'>RANK</p>
                     </div>
                     {topVendors.map((v, i) => (
-                        <div key={v._id} className='grid grid-cols-[2fr_1fr_1fr_1fr_1fr] items-center py-3 px-4 text-sm border-b border-line last:border-b-0 gap-2'>
-                            <div>
-                                <p className='font-medium'>{v.name}</p>
-                                <p className='text-xs text-ink-soft'>📍 {v.city}</p>
-                            </div>
-                            <p>{v.orders}</p>
+                        <div key={v._id} className='grid grid-cols-[3fr_2fr_1fr] items-center py-3 px-4 text-sm border-b border-line last:border-b-0 gap-2'>
+                            <p className='font-medium'>{v.name}</p>
                             <p className='font-medium'>{formatINR(v.sales)}</p>
-                            <div className='flex items-center gap-2'>
-                                <span className={`text-[10px] text-paper px-2 py-0.5 rounded ${getScoreColor(v.score)}`}>{v.score}</span>
-                            </div>
                             <p className='text-right text-ink-soft'>#{i+1}</p>
                         </div>
                     ))}

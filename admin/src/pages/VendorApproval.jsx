@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react'
+import axios from 'axios'
 import { toast } from 'react-toastify'
+
+const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
 
 const VendorCard = ({ vendor, onApprove, onReject }) => {
     const [isRejecting, setIsRejecting] = useState(false);
@@ -19,17 +22,16 @@ const VendorCard = ({ vendor, onApprove, onReject }) => {
             <div className='flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-4'>
                 <div>
                     <p className='font-medium text-lg'>{vendor.shopName}</p>
-                    <p className='text-sm text-ink-soft'>{vendor.ownerName} · 📍 {vendor.city}</p>
+                    <p className='text-sm text-ink-soft'>{vendor.ownerName}{vendor.city ? ` · 📍 ${vendor.city}` : ''}</p>
                 </div>
                 <p className='text-xs text-ink-soft'>Applied {vendor.appliedDate}</p>
             </div>
 
             <p className='text-sm mb-4'>{vendor.description}</p>
 
-            <div className='grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs text-ink-soft mb-5'>
+            <div className='grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-ink-soft mb-5'>
                 <p><span className='text-ink-soft'>Email:</span> <span className='text-ink'>{vendor.email}</span></p>
-                <p><span className='text-ink-soft'>Phone:</span> <span className='text-ink'>{vendor.phone}</span></p>
-                <p><span className='text-ink-soft'>GSTIN:</span> <span className='text-ink font-mono'>{vendor.gstin || 'Not provided'}</span></p>
+                <p><span className='text-ink-soft'>Phone:</span> <span className='text-ink'>{vendor.phone || 'Not provided'}</span></p>
             </div>
 
             {isRejecting ? (
@@ -71,56 +73,50 @@ const VendorApproval = () => {
     const [pending, setPending] = useState([]);
 
     const fetchPending = async () => {
-        // Backend wiring later
-        const mockPending = [
-            {
-                _id: 'v_app001',
-                shopName: 'Tantuja Studio',
-                ownerName: 'Aarav Mehta',
-                email: 'aarav@tantuja.in',
-                phone: '9876543210',
-                city: 'Bengaluru',
-                description: 'Handwoven cotton products. Family-run, three generations.',
-                gstin: '29AABCT1234M1Z5',
-                appliedDate: 'May 22, 2026',
-            },
-            {
-                _id: 'v_app002',
-                shopName: 'Modi Metals',
-                ownerName: 'Priya Modi',
-                email: 'priya@modimetals.com',
-                phone: '9123456780',
-                city: 'Moradabad',
-                description: 'Brass and copper homeware, exporting since 1998.',
-                gstin: '09AABCM5678N2Z6',
-                appliedDate: 'May 23, 2026',
-            },
-            {
-                _id: 'v_app003',
-                shopName: 'Flax & Folk',
-                ownerName: 'Karthik Iyer',
-                email: 'hello@flaxandfolk.in',
-                phone: '9988776655',
-                city: 'Coimbatore',
-                description: 'Heavyweight linen bags and home textiles.',
-                gstin: '',
-                appliedDate: 'May 24, 2026',
-            },
-        ];
-        setPending(mockPending);
+        const token = localStorage.getItem('token');
+        try {
+            const res = await axios.get(`${API}/admin/vendors/pending`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            const vendors = res.data.map(v => ({
+                _id: v._id,
+                shopName: v.storeName,
+                ownerName: v.user?.name || '',
+                email: v.user?.email || '',
+                phone: v.phone || v.user?.phone || '',
+                description: v.storeDescription || '',
+                appliedDate: v.createdAt ? new Date(v.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '',
+            }));
+            setPending(vendors);
+        } catch (err) {
+            toast.error('Failed to load pending vendors');
+        }
     }
 
-    const approveVendor = (id) => {
-        // Backend wiring later
-        setPending(prev => prev.filter(v => v._id !== id));
-        toast.success('Vendor approved');
+    const approveVendor = async (id) => {
+        const token = localStorage.getItem('token');
+        try {
+            await axios.put(`${API}/vendors/${id}/approve`, {}, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            setPending(prev => prev.filter(v => v._id !== id));
+            toast.success('Vendor approved');
+        } catch (err) {
+            toast.error(err.response?.data?.message || 'Failed to approve vendor');
+        }
     }
 
-    const rejectVendor = (id, reason) => {
-        // Backend wiring later - reason will be sent to backend
-        console.log('Rejecting', id, 'with reason:', reason);
-        setPending(prev => prev.filter(v => v._id !== id));
-        toast.success('Vendor rejected');
+    const rejectVendor = async (id, reason) => {
+        const token = localStorage.getItem('token');
+        try {
+            await axios.put(`${API}/vendors/${id}/reject`, { reason }, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            setPending(prev => prev.filter(v => v._id !== id));
+            toast.success('Vendor rejected');
+        } catch (err) {
+            toast.error(err.response?.data?.message || 'Failed to reject vendor');
+        }
     }
 
     useEffect(()=>{
