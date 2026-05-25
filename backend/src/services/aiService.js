@@ -1,3 +1,6 @@
+import dotenv from 'dotenv';
+dotenv.config();
+
 import OpenAI from 'openai';
 import { Order } from '../models/Order.js';
 import { Product } from '../models/Product.js';
@@ -5,7 +8,7 @@ import { Product } from '../models/Product.js';
 const client = new OpenAI({
   baseURL: 'https://openrouter.ai/api/v1',
 
-  apiKey: process.env.OPENROUTER_API_KEY,
+  apiKey: process.env.OPENAI_API_KEY,
 });
 
 //recommendation engine 
