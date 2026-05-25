@@ -7,6 +7,15 @@ import { auth }              from '../middleware/auth.js';
 import { role }              from '../middleware/role.js';
 import { uploadMultiple }    from '../middleware/upload.js';
 
+
+// ----- PROTECTED ROUTES -------------------------------
+
+router.get('/my', 
+    auth,
+    role('vendor'),
+    asyncHandler(productController.getMyProducts)
+);
+
 // ----- PUBLIC ROUTES (no auth required) ------------------
 
 // get all products

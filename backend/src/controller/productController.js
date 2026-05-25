@@ -4,6 +4,7 @@ import {
     createProductService,
     updateProductService,
     deleteProductService,
+    getMyProductsService
 } from "../services/productService.js";
 
 const getProducts = async (req, res) => {
@@ -44,10 +45,16 @@ const deleteProduct = async (req, res) => {
     return res.status(200).json(data);
 };
 
+const getMyProducts = async (req, res) => {
+    const data = await getMyProductsService({ userId: req.user.id });
+    return res.status(200).json(data);
+}
+
 export const productController = {
     getProducts,
     getProductById,
     createProduct,
     updateProduct,
     deleteProduct,
+    getMyProducts
 };

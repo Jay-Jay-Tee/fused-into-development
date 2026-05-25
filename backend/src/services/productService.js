@@ -122,3 +122,11 @@ export const deleteProductService = async ({ userId, productId }) => {
 
     return { message: "Product removed from listing" };
 };
+
+export const getMyProductsService = async ({ userId }) => {
+    const products = await Product.find({ vendor: userId, isActive: true })
+        .populate("vendor", "storeName averageRating")
+        .populate("category", "name slug")
+        .lean();
+    return products;
+};    
