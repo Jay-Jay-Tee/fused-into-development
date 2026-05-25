@@ -8,6 +8,7 @@ import {
     getApplicationStatusService,
     updateVendorCommissionService,
 } from "../services/vendorService.js";
+import { AppError } from "../utils/appError.js";
 
 const getVendorProfile = async (req, res) => {
     const data = await getVendorProfileService({ vendorId: req.params.id });
@@ -62,7 +63,7 @@ const getApplicationStatus = async (req, res) => {
 const updateVendorCommission = async (req, res) => {
     const { commissionPercent } = req.body;
     if (Number.isNaN(Number(commissionPercent)))
-        throw new TypeError("Expected numerical input");
+        throw new AppError("Expected numerical input", 400);
     const data = await updateVendorCommissionService({
         vendorId: req.params.id,
         commissionPercent: Number(commissionPercent),

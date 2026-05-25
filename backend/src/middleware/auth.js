@@ -1,12 +1,11 @@
 import jwt from 'jsonwebtoken';
+import { AppError } from "../utils/appError.js"
 
 const auth = (req, res, next) => {
     const authHeader = req.headers.authorization;
 
     if (!authHeader?.startsWith('Bearer ')) {
-        const err = new Error('No token provided, authorization denied');
-        err.statusCode = 401;
-        err.name = 'NoTokenError';
+        const err = new AppError('No token provided, authorization denied', 401);
         return next(err);
     }
 
@@ -21,9 +20,7 @@ const auth = (req, res, next) => {
 
         next();
     } catch {
-        const error = new Error('Token is invalid or expired');
-        error.statusCode = 401;
-        error.name = 'InvalidTokenError';
+        const error = new AppError('Token is invalid or expired', 401);
         return next(error);
     }
 };

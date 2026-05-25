@@ -1,6 +1,7 @@
-import { Order } from "../models/Order.js";
-import { Vendor } from "../models/Vendor.js";
+import { Order }        from "../models/Order.js";
+import { Vendor }       from "../models/Vendor.js";
 import { VendorPayout } from "../models/VendorPayouts.js";
+import { AppError }     from "./appError.js";
 
 
 // Computes and writes a VendorPayout document for a given vendor
@@ -16,13 +17,12 @@ export const calculateCommission = async ({ vendorId, month, year }) => {
 
     const vendor = await Vendor.findById(vendorId);
 
-    if (!vendor) {
-        throw Object.assign(new Error("Vendor not found"), { statusCode: 404 });
-    }
+    if (!vendor)
+        throw new AppError("Vendor not found", 404);
 
     // Build date range for the given month and year
     const from = new Date(year, month - 1, 1);           // first day of month
-    const to   = new Date(year, month, 0, 23, 59, 59);   // last day of month
+    const to = new Date(year, month, 0, 23, 59, 59);   // last day of month
 
     // Aggregate all delivered orders in the period with items from this vendor
     const result = await Order.aggregate([
@@ -46,13 +46,13 @@ export const calculateCommission = async ({ vendorId, month, year }) => {
             $group: {
                 _id: null,
                 totalRevenue: { $sum: { $multiply: ["$items.price", "$items.quantity"] } },
-                totalOrders:  { $sum: 1 },
+                totalOrders: { $sum: 1 },
             },
         },
     ]);
 
-    const totalRevenue  = result[0]?.totalRevenue || 0;
-    const totalOrders   = result[0]?.totalOrders  || 0;
+    const totalRevenue = result[0]?.totalRevenue || 0;
+    const totalOrders = result[0]?.totalOrders || 0;
 
 
 

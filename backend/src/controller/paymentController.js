@@ -90,17 +90,26 @@ const getPaymentHistory = async (req, res) => {
 // ---- POST /api/payments/webhook --------------------
 
 const handleWebhook = async (req, res) => {
-    const { event, payload } = req.body;
     const razorpaySignature = req.headers["x-razorpay-signature"];
+    const webhookBody = req.body;                        // raw Buffer from express.raw()
 
-    if (!event || !payload || !razorpaySignature) {
+    if (!razorpaySignature || !webhookBody) {
         return res.status(400).json({
             success: false,
             message: "Missing webhook parameters",
         });
     }
 
-    // Extract OrderId from receipt (format: "order_<objectId>")
+    const parsed  = JSON.parse(webhookBody.toString());
+    const { event, payload } = parsed;
+
+    if (!event || !payload) {
+        return res.status(400).json({
+            success: false,
+            message: "Missing webhook parameters",
+        });
+    }
+
     const receipt = payload.payment?.entity?.receipt;
     const orderId = receipt?.startsWith("order_") ? receipt.slice(6) : receipt;
 
@@ -110,7 +119,7 @@ const handleWebhook = async (req, res) => {
         orderId,
         amount: payload.payment?.entity?.amount,
         razorpaySignature,
-        webhookBody: JSON.stringify(req.body),
+        webhookBody,                                     // raw Buffer, not re-stringified
     });
 
     res.status(200).json({

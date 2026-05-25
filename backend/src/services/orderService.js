@@ -1,6 +1,7 @@
 import { Order } from "../models/Order.js";
 import { Product } from "../models/Product.js";
 import { paginate } from "../utils/paginate.js";
+import { AppError } from "../utils/appError.js";
 
 
 export const createOrderService = async ({ userId, items, shippingAddress }) => {
@@ -19,10 +20,9 @@ export const createOrderService = async ({ userId, items, shippingAddress }) => 
         const product = productMap[item.product.toString()];
 
         if (!product)
-            throw new Error(`Product not found: ${item.product}`);
-
+            throw new AppError(`Product not found: ${item.product}`, 404);
         if (product.stock < item.quantity) 
-            throw new Error(`Insufficient stock for: ${product.name}`);
+            throw new AppError(`Insufficient stock for: ${product.name}`, 400);
 
         subtotal += product.price * item.quantity;
 
@@ -109,7 +109,7 @@ export const getOrderByIdService = async ({ orderId }) => {
         .lean();
 
     if (!order) {
-        throw Object.assign(new Error("Order not found"), { statusCode: 404 });
+        throw new AppError("Order not found", 404);
     }
 
     return order;
@@ -123,7 +123,7 @@ export const updateOrderStatusService = async ({ orderId, status, vendorId }) =>
     const order = await Order.findById(orderId);
 
     if (!order) {
-        throw Object.assign(new Error("Order not found"), { statusCode: 404 });
+        throw new AppError("Order not found", 404);
     }
 
     // Ensure at least one item in this order belongs to the requesting vendor.
@@ -132,7 +132,7 @@ export const updateOrderStatusService = async ({ orderId, status, vendorId }) =>
     );
 
     if (!vendorHasItem) {
-        throw Object.assign(new Error("Not authorised to update this order"), { statusCode: 403 });
+        throw new AppError("Not authorised to update this order", 403);
     }
 
     const validTransitions = {
@@ -144,10 +144,7 @@ export const updateOrderStatusService = async ({ orderId, status, vendorId }) =>
     };
 
     if (!validTransitions[order.orderStatus]?.includes(status)) {
-        throw Object.assign(
-            new Error(`Cannot transition from ${order.orderStatus} to ${status}`),
-            { statusCode: 400 }
-        );
+        throw new AppError(`Cannot transition from ${order.orderStatus} to ${status}`, 400);
     }
 
     order.orderStatus = status;

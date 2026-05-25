@@ -13,21 +13,23 @@ import { reviewRoutes }  from './routes/review.routes.js';
 import { vendorRoutes }  from './routes/vendor.routes.js';
 
 import { errorHandler }  from './middleware/error.js';
+import { AppError } from './utils/appError.js';
 
 const app = express();
 
-// ─── GLOBAL MIDDLEWARE ───────────────────────────────────────
+// ------ GLOBAL MIDDLEWARE -----------------------------
 app.use(cors({
     origin: process.env.CLIENT_URL || 'http://localhost:5173'    // for testing, 5173
 }));
 
+app.use('/api/payments/webhook', express.raw({ type: 'application/json' }));
 app.use(express.json());
 // helpful for debugging
 if (process.env.NODE_ENV !== 'test') {
     app.use(morgan('dev'));
 }
 
-// ─── ROUTES ──────────────────────────────────────────────────
+// ------------- ROUTES ---------------------------------
 
 app.use('/api/admin',    adminRoutes);
 app.use('/api/auth',     authRoutes);
@@ -39,15 +41,14 @@ app.use('/api/reviews',  reviewRoutes);
 app.use('/api/vendors',  vendorRoutes);
 app.use('/api/ai',       aiRoutes);
 
-// ─── 404 HANDLER ─────────────────────────────────────────────
+// ------------ 404 HANDLER -----------------------------
 
 app.use((req, res, next) => {
-    const error = new Error(`Route not found: ${req.originalUrl}`);
-    error.statusCode = 404;
+    const error = new AppError(`Can't find ${req.originalUrl} on this server!`, 404);
     next(error);
 });
 
-// ─── GLOBAL ERROR HANDLER ────────────────────────────────────
+// ----- GLOBAL ERROR HANDLER ---------------------------
 
 app.use(errorHandler);
 
