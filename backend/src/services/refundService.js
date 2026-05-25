@@ -96,7 +96,7 @@ export const approveRefundService = async ({ refundId, adminNote }) => {
     return refund.toObject();
 };
 
-export const rejectRefundService = async ({ refundId }) => {
+export const rejectRefundService = async ({ refundId, adminNote }) => {
     const refund = await Refund.findById(refundId);
 
     if (!refund) 
@@ -106,6 +106,7 @@ export const rejectRefundService = async ({ refundId }) => {
         throw new Error(`Refund is already ${refund.status}`);
 
     refund.status = "rejected";
+    if (adminNote) refund.adminNote = adminNote;
     await refund.save();
 
     return refund.toObject();
