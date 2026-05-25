@@ -2,6 +2,7 @@ import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import React from 'react'
 import {Routes,Route} from 'react-router-dom'
+import NotFound from './pages/NotFound'
 import Home from './pages/Home'
 import Collection from './pages/Collection'
 import About from './pages/About'
@@ -13,7 +14,6 @@ import PlaceOrder from './pages/PlaceOrder'
 import Navbar from './components/Navbar'
 import Orders from './pages/Orders'
 import SearchBar from './components/SearchBar'
-import NotFound from './pages/NotFound';
 
 const App = () => {
   return (
