@@ -60,10 +60,10 @@ const PlaceOrder = () => {
                     <input required onChange={onChangeHandler} name='state' value={formData.state} className='border border-line py-1.5 px-3.5 w-full outline-none focus:border-navy' type='text' placeholder='State'/>
                 </div>
                 <div className='flex gap-3'>
-                    <input required onChange={onChangeHandler} name='zipcode' value={formData.zipcode} className='border border-line py-1.5 px-3.5 w-full outline-none focus:border-navy' type='number' placeholder='Pincode'/>
+                    <input required onChange={onChangeHandler} name='zipcode' value={formData.zipcode} className='border border-line py-1.5 px-3.5 w-full outline-none focus:border-navy' type='text' pattern='[0-9]{6}' title='6-digit Indian pincode' placeholder='Pincode'/>
                     <input required onChange={onChangeHandler} name='country' value={formData.country} className='border border-line py-1.5 px-3.5 w-full outline-none focus:border-navy' type='text' placeholder='Country'/>
                 </div>
-                <input required onChange={onChangeHandler} name='phone' value={formData.phone} className='border border-line py-1.5 px-3.5 w-full outline-none focus:border-navy' type='number' placeholder='Phone number'/>
+                <input required onChange={onChangeHandler} name='phone' value={formData.phone} className='border border-line py-1.5 px-3.5 w-full outline-none focus:border-navy' type='tel' pattern='[6-9][0-9]{9}' title='10-digit Indian mobile number' placeholder='Phone number'/>
             </div>
 
             {/* Right side - cart total + payment method */}
