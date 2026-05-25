@@ -11,9 +11,9 @@ export const registerService = async ({ name, userName, email, phone, password }
     const existingUserName = await User.findOne({ userName });
     const existingPhone    = await User.findOne({ phone });
 
-    if (existingEmail)    throw Object.assign(new Error("Email already in use"), { statusCode: 409 });
-    if (existingUserName) throw Object.assign(new Error("Username already taken"), { statusCode: 409 });
-    if (existingPhone)    throw Object.assign(new Error("Phone number already in use"), { statusCode: 409 });
+    if (existingEmail)    throw new AppError("Email already in use", 400);
+    if (existingUserName) throw new AppError("Username already taken", 400);
+    if (existingPhone)    throw new AppError("Phone number already in use", 400);
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -82,7 +82,7 @@ export const loginService = async ({ email, userName, password }) => {
 // The refresh token is NOT rotated — same one stays valid for 7 days
 export const refreshTokenService = async ({ refreshToken }) => {
     if (!refreshToken) {
-        throw Object.assign(new Error("Refresh token is required"), { statusCode: 400 });
+        throw new AppError("Refresh token is required", 400);
     }
 
     let decoded;

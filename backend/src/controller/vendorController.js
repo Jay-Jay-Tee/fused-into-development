@@ -7,6 +7,7 @@ import {
     rejectVendorService,
     getApplicationStatusService,
     updateVendorCommissionService,
+    getMyPayoutsService,
 } from "../services/vendorService.js";
 import { AppError } from "../utils/appError.js";
 
@@ -71,6 +72,11 @@ const updateVendorCommission = async (req, res) => {
     return res.status(200).json(data);
 };
 
+const getMyPayouts = async (req, res) => {
+    const data = await getMyPayoutsService({ userId: req.user.id });
+    return res.status(200).json(data);
+};
+
 export const vendorController = {
     getVendorProfile,
     getMyVendorProfile,
@@ -80,4 +86,5 @@ export const vendorController = {
     rejectVendor,
     getApplicationStatus,
     updateVendorCommission,
+    getMyPayouts
 };

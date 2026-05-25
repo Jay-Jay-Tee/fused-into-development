@@ -5,6 +5,8 @@ import {
     updateCommissionService,
     disbursePayoutService,
     getPayoutsService,
+    updateCategoryService,
+    deleteCategoryService
 } from "../services/adminService.js";
 
 const getAnalytics = async (req, res) => {
@@ -41,6 +43,16 @@ const getPayouts = async (req, res) => {
     return res.status(200).json(data);
 };
 
+const updateCategory = async (req, res) => {
+    const data = await updateCategoryService({ categoryId: req.params.id, updateData: req.body });
+    return res.status(200).json(data);
+};
+
+const deleteCategory = async (req, res) => {
+    const data = await deleteCategoryService({ categoryId: req.params.id });
+    return res.status(200).json(data);
+};
+
 export const adminController = {
     getAnalytics,
     getPendingVendors,
@@ -48,4 +60,6 @@ export const adminController = {
     updateCommission,
     disbursePayout,
     getPayouts,
+    updateCategory,
+    deleteCategory 
 };

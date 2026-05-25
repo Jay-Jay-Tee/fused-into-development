@@ -170,3 +170,20 @@ export const getPayoutsService = async ({ vendorId, status }) => {
         .sort({ year: -1, month: -1 })
         .lean();
 };
+
+export const updateCategoryService = async ({ categoryId, updateData }) => {
+    const category = await Category.findById(categoryId);
+    if (!category)
+        throw new AppError("Category not found", 404);
+    Object.assign(category, updateData);
+    await category.save();
+    return category.toObject();
+};
+export const deleteCategoryService = async ({ categoryId }) => {
+    const category = await Category.findById(categoryId);
+    if (!category)
+        throw new AppError("Category not found", 404);
+    category.isActive = false;
+    await category.save();
+    return { message: "Category deactivated" };
+};

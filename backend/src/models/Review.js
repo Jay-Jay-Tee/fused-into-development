@@ -48,7 +48,7 @@ reviewSchema.pre("validate", function (next) {
 
     if (hasProduct === hasVendor)
         return next(
-            new Error("Review must reference either product or vendor, but not both")
+            new AppError("Review must reference either product or vendor, but not both", 400)
         );
 
     if (this.reviewType === "product" && !hasProduct)

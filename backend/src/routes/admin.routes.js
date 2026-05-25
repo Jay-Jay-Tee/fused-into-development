@@ -53,4 +53,17 @@ router.get(
     asyncHandler(adminController.getPayouts)
 );
 
+router.put(
+    '/categories/:id',
+    auth,
+    role("admin"),
+    asyncHandler(adminController.updateCategory)
+);
+router.delete(
+    '/categories/:id',
+    auth,
+    role("admin"),
+    asyncHandler(adminController.deleteCategory)
+);
+
 export { router as adminRoutes };

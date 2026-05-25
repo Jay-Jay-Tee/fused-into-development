@@ -90,12 +90,13 @@ export const createVendorReviewService = async ({ userId, vendorId, rating, comm
     // Recompute and update the vendor's averageRating.
     const stats = await Review.aggregate([
         { $match: { vendor: vendor._id, reviewType: "vendor" } },
-        { $group: { _id: null, avgRating: { $avg: "$rating" } } },
+        { $group: { _id: null, avgRating: { $avg: "$rating" },  count : { $sum: 1 } } },
     ]);
 
     if (stats.length > 0) {
         await Vendor.findByIdAndUpdate(vendorId, {
             averageRating: Math.round(stats[0].avgRating * 10) / 10,
+            totalReviews: stats[0].count,
         });
     }
 
