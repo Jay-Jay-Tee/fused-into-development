@@ -25,12 +25,20 @@ export const getRecommendations = async ({
   try {
     const pastOrders = await Order.find({ buyer: userId })
       .limit(10)
-      .select('items.category')
+      .select('items.product')
       .lean();
 
-    // map i to i.category, then as all i belongs to an order, map that array of i to its order
-    // then map that array of array of categories to a flatMap, then a set
-    const orderCategories = [...new Set(pastOrders.flatMap(o => o.items.map(i => i.category)))];
+    const productIds = [...new Set(
+      pastOrders.flatMap(o => o.items.map(i => i.product.toString()))
+    )];
+
+    const productDocs = await Product.find({ _id: { $in: productIds } })
+      .select('category')
+      .lean();
+
+    const orderCategories = [...new Set(
+      productDocs.map(p => p.category?.toString()).filter(Boolean)
+    )];
 
     const catalogueSample = await Product.find({
       isActive: true,
@@ -91,8 +99,8 @@ No extra text.
     const raw = completion.choices[0].message.content.trim();
 
     const cleaned = raw
-      .replace(/```json/g, '')
-      .replace(/```/g, '')
+      .replaceAll(/```json/g, '')
+      .replaceAll(/```/g, '')
       .trim();
 
     const parsed = JSON.parse(cleaned);
@@ -155,8 +163,8 @@ Output:
     const raw = completion.choices[0].message.content.trim();
 
     const cleaned = raw
-      .replace(/```json/g, '')
-      .replace(/```/g, '')
+      .replaceAll(/```json/g, '')
+      .replaceAll(/```/g, '')
       .trim();
 
     const parsed = JSON.parse(cleaned);
@@ -243,8 +251,8 @@ Rules:
     const raw = completion.choices[0].message.content.trim();
 
     const cleaned = raw
-      .replace(/```json/g, '')
-      .replace(/```/g, '')
+      .replaceAll(/```json/g, '')
+      .replaceAll(/```/g, '')
       .trim();
 
     const parsed = JSON.parse(cleaned);
