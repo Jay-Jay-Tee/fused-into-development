@@ -11,6 +11,8 @@ const Login = () => {
     const { setToken } = useContext(ShopContext);
     const [currentState, setCurrentState] = useState('Login');
     const [name, setName] = useState('');
+    const [userName, setUserName] = useState('');
+    const [phone, setPhone] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
@@ -20,7 +22,7 @@ const Login = () => {
         setLoading(true);
         try {
             if (currentState === 'Sign Up') {
-                await axios.post(`${API}/auth/register`, { name, email, password });
+                await axios.post(`${API}/auth/register`, { name, userName, email, phone, password });
                 toast.success('Account created! Please sign in.');
                 setCurrentState('Login');
             } else {
@@ -44,7 +46,11 @@ const Login = () => {
                 <hr className='border-none h-[1.5px] w-8 bg-ink'/>
             </div>
             {currentState === 'Login' ? null : (
-                <input onChange={(e)=>setName(e.target.value)} value={name} type='text' className='w-full px-3 py-2 border border-line outline-none focus:border-navy' placeholder='Name' required/>
+                <>
+                    <input onChange={(e)=>setName(e.target.value)} value={name} type='text' className='w-full px-3 py-2 border border-line outline-none focus:border-navy' placeholder='Name' required/>
+                    <input onChange={(e)=>setUserName(e.target.value)} value={userName} type='text' className='w-full px-3 py-2 border border-line outline-none focus:border-navy' placeholder='Username' required/>
+                    <input onChange={(e)=>setPhone(e.target.value)} value={phone} type='tel' className='w-full px-3 py-2 border border-line outline-none focus:border-navy' placeholder='Phone' required/>
+                </>
             )}
             <input onChange={(e)=>setEmail(e.target.value)} value={email} type='email' className='w-full px-3 py-2 border border-line outline-none focus:border-navy' placeholder='Email' required/>
             <input onChange={(e)=>setPassword(e.target.value)} value={password} type='password' className='w-full px-3 py-2 border border-line outline-none focus:border-navy' placeholder='Password' required/>
