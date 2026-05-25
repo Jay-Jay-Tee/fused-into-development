@@ -1,20 +1,39 @@
-import React, { useState } from 'react'
+import React, { useState, useContext } from 'react'
 import { toast } from 'react-toastify'
+import { useNavigate } from 'react-router-dom'
+import axios from 'axios'
+import { ShopContext } from '../context/ShopContext'
+
+const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
 
 const Login = () => {
-
+    const navigate = useNavigate();
+    const { setToken } = useContext(ShopContext);
     const [currentState, setCurrentState] = useState('Login');
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [loading, setLoading] = useState(false);
 
     const onSubmitHandler = async (event) => {
         event.preventDefault();
-        // Backend wiring later
-        if (currentState === 'Sign Up'){
-            toast.success('Account created');
-        } else {
-            toast.success('Logged in');
+        setLoading(true);
+        try {
+            if (currentState === 'Sign Up') {
+                await axios.post(`${API}/auth/register`, { name, email, password });
+                toast.success('Account created! Please sign in.');
+                setCurrentState('Login');
+            } else {
+                const res = await axios.post(`${API}/auth/login`, { email, password });
+                const { accessToken } = res.data;
+                localStorage.setItem('token', accessToken);
+                setToken(accessToken);
+                navigate('/');
+            }
+        } catch (err) {
+            toast.error(err.response?.data?.message || 'Something went wrong');
+        } finally {
+            setLoading(false);
         }
     }
 
@@ -36,8 +55,8 @@ const Login = () => {
                     : <p onClick={()=>setCurrentState('Login')} className='cursor-pointer hover:text-ink'>Login here</p>
                 }
             </div>
-            <button className='bg-ink text-paper font-light px-8 py-2 mt-4 w-full hover:bg-navy transition-colors'>
-                {currentState === 'Login' ? 'Sign In' : 'Sign Up'}
+            <button disabled={loading} className='bg-ink text-paper font-light px-8 py-2 mt-4 w-full hover:bg-navy transition-colors disabled:opacity-50'>
+                {loading ? '...' : (currentState === 'Login' ? 'Sign In' : 'Sign Up')}
             </button>
         </form>
     )

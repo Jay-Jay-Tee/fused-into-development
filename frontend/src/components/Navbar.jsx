@@ -4,7 +4,7 @@ import {Link,NavLink,useNavigate,useLocation} from 'react-router-dom'
 import { ShopContext } from '../context/ShopContext'
 const Navbar=()=>{
     const [visible,setVisible]=useState(false);
-    const {setShowSearch,getCartCount}=useContext(ShopContext);
+    const {setShowSearch,getCartCount,logout}=useContext(ShopContext);
     const navigate=useNavigate();
     const location=useLocation();
     const onCollection=location.pathname.includes('collection');
@@ -38,7 +38,7 @@ const Navbar=()=>{
                             <p onClick={()=>navigate('/profile')} className='cursor-pointer hover:text-ink'>My profile</p>
                             <p onClick={()=>navigate('/orders')} className='cursor-pointer hover:text-ink'>Orders</p>
                             <p onClick={()=>navigate('/wishlist')} className='cursor-pointer hover:text-ink'>Wishlist</p>
-                            <p onClick={()=>{ localStorage.removeItem('token'); navigate('/login'); }} className='cursor-pointer hover:text-ink'>Logout</p>
+                            <p onClick={()=>{ logout(); navigate('/login'); }} className='cursor-pointer hover:text-ink'>Logout</p>
                         </div>
                     </div>
                 </div>
