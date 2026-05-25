@@ -8,6 +8,7 @@ import useDebounce from '../hooks/useDebounce';
 import { expandSearchQuery } from '../api/ai';
 import ProductCardSkeleton from '../components/ProductCardSkeleton';
 import { formatINR } from '../utils/money'
+import VendorMap from '../components/VendorMap'
 
 const Collection = () => {
     const {products, search, showSearch} = useContext(ShopContext);
@@ -25,6 +26,7 @@ const Collection = () => {
     const [priceRange, setPriceRange] = useState(1000000);
     const [minRating, setMinRating] = useState(0);
     const [currentPage, setCurrentPage] = useState(1);
+    const [view, setView] = useState('grid');
     const [loading, setLoading] = useState(true);
     const productsPerPage = 8;
     const toggleCategory=(e)=>{
@@ -224,46 +226,59 @@ const Collection = () => {
                 </div>
             </div>
             <div className='flex-1'>
-                <div className='flex justify-between text-base sm:text-2xl mb-4'>
+                <div className='flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4'>
                     <Title text1={'ALL'} text2={'COLLECTIONS'}/>
-                    <select onChange={(e)=>setSortType(e.target.value)} className='border border-line text-sm px-2'>
-                        <option value="relevant">Sort by: Relevant</option>
-                        <option value="low-high">Sort by: Low to High</option>
-                        <option value="high-low">Sort by: High to Low</option>
-                        <option value="rating">Sort by: Rating</option>
-                    </select>
+                    <div className='flex gap-3 items-center'>
+                        <div className='flex border border-line'>
+                            <button onClick={()=>setView('grid')} className={`px-3 py-1 text-xs transition-colors ${view==='grid' ? 'bg-ink text-paper' : 'hover:bg-line'}`}>
+                                Grid
+                            </button>
+                            <button onClick={()=>setView('map')} className={`px-3 py-1 text-xs transition-colors ${view==='map' ? 'bg-ink text-paper' : 'hover:bg-line'}`}>
+                                Map
+                            </button>
+                        </div>
+                        <select onChange={(e)=>setSortType(e.target.value)} className='border border-line text-sm px-2'>
+                            <option value="relevant">Sort by: Relevant</option>
+                            <option value="low-high">Sort by: Low to High</option>
+                            <option value="high-low">Sort by: High to Low</option>
+                            <option value="rating">Sort by: Rating</option>
+                        </select>
+                    </div>
                 </div>
                 <p className='text-sm text-ink-soft mb-4'>
-                    Showing {filterProducts.length===0 ? 0 : indexOfFirst+1}-{Math.min(indexOfLast,filterProducts.length)} of {filterProducts.length} products
-                </p>
-                <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 gap-y-6'>
-
-                    {
-                        loading
-                            ? [...Array(8)].map((_, index) => (
-                                <ProductCardSkeleton key={index} />
-                            ))
-                            : currentProducts.map((item, index) => (
-                                <ProductItem key={index} id={item._id} image={item.image[0]} name={item.name} price={item.price} vendor={item.vendor} location={item.location}
-                                />
-                            ))
+                    {view === 'map'
+                        ? `Showing ${Object.keys(filterProducts.reduce((acc,p)=>({...acc,[p.vendor]:1}),{})).length} vendor${filterProducts.length===1?'':'s'}`
+                        : `Showing ${filterProducts.length===0 ? 0 : indexOfFirst+1}-${Math.min(indexOfLast,filterProducts.length)} of ${filterProducts.length} products`
                     }
+                </p>
 
-                </div>
-                {!loading && filterProducts.length===0 && (
-                    <div className='text-center py-20 text-ink-soft'>
-                        <p>No products match your filters.</p>
-                    </div>
-                )}
-                {totalPages>1 && (
-                    <div className='flex justify-center items-center gap-2 mt-12'>
-                        <button onClick={()=>setCurrentPage(p=>Math.max(p-1,1))} disabled={currentPage===1} className='px-4 py-2 border border-line text-sm disabled:opacity-40 hover:bg-ink hover:text-paper transition-colors'>Prev</button>
-                        {[...new Array(totalPages)].map((_,i)=>(
-                            <button key={i} onClick={()=>setCurrentPage(i+1)} className={`w-9 h-9 text-sm border border-line ${currentPage===i+1 ? 'bg-ink text-paper' : 'hover:bg-line'}`}>{i+1}</button>
-                        ))}
-                        <button onClick={()=>setCurrentPage(p=>Math.min(p+1,totalPages))} disabled={currentPage===totalPages} className='px-4 py-2 border border-line text-sm disabled:opacity-40 hover:bg-ink hover:text-paper transition-colors'>Next</button>
-                    </div>
-                )}
+                {view === 'map' ? (
+                    <VendorMap products={filterProducts}/>
+                        ) : (
+                            <>
+                                <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 gap-y-6'>
+                                    {
+                                        currentProducts.map((item,index)=>(
+                                            <ProductItem key={index} id={item._id} image={item.image[0]} name={item.name} price={item.price} vendor={item.vendor} location={item.location}/>
+                                        ))
+                                    }
+                                </div>
+                                {filterProducts.length===0 && (
+                                    <div className='text-center py-20 text-ink-soft'>
+                                        <p>No products match your filters.</p>
+                                    </div>
+                                )}
+                                {totalPages>1 && (
+                                    <div className='flex justify-center items-center gap-2 mt-12'>
+                                        <button onClick={()=>setCurrentPage(p=>Math.max(p-1,1))} disabled={currentPage===1} className='px-4 py-2 border border-line text-sm disabled:opacity-40 hover:bg-ink hover:text-paper transition-colors'>Prev</button>
+                                        {[...new Array(totalPages)].map((_,i)=>(
+                                            <button key={i} onClick={()=>setCurrentPage(i+1)} className={`w-9 h-9 text-sm border border-line ${currentPage===i+1 ? 'bg-ink text-paper' : 'hover:bg-line'}`}>{i+1}</button>
+                                        ))}
+                                        <button onClick={()=>setCurrentPage(p=>Math.min(p+1,totalPages))} disabled={currentPage===totalPages} className='px-4 py-2 border border-line text-sm disabled:opacity-40 hover:bg-ink hover:text-paper transition-colors'>Next</button>
+                                    </div>
+                                )}
+                            </>
+                        )}
             </div>
         </div>
     )
