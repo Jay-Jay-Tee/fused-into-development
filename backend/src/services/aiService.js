@@ -5,11 +5,16 @@ import OpenAI from 'openai';
 import { Order } from '../models/Order.js';
 import { Product } from '../models/Product.js';
 
-const client = new OpenAI({
-  baseURL: 'https://openrouter.ai/api/v1',
-
-  apiKey: process.env.OPENAI_API_KEY,
-});
+let client = null;
+const getClient = () => {
+    if (!client) {
+        client = new OpenAI({
+            baseURL: 'https://openrouter.ai/api/v1',
+            apiKey: process.env.OPENAI_API_KEY,
+        });
+    }
+    return client;
+};
 
 //recommendation engine 
 
@@ -71,7 +76,7 @@ No explanation.
 No extra text.
 `;
 
-    const completion = await client.chat.completions.create({
+    const completion = await getClient().chat.completions.create({
       //this is best for now, maybe switch to be a better model or some other paid service for deployment
       model: 'openai/gpt-4o-mini',
 
@@ -136,7 +141,7 @@ Output:
 ]
 `;
 
-    const completion = await client.chat.completions.create({
+    const completion = await getClient().chat.completions.create({
       model: 'openai/gpt-4o-mini',
 
       messages: [
@@ -224,7 +229,7 @@ Rules:
 - No explanation outside JSON
 `;
 
-    const completion = await client.chat.completions.create({
+    const completion = await getClient().chat.completions.create({
       model: 'openai/gpt-4o-mini',
 
       messages: [

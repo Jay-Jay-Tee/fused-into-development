@@ -6,10 +6,16 @@ import { Payment } from "../models/Payment.js";
 import { Refund } from "../models/Refund.js";
 import { AppError } from "../utils/appError.js";
 
-const razorpay = new Razorpay({
-    key_id: process.env.RAZORPAY_KEY_ID,
-    key_secret: process.env.RAZORPAY_KEY_SECRET,
-});
+let razorpay = null;
+const getRazorpay = () => {
+    if (!razorpay) {
+        razorpay = new Razorpay({
+            key_id: process.env.RAZORPAY_KEY_ID,
+            key_secret: process.env.RAZORPAY_KEY_SECRET,
+        });
+    }
+    return razorpay;
+};
 
 export const createPaymentOrderService = async ({ orderId, userId }) => {
     const order = await Order.findById(orderId).populate("payment");
@@ -28,7 +34,7 @@ export const createPaymentOrderService = async ({ orderId, userId }) => {
          throw new AppError("Order already paid", 409);
     }
 
-    const razorpayOrder = await razorpay.orders.create({
+    const razorpayOrder = await getRazorpay().orders.create({
         amount: Math.round(order.totalAmount),  // input is recieved in paise
         currency: "INR",
         receipt: `order_${order._id}`,
@@ -134,7 +140,7 @@ export const triggerRefundService = async ({ refundId }) => {
 
     // initiate refund via Razorpay using original payment's transactionId
     // amount is in paise
-    const razorpayRefund = await razorpay.payments.refund(
+    const razorpayRefund = await getRazorpay().payments.refund(
         originalPayment.transactionId,
         { amount: refund.refundAmount }
     );
