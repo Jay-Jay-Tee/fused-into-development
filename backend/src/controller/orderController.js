@@ -23,7 +23,7 @@ const getVendorOrders = async (req, res) => {
 const getOrderById = async (req, res) => {
     const order = await getOrderByIdService({ 
         userId: req.user.id,
-        vendorId: Vendor.findOne({ user: req.user.id }).select("_id"),
+        vendorId: await Vendor.findOne({ user: req.user.id }).select("_id"),
         orderId: req.params.id,
     });
     return res.status(200).json(order);

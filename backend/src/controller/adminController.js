@@ -8,6 +8,7 @@ import {
     updateCategoryService,
     deleteCategoryService
 } from "../services/adminService.js";
+import { AppError } from "../utils/appError.js";
 
 const getAnalytics = async (req, res) => {
     const data = await getAnalyticsService();
@@ -27,7 +28,7 @@ const addCategory = async (req, res) => {
 const updateCommission = async (req, res) => {
     const { commissionPercent } = req.body;
     if (Number.isNaN(Number(commissionPercent)))
-        throw new TypeError("Expected numerical input", 400);
+        throw new AppError("Expected numerical input", 400);
     const data = await updateCommissionService({ commissionPercent: Number(commissionPercent) });
     return res.status(200).json(data);
 };

@@ -48,6 +48,8 @@ export const calculateCommission = async ({ vendorId, month, year }) => {
                 totalRevenue: { $sum: { $multiply: ["$items.price", "$items.quantity"] } },
                 orderIds: { $addToSet: "$_id" },   // unique order count
             },
+        },
+        {
             $project: {
                 totalRevenue: 1,
                 totalOrders: { $size: "$orderIds" },

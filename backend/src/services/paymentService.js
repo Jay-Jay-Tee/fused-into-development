@@ -174,9 +174,7 @@ export const getPaymentsByOrderService = async ({ orderId }) => {
         ? await Payment.find({ transactionType: "refund", refund: { $in: refundIds } }).lean()
         : [];
 
-    const filteredRefundPayments = refundPayments.filter(p => p.refund !== null);
-
-    return [...directPayments, ...filteredRefundPayments];
+    return [...directPayments, ...refundPayments];
 };
 
 export const getMyPaymentsService = async ({ userId }) => {
