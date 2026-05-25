@@ -52,7 +52,7 @@ const Profile = () => {
                     </div>
                     <div className='flex-1'>
                         <p className='mb-2 text-sm font-medium'>Phone</p>
-                        <input onChange={(e)=>setPhone(e.target.value)} value={phone} type='tel' className='w-full px-3 py-2 border border-line outline-none focus:border-navy bg-paper' required/>
+                        <input onChange={(e)=>setPhone(e.target.value)} value={phone} type='tel' pattern='[6-9][0-9]{9}' title='10-digit Indian mobile number' className='w-full px-3 py-2 border border-line outline-none focus:border-navy bg-paper' required/>
                     </div>
                 </div>
 

@@ -83,8 +83,8 @@ const Register = () => {
                                 <input required onChange={onChangeHandler} name='lastName' value={formData.lastName} type='text' placeholder='Last name' className='flex-1 px-3 py-2 border border-line outline-none focus:border-navy bg-paper'/>
                             </div>
                             <input required onChange={onChangeHandler} name='email' value={formData.email} type='email' placeholder='Email' className='px-3 py-2 border border-line outline-none focus:border-navy bg-paper'/>
-                            <input required onChange={onChangeHandler} name='password' value={formData.password} type='password' placeholder='Password' className='px-3 py-2 border border-line outline-none focus:border-navy bg-paper'/>
-                            <input required onChange={onChangeHandler} name='phone' value={formData.phone} type='tel' placeholder='Phone' className='px-3 py-2 border border-line outline-none focus:border-navy bg-paper'/>
+                            <input required onChange={onChangeHandler} name='password' value={formData.password} type='password' placeholder='Password (min 8 characters)' minLength={8} className='px-3 py-2 border border-line outline-none focus:border-navy bg-paper'/>
+                            <input required onChange={onChangeHandler} name='phone' value={formData.phone} type='tel' placeholder='10-digit phone number' pattern='[6-9][0-9]{9}' title='Indian mobile number starts with 6, 7, 8, or 9 and has 10 digits' className='px-3 py-2 border border-line outline-none focus:border-navy bg-paper'/>
                         </>
                     )}
 
@@ -94,7 +94,7 @@ const Register = () => {
                             <input required onChange={onChangeHandler} name='shopName' value={formData.shopName} type='text' placeholder='Shop name' className='px-3 py-2 border border-line outline-none focus:border-navy bg-paper'/>
                             <textarea required onChange={onChangeHandler} name='description' value={formData.description} rows={3} placeholder='What do you sell? (1-2 sentences)' className='px-3 py-2 border border-line outline-none focus:border-navy bg-paper'/>
                             <input required onChange={onChangeHandler} name='city' value={formData.city} type='text' placeholder='City' className='px-3 py-2 border border-line outline-none focus:border-navy bg-paper'/>
-                            <input onChange={onChangeHandler} name='gstin' value={formData.gstin} type='text' placeholder='GSTIN (optional)' className='px-3 py-2 border border-line outline-none focus:border-navy bg-paper'/>
+                            <input onChange={onChangeHandler} name='gstin' value={formData.gstin} type='text' placeholder='GSTIN (optional)' pattern='[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[A-Z0-9]{1}Z[A-Z0-9]{1}' title='15-character GSTIN format' className='px-3 py-2 border border-line outline-none focus:border-navy bg-paper font-mono uppercase'/>
                             <p className='text-xs text-ink-soft'>GSTIN is required only if you sell more than ₹20 lakhs per year. Skip if not applicable.</p>
                         </>
                     )}
@@ -103,8 +103,8 @@ const Register = () => {
                     {step===3 && (
                         <>
                             <input required onChange={onChangeHandler} name='accountName' value={formData.accountName} type='text' placeholder='Account holder name' className='px-3 py-2 border border-line outline-none focus:border-navy bg-paper'/>
-                            <input required onChange={onChangeHandler} name='accountNumber' value={formData.accountNumber} type='text' placeholder='Account number' className='px-3 py-2 border border-line outline-none focus:border-navy bg-paper'/>
-                            <input required onChange={onChangeHandler} name='ifsc' value={formData.ifsc} type='text' placeholder='IFSC code' className='px-3 py-2 border border-line outline-none focus:border-navy bg-paper'/>
+                            <input required onChange={onChangeHandler} name='accountNumber' value={formData.accountNumber} type='text' placeholder='Account number (9-18 digits)' pattern='[0-9]{9,18}' title='Bank account number, 9 to 18 digits' className='px-3 py-2 border border-line outline-none focus:border-navy bg-paper font-mono'/>
+                            <input required onChange={onChangeHandler} name='ifsc' value={formData.ifsc} type='text' placeholder='IFSC code (e.g., HDFC0001234)' pattern='[A-Z]{4}0[A-Z0-9]{6}' title='IFSC format: 4 letters + 0 + 6 alphanumeric' className='px-3 py-2 border border-line outline-none focus:border-navy bg-paper font-mono uppercase'/>
                             <p className='text-xs text-ink-soft'>Payouts happen on the 1st and 15th of every month to this account.</p>
                         </>
                     )}
