@@ -11,6 +11,7 @@ import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import NotFound from './pages/NotFound'
 
+
 const App = () => {
   return (
     <div className='bg-paper min-h-screen'>
