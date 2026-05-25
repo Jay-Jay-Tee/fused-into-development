@@ -1,5 +1,6 @@
 import { Vendor } from "../models/Vendor.js";
 import { User } from "../models/User.js";
+import { VendorPayout } from "../models/VendorPayouts.js";
 import { AppError } from "../utils/appError.js";
 
 
@@ -125,4 +126,16 @@ export const getApplicationStatusService = async ({ userId }) => {
         throw new AppError("User not found", 404);
 
     return user.vendorApplication;
+};
+
+export const getMyPayoutsService = async ({ userId }) => {
+    const vendor = await Vendor.findOne({ user: userId });
+    if (!vendor)
+        throw new AppError("Vendor profile not found", 404);
+    const results = await VendorPayout.find({ vendor: vendor._id })
+        .populate("paymentInfo", "amount status transactionId")
+        .sort({ year: -1, month: -1 })
+        .lean();
+
+    return results;
 };

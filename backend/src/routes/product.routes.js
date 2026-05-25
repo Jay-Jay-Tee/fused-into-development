@@ -29,6 +29,7 @@ router.put(
   '/:id',
   auth,
   role('vendor'),
+  uploadMultiple,
   asyncHandler(productController.updateProduct)
 );
 // delete product by id

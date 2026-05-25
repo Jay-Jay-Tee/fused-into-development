@@ -6,7 +6,7 @@ const register = async (req, res) => {
     if (!name || !userName || !email || !phone || !password)
         throw new AppError("Insufficient auth info", 400);
     const data = await registerService({ name, userName, email, phone, password });
-    return res.status(200).json(data);
+    return res.status(201).json(data);
 };
 
 const refreshToken = async (req, res) => {

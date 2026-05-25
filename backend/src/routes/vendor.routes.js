@@ -40,6 +40,13 @@ router.put(
     asyncHandler(vendorController.updateVendorProfile)
 );
 
+router.get(
+    '/my/payouts',
+    auth,
+    role('vendor'),
+    asyncHandler(vendorController.getMyPayouts)
+);
+
 router.put(
     '/:id/approve',
     auth,
