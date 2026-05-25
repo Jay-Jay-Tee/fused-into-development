@@ -66,8 +66,9 @@ export const createProductService = async ({ userId, productData }) => {
         throw new AppError("Vendor account is not approved yet", 403);
     }
 
+    const { name, description, images, price, stock, category } = productData;
     const product = await Product.create({
-        ...productData,
+        name, description, images, price, stock, category,
         vendor: vendor._id,
     });
 
@@ -93,8 +94,10 @@ export const updateProductService = async ({ userId, productId, updateData }) =>
         throw new AppError("Not authorised to edit this product", 403);
     }
 
-    // Apply only the fields passed in - don't overwrite everything.
-    Object.assign(product, updateData);
+    const allowed = ['name', 'description', 'images', 'price', 'stock', 'category'];
+    for (const key of allowed) {
+        if (updateData[key] !== undefined) product[key] = updateData[key];
+    }
     await product.save();
 
     return product.toObject();
@@ -124,9 +127,15 @@ export const deleteProductService = async ({ userId, productId }) => {
 };
 
 export const getMyProductsService = async ({ userId }) => {
-    const products = await Product.find({ vendor: userId })
+    const vendor = await Vendor.findOne({ user: userId });
+
+    if (!vendor) {
+        throw new AppError("Vendor profile not found", 404);
+    }
+
+    const products = await Product.find({ vendor: vendor._id })
         .populate("vendor", "storeName averageRating")
         .populate("category", "name slug")
         .lean();
     return products;
-};    
+};

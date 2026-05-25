@@ -11,12 +11,13 @@ const ShopContextProvider=(props)=>{
     const [wishlist,setWishlist]=useState([]);
 
    const toggleWishlist=(itemId)=>{
+        const inWishlist = wishlist.includes(itemId);
         setWishlist(prev =>
-        prev.includes(itemId)
-            ? prev.filter(id => id !== itemId)
-            : [...prev, itemId]
+            inWishlist
+                ? prev.filter(id => id !== itemId)
+                : [...prev, itemId]
         );
-        toast.success(wishlist.includes(itemId) ? 'Removed from wishlist' : 'Added to wishlist');
+        toast.success(inWishlist ? 'Removed from wishlist' : 'Added to wishlist');
     }
 
     const addToCart=async(itemId,size,quantity=1)=>{

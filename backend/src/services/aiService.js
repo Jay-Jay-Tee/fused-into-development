@@ -46,7 +46,7 @@ export const getRecommendations = async ({
     })
       .sort({ averageRating: -1 })
       .limit(50)
-      .select('_id name category price rating')
+      .select('_id name category price averageRating')
       .lean();
 
     const prompt = `

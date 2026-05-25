@@ -6,7 +6,6 @@ const useCartStore = create(
     (set) => ({
       items: [],
 
-      // meow meow meow meow
       addItem: (item) =>
         set((state) => {
           const existingItem = state.items.find(
@@ -37,7 +36,6 @@ const useCartStore = create(
           }
         }),
 
-      // banish from existence
       removeItem: (id) =>
         set((state) => ({
           items: state.items.filter((item) => item.id !== id),
@@ -71,7 +69,6 @@ const useCartStore = create(
             .filter((item) => item.quantity > 0),
         })),
 
-      // hollow technique purple
       clearCart: () => set({ items: [] }),
     }),
     {

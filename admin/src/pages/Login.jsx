@@ -14,13 +14,15 @@ const Login = () => {
         e.preventDefault();
         setLoading(true);
         try {
-            const res = await axios.post('http://localhost:5000/api/auth/login', { email, password });
-            const { token, user } = res.data;
-            if (user.role !== 'admin') {
+            const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
+            const res = await axios.post(`${API}/auth/login`, { email, password });
+            const { accessToken } = res.data;
+            const payload = JSON.parse(atob(accessToken.split('.')[1]));
+            if (payload.role !== 'admin') {
                 toast.error('Access denied');
                 return;
             }
-            localStorage.setItem('token', token);
+            localStorage.setItem('token', accessToken);
             navigate('/analytics');
         } catch (err) {
             toast.error(err.response?.data?.message || 'Login failed');

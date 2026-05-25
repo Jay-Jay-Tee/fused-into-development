@@ -11,6 +11,7 @@ export const getAnalyticsService = async () => {
 
     // its unfortunately messed up 
     const totalSales = (await Order.aggregate([
+        { $match: { orderStatus: { $in: ['confirmed', 'shipped', 'delivered'] } } },
         {
             $group: {
                 _id: null,

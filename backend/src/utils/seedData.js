@@ -5,6 +5,9 @@ import { Vendor } from "../models/Vendor.js";
 import { Category } from "../models/Category.js";
 import { Product } from "../models/Product.js";
 import { Order } from "../models/Order.js";
+import { Payment } from "../models/Payment.js";
+import { Refund } from "../models/Refund.js";
+import { Newsletter } from "../models/Newsletter.js";
 
 
 // Inserts demo data for testing
@@ -19,6 +22,9 @@ export const seedData = async () => {
         Category.deleteMany({}),
         Product.deleteMany({}),
         Order.deleteMany({}),
+        Payment.deleteMany({}),
+        Refund.deleteMany({}),
+        Newsletter.deleteMany({}),
     ]);
 
 // categories

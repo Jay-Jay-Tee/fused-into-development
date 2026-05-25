@@ -38,7 +38,7 @@ const Navbar=()=>{
                             <p onClick={()=>navigate('/profile')} className='cursor-pointer hover:text-ink'>My profile</p>
                             <p onClick={()=>navigate('/orders')} className='cursor-pointer hover:text-ink'>Orders</p>
                             <p onClick={()=>navigate('/wishlist')} className='cursor-pointer hover:text-ink'>Wishlist</p>
-                            <p className='cursor-pointer hover:text-ink'>Logout</p>
+                            <p onClick={()=>{ localStorage.removeItem('token'); navigate('/login'); }} className='cursor-pointer hover:text-ink'>Logout</p>
                         </div>
                     </div>
                 </div>

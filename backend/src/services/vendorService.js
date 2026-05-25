@@ -58,7 +58,10 @@ export const updateVendorProfileService = async ({ userId, updateData, logo, ban
     if (!vendor)
         throw new AppError("Vendor profile not found", 404);
 
-    Object.assign(vendor, updateData);
+    const allowed = ['storeName', 'storeDescription', 'phone', 'addresses', 'categories'];
+    for (const key of allowed) {
+        if (updateData[key] !== undefined) vendor[key] = updateData[key];
+    }
     if (logo)        vendor.logo        = logo;
     if (bannerImage) vendor.bannerImage = bannerImage;
 

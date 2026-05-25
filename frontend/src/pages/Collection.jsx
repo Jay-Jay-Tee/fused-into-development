@@ -125,7 +125,7 @@ const Collection = () => {
             productsCopy=productsCopy.filter(item=>item.location.toLowerCase().includes(location.toLowerCase()));
         }
         productsCopy=productsCopy.filter(item=>item.price<=priceRange);
-        productsCopy=productsCopy.filter(item=>item.rating>=minRating);
+        productsCopy=productsCopy.filter(item=>(item.averageRating||0)>=minRating);
         setFilterProducts(productsCopy);
         setCurrentPage(1);
     }
@@ -139,7 +139,7 @@ const Collection = () => {
                 setFilterProducts(fpCopy.sort((a,b)=>(b.price-a.price)));
                 break;
             case 'rating':
-                setFilterProducts(fpCopy.sort((a,b)=>(b.rating-a.rating)));
+                setFilterProducts(fpCopy.sort((a,b)=>((b.averageRating||0)-(a.averageRating||0))));
                 break;
             default:
                 applyFilter();

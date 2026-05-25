@@ -17,6 +17,7 @@ import Wishlist from './pages/Wishlist'
 import Profile from './pages/Profile'
 import VendorShop from './pages/VendorShop'
 import SearchBar from './components/SearchBar'
+import Footer from './components/Footer'
 
 const App = () => {
   return (
@@ -39,6 +40,7 @@ const App = () => {
             <Route path='/vendor/:vendorName' element={<VendorShop/>} />
             <Route path="*" element={<NotFound />} />
         </Routes>
+        <Footer/>
     </div>
 
   )

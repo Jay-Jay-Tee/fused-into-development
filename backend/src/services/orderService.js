@@ -154,6 +154,16 @@ export const updateOrderStatusService = async ({ orderId, status, vendorId }) =>
 
     order.orderStatus = status;
     if (status === "delivered") order.deliveredAt = new Date();
+    if (status === "cancelled") {
+        await Product.bulkWrite(
+            order.items.map(item => ({
+                updateOne: {
+                    filter: { _id: item.product },
+                    update: { $inc: { stock: item.quantity } },
+                },
+            }))
+        );
+    }
     await order.save();
 
     return order.toObject();
