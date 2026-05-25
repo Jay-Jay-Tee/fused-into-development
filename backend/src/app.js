@@ -15,6 +15,7 @@ import { userRoutes }       from './routes/user.routes.js';
 import { vendorRoutes }     from './routes/vendor.routes.js';
 import { cartRoutes }       from './routes/cart.routes.js';
 import { wishlistRoutes }   from './routes/wishlist.routes.js';
+import { newsletterRoutes } from './routes/newsletter.routes.js';
 
 import { errorHandler }  from './middleware/error.js';
 import { AppError } from './utils/appError.js';
@@ -58,6 +59,7 @@ app.use('/api/users',       userRoutes);
 app.use('/api/vendors',     vendorRoutes);
 app.use('/api/cart',        cartRoutes);
 app.use('/api/wishlist',    wishlistRoutes);
+app.use('/api/newsletter',  newsletterRoutes);
 
 // ------------ 404 HANDLER -----------------------------
 
