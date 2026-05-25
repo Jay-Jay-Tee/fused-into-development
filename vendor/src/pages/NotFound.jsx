@@ -6,14 +6,14 @@ const NotFound = () => {
     const navigate = useNavigate();
 
     return (
-        <div className='min-h-[60vh] flex flex-col items-center justify-center text-center border-t border-line pt-16'>
+        <div className='min-h-[60vh] flex flex-col items-center justify-center text-center'>
             <p className='font-display text-6xl text-brick mb-4'>404</p>
             <p className='text-lg mb-2'>Page not found</p>
             <p className='text-sm text-ink-soft mb-6 max-w-sm'>
-                Looks like that page doesn't exist. Want to browse the collection instead?
+                This page doesn't exist or you don't have access to it.
             </p>
-            <button onClick={()=>navigate('/collection')} className='bg-ink text-paper px-6 py-3 text-sm hover:bg-navy transition-colors'>
-                Shop the collection
+            <button onClick={()=>navigate('/add')} className='bg-ink text-paper px-6 py-3 text-sm hover:bg-navy transition-colors'>
+                Back to dashboard
             </button>
         </div>
     )
