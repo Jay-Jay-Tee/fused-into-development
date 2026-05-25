@@ -167,11 +167,12 @@ export const triggerRefundService = async ({ refundId }) => {
 export const getPaymentsByOrderService = async ({ orderId }) => {
     const directPayments = await Payment.find({ order: orderId }).lean();
 
-    // Refund payments link to the order via refund → order, not directly.
-    // We fetch all refund-type payments and filter by matching order.
-    const refundPayments = await Payment.find({ transactionType: "refund" })
-        .populate({ path: "refund", match: { order: orderId } })
-        .lean();
+    // Find refunds for this order first, then find their payments
+    const refundDocs = await Refund.find({ order: orderId }).select("_id").lean();
+    const refundIds = refundDocs.map(r => r._id);
+    const refundPayments = refundIds.length > 0
+        ? await Payment.find({ transactionType: "refund", refund: { $in: refundIds } }).lean()
+        : [];
 
     const filteredRefundPayments = refundPayments.filter(p => p.refund !== null);
 

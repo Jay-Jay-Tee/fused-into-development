@@ -98,7 +98,7 @@ export const getVendorOrdersService = async ({ vendorId, query }) => {
 };
 
 // (buyer owns it, or vendor has items in it) before calling this.
-export const getOrderByIdService = async ({ userId, orderId }) => {
+export const getOrderByIdService = async ({ userId, vendorId, orderId }) => {
     const order = await Order.findById(orderId)
         .populate("items.product", "name images price")
         .populate("buyer", "name email")
@@ -109,7 +109,7 @@ export const getOrderByIdService = async ({ userId, orderId }) => {
         throw new AppError("Order not found", 404);
 
     const isBuyer     = order.buyer._id.toString() === userId;
-    const vendorItems = order.items.filter(item => item.vendor.toString() === userId);
+    const vendorItems = order.items.filter(item => item.vendor.toString() === vendorId.toString());
     const isVendor    = vendorItems.length > 0;
 
     if (!isBuyer && !isVendor)

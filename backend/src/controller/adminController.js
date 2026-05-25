@@ -27,7 +27,7 @@ const addCategory = async (req, res) => {
 const updateCommission = async (req, res) => {
     const { commissionPercent } = req.body;
     if (Number.isNaN(Number(commissionPercent)))
-        throw new TypeError("Expected numerical input");
+        throw new TypeError("Expected numerical input", 400);
     const data = await updateCommissionService({ commissionPercent: Number(commissionPercent) });
     return res.status(200).json(data);
 };
