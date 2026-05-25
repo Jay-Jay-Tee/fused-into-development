@@ -13,6 +13,9 @@ import Login from './pages/Login'
 import PlaceOrder from './pages/PlaceOrder'
 import Navbar from './components/Navbar'
 import Orders from './pages/Orders'
+import Wishlist from './pages/Wishlist'
+import Profile from './pages/Profile'
+import VendorShop from './pages/VendorShop'
 import SearchBar from './components/SearchBar'
 
 const App = () => {
@@ -31,6 +34,9 @@ const App = () => {
             <Route path='/login' element={<Login/>} />
             <Route path='/place-order' element={<PlaceOrder/>} />
             <Route path='/orders' element={<Orders/>} />
+            <Route path='/wishlist' element={<Wishlist/>} />
+            <Route path='/profile' element={<Profile/>} />
+            <Route path='/vendor/:vendorName' element={<VendorShop/>} />
             <Route path="*" element={<NotFound />} />
         </Routes>
     </div>

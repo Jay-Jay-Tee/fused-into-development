@@ -1,15 +1,21 @@
-import React, { useContext, useState } from 'react'
+import React, { useContext, useState, useEffect } from 'react'
 import Title from '../components/Title'
 import CartTotal from '../components/CartTotal'
 import { ShopContext } from '../context/ShopContext'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 
+const STORAGE_KEY = 'vendorhub_addresses';
+
 const PlaceOrder = () => {
 
     const [method, setMethod]=useState('cod');
     const {setCartItems, getCartAmount} = useContext(ShopContext);
     const navigate = useNavigate();
+
+    const [savedAddresses, setSavedAddresses] = useState([]);
+    const [selectedAddressId, setSelectedAddressId] = useState(null);
+    const [useNewAddress, setUseNewAddress] = useState(false);
 
     const [formData, setFormData] = useState({
         firstName:'',
@@ -23,6 +29,21 @@ const PlaceOrder = () => {
         phone:''
     });
 
+    useEffect(()=>{
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored){
+            const addrs = JSON.parse(stored);
+            setSavedAddresses(addrs);
+            if (addrs.length > 0){
+                setSelectedAddressId(addrs[0].id);
+            } else {
+                setUseNewAddress(true);
+            }
+        } else {
+            setUseNewAddress(true);
+        }
+    },[])
+
     const onChangeHandler = (event) => {
         const name = event.target.name;
         const value = event.target.value;
@@ -35,7 +56,15 @@ const PlaceOrder = () => {
             toast.error('Your cart is empty');
             return;
         }
-        // Backend wiring later
+        // Backend wiring later - get final address either from selection or form
+        const finalAddress = useNewAddress
+            ? formData
+            : savedAddresses.find(a => a.id === selectedAddressId);
+        if (!finalAddress){
+            toast.error('Select or enter an address');
+            return;
+        }
+        console.log('Placing order with address:', finalAddress, 'payment:', method);
         toast.success('Order placed');
         setCartItems({});
         navigate('/orders');
@@ -44,26 +73,63 @@ const PlaceOrder = () => {
     return (
         <form onSubmit={onSubmitHandler} className='flex flex-col sm:flex-row justify-between gap-4 pt-5 sm:pt-14 min-h-[80vh] border-t border-line'>
 
-            {/* Left side - delivery info */}
+            {/* Left side - address */}
             <div className='flex flex-col gap-4 w-full sm:max-w-[480px]'>
                 <div className='text-xl sm:text-2xl my-3'>
-                    <Title text1={'DELIVERY'} text2={'INFORMATION'}/>
+                    <Title text1={'DELIVERY'} text2={'ADDRESS'}/>
                 </div>
-                <div className='flex gap-3'>
-                    <input required onChange={onChangeHandler} name='firstName' value={formData.firstName} className='border border-line py-1.5 px-3.5 w-full outline-none focus:border-navy' type='text' placeholder='First name'/>
-                    <input required onChange={onChangeHandler} name='lastName' value={formData.lastName} className='border border-line py-1.5 px-3.5 w-full outline-none focus:border-navy' type='text' placeholder='Last name'/>
-                </div>
-                <input required onChange={onChangeHandler} name='email' value={formData.email} className='border border-line py-1.5 px-3.5 w-full outline-none focus:border-navy' type='email' placeholder='Email address'/>
-                <input required onChange={onChangeHandler} name='street' value={formData.street} className='border border-line py-1.5 px-3.5 w-full outline-none focus:border-navy' type='text' placeholder='Street'/>
-                <div className='flex gap-3'>
-                    <input required onChange={onChangeHandler} name='city' value={formData.city} className='border border-line py-1.5 px-3.5 w-full outline-none focus:border-navy' type='text' placeholder='City'/>
-                    <input required onChange={onChangeHandler} name='state' value={formData.state} className='border border-line py-1.5 px-3.5 w-full outline-none focus:border-navy' type='text' placeholder='State'/>
-                </div>
-                <div className='flex gap-3'>
-                    <input required onChange={onChangeHandler} name='zipcode' value={formData.zipcode} className='border border-line py-1.5 px-3.5 w-full outline-none focus:border-navy' type='text' pattern='[0-9]{6}' title='6-digit Indian pincode' placeholder='Pincode'/>
-                    <input required onChange={onChangeHandler} name='country' value={formData.country} className='border border-line py-1.5 px-3.5 w-full outline-none focus:border-navy' type='text' placeholder='Country'/>
-                </div>
-                <input required onChange={onChangeHandler} name='phone' value={formData.phone} className='border border-line py-1.5 px-3.5 w-full outline-none focus:border-navy' type='tel' pattern='[6-9][0-9]{9}' title='10-digit Indian mobile number' placeholder='Phone number'/>
+
+                {/* Saved addresses */}
+                {savedAddresses.length > 0 && !useNewAddress && (
+                    <div className='flex flex-col gap-3'>
+                        {savedAddresses.map((addr) => (
+                            <div
+                                key={addr.id}
+                                onClick={()=>setSelectedAddressId(addr.id)}
+                                className={`border p-4 cursor-pointer transition-colors ${selectedAddressId === addr.id ? 'border-navy bg-mustard/10' : 'border-line hover:border-ink-soft'}`}
+                            >
+                                <div className='flex items-start gap-3'>
+                                    <div className={`min-w-4 h-4 rounded-full border-2 mt-0.5 ${selectedAddressId === addr.id ? 'border-navy bg-navy' : 'border-line'}`}></div>
+                                    <div className='flex-1'>
+                                        <p className='text-xs font-medium tracking-wider text-ink-soft mb-1'>{addr.label || 'ADDRESS'}</p>
+                                        <p className='font-medium text-sm'>{addr.firstName} {addr.lastName}</p>
+                                        <p className='text-sm text-ink-soft'>{addr.street}, {addr.city}, {addr.state} {addr.zipcode}</p>
+                                        <p className='text-sm text-ink-soft mt-1'>📞 {addr.phone}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                        <button type='button' onClick={()=>setUseNewAddress(true)} className='text-sm text-ink-soft hover:text-ink underline text-left'>
+                            + Use a different address
+                        </button>
+                    </div>
+                )}
+
+                {/* New address form */}
+                {(savedAddresses.length === 0 || useNewAddress) && (
+                    <>
+                        {savedAddresses.length > 0 && (
+                            <button type='button' onClick={()=>setUseNewAddress(false)} className='text-sm text-ink-soft hover:text-ink underline text-left mb-2'>
+                                ← Use a saved address
+                            </button>
+                        )}
+                        <div className='flex gap-3'>
+                            <input required onChange={onChangeHandler} name='firstName' value={formData.firstName} className='border border-line py-1.5 px-3.5 w-full outline-none focus:border-navy bg-paper' type='text' placeholder='First name'/>
+                            <input required onChange={onChangeHandler} name='lastName' value={formData.lastName} className='border border-line py-1.5 px-3.5 w-full outline-none focus:border-navy bg-paper' type='text' placeholder='Last name'/>
+                        </div>
+                        <input required onChange={onChangeHandler} name='email' value={formData.email} className='border border-line py-1.5 px-3.5 w-full outline-none focus:border-navy bg-paper' type='email' placeholder='Email address'/>
+                        <input required onChange={onChangeHandler} name='street' value={formData.street} className='border border-line py-1.5 px-3.5 w-full outline-none focus:border-navy bg-paper' type='text' placeholder='Street'/>
+                        <div className='flex gap-3'>
+                            <input required onChange={onChangeHandler} name='city' value={formData.city} className='border border-line py-1.5 px-3.5 w-full outline-none focus:border-navy bg-paper' type='text' placeholder='City'/>
+                            <input required onChange={onChangeHandler} name='state' value={formData.state} className='border border-line py-1.5 px-3.5 w-full outline-none focus:border-navy bg-paper' type='text' placeholder='State'/>
+                        </div>
+                        <div className='flex gap-3'>
+                            <input required onChange={onChangeHandler} name='zipcode' value={formData.zipcode} className='border border-line py-1.5 px-3.5 w-full outline-none focus:border-navy bg-paper' type='text' pattern='[0-9]{6}' title='6-digit Indian pincode' placeholder='Pincode'/>
+                            <input required onChange={onChangeHandler} name='country' value={formData.country} className='border border-line py-1.5 px-3.5 w-full outline-none focus:border-navy bg-paper' type='text' placeholder='Country'/>
+                        </div>
+                        <input required onChange={onChangeHandler} name='phone' value={formData.phone} className='border border-line py-1.5 px-3.5 w-full outline-none focus:border-navy bg-paper' type='tel' pattern='[6-9][0-9]{9}' title='10-digit Indian mobile number' placeholder='Phone number'/>
+                    </>
+                )}
             </div>
 
             {/* Right side - cart total + payment method */}

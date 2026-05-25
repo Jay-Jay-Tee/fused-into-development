@@ -1,12 +1,44 @@
 import React, { useContext, useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import { ShopContext } from '../context/ShopContext'
 import { assets } from '../assets/assets'
 import RelatedProducts from '../components/RelatedProducts'
 import { formatINR } from '../utils/money'
 
+const ReviewsList = ({productId}) => {
+    const [reviews, setReviews] = useState([]);
+
+    useEffect(()=>{
+        const stored = JSON.parse(localStorage.getItem('vendorhub_reviews') || '{}');
+        setReviews(stored[productId] || []);
+    },[productId])
+
+    if (reviews.length === 0){
+        return (
+            <div className='text-center py-10'>
+                <p>No reviews yet. Be the first to review.</p>
+            </div>
+        )
+    }
+
+    return (
+        <div className='flex flex-col gap-4'>
+            {reviews.map((r) => (
+                <div key={r.id} className='border-b border-line last:border-b-0 pb-4 last:pb-0'>
+                    <div className='flex items-center gap-3 mb-2'>
+                        <p className='text-mustard'>{'★'.repeat(r.rating)}<span className='text-ink-soft/30'>{'★'.repeat(5-r.rating)}</span></p>
+                        <p className='text-xs text-ink-soft'>{r.buyerName} · {new Date(r.createdAt).toLocaleDateString('en-IN', {day:'numeric', month:'short', year:'numeric'})}</p>
+                    </div>
+                    <p className='text-sm text-ink'>{r.comment}</p>
+                </div>
+            ))}
+        </div>
+    )
+}
+
 const Product=()=>{
     const {productId} = useParams();
+    const navigate = useNavigate();
     const {products, addToCart} = useContext(ShopContext);
     const [productData, setProductData] = useState(false);
     const [image, setImage] = useState('');
@@ -55,7 +87,7 @@ const Product=()=>{
                             <p className='font-medium'>{productData.vendor}</p>
                             <p className='text-sm text-ink-soft'>📍 {productData.location}</p>
                         </div>
-                        <button className='text-sm border border-ink px-4 py-2 hover:bg-ink hover:text-paper transition-colors'>
+                        <button onClick={()=>navigate(`/vendor/${encodeURIComponent(productData.vendor)}`)} className='text-sm border border-ink px-4 py-2 hover:bg-ink hover:text-paper transition-colors'>
                             View Shop
                         </button>
                     </div>
@@ -101,9 +133,7 @@ const Product=()=>{
                             <p>This product is made and shipped by {productData.vendor}, a verified seller from {productData.location}. Every product on VendorHub is quality-checked and authentic.</p>
                         </>
                     ) : (
-                        <div className='text-center py-10'>
-                            <p>Reviews coming soon.</p>
-                        </div>
+                        <ReviewsList productId={productData._id}/>
                     )}
                 </div>
             </div>

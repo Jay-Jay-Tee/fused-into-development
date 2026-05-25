@@ -7,6 +7,7 @@ import { useRef } from 'react';
 import useDebounce from '../hooks/useDebounce';
 import { expandSearchQuery } from '../api/ai';
 import ProductCardSkeleton from '../components/ProductCardSkeleton';
+import { formatINR } from '../utils/money'
 
 const Collection = () => {
     const {products, search, showSearch} = useContext(ShopContext);
@@ -21,7 +22,7 @@ const Collection = () => {
     const [subCategory, setSubCategory] = useState([]);
     const [sortType, setSortType] = useState('relevant');
     const [location, setLocation] = useState('');
-    const [priceRange, setPriceRange] = useState(10000);
+    const [priceRange, setPriceRange] = useState(1000000);
     const [minRating, setMinRating] = useState(0);
     const [currentPage, setCurrentPage] = useState(1);
     const [loading, setLoading] = useState(true);
@@ -207,8 +208,8 @@ const Collection = () => {
                     <input type='text' value={location} onChange={(e)=>setLocation(e.target.value)} placeholder='Search by city...' className='w-full text-sm border border-line px-2 py-1 outline-none focus:border-navy'/>
                 </div>
                 <div className={`border border-line pl-5 pr-3 py-3 my-5 ${showFilter ? '' : 'hidden'} sm:block`}>
-                    <p className='mb-3 text-sm font-medium'>MAX PRICE: ₹{priceRange}</p>
-                    <input type='range' min='100' max='10000' step='100' value={priceRange} onChange={(e)=>setPriceRange(Number(e.target.value))} className='w-full accent-navy'/>
+                    <p className='mb-3 text-sm font-medium'>MAX PRICE: {formatINR(priceRange)}</p>
+                    <input type='range' min='10000' max='1000000' step='10000' value={priceRange} onChange={(e)=>setPriceRange(Number(e.target.value))} className='w-full accent-navy'/>
                 </div>
                 <div className={`border border-line pl-5 py-3 my-5 ${showFilter ? '' : 'hidden'} sm:block`}>
                     <p className='mb-3 text-sm font-medium'>MIN RATING</p>

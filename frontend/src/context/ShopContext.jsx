@@ -8,6 +8,16 @@ const ShopContextProvider=(props)=>{
     const [search,setSearch]=useState('');
     const [showSearch,setShowSearch]=useState(false);
     const [cartItems,setCartItems]=useState({});
+    const [wishlist,setWishlist]=useState([]);
+
+   const toggleWishlist=(itemId)=>{
+        setWishlist(prev =>
+        prev.includes(itemId)
+            ? prev.filter(id => id !== itemId)
+            : [...prev, itemId]
+        );
+        toast.success(wishlist.includes(itemId) ? 'Removed from wishlist' : 'Added to wishlist');
+    }
 
     const addToCart=async(itemId,size,quantity=1)=>{
        if (!size && products.find(p=>p._id===itemId)?.sizes?.length>0){
@@ -80,7 +90,8 @@ const ShopContextProvider=(props)=>{
         getCartCount,
         updateQuantity,
         getCartAmount,
-    }),[search,showSearch,cartItems]);
+        wishlist,toggleWishlist,
+    }),[search,showSearch,cartItems,wishlist]);
     return (
         <ShopContext.Provider value={value}>
             {props.children}
