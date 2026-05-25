@@ -19,8 +19,18 @@ import { AppError } from './utils/appError.js';
 const app = express();
 
 // ------ GLOBAL MIDDLEWARE -----------------------------
+const allowedOrigins = process.env.CLIENT_URL
+    ? process.env.CLIENT_URL.split(',')
+    : ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175'];
+
 app.use(cors({
-    origin: process.env.CLIENT_URL || 'http://localhost:5173'    // for testing, 5173
+    origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
 }));
 
 app.use('/api/payments/webhook', express.raw({ type: 'application/json' }));
