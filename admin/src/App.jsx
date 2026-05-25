@@ -1,7 +1,7 @@
 import React from 'react'
 import Navbar from './components/Navbar'
 import Sidebar from './components/Sidebar'
-import { Routes, Route, Navigate } from 'react-router-dom'
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import VendorApproval from './pages/VendorApproval'
 import RefundQueue from './pages/RefundQueue'
 import Categories from './pages/Categories'
@@ -10,19 +10,24 @@ import Analytics from './pages/Analytics'
 import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import NotFound from './pages/NotFound'
+import Login from './pages/Login'
 
 
 const App = () => {
+  const location = useLocation();
+  const isBareLayout = location.pathname === '/login';
+
   return (
     <div className='bg-paper min-h-screen'>
       <ToastContainer/>
-      <Navbar/>
-      <hr className='border-line'/>
-      <div className='flex w-full'>
-        <Sidebar/>
-        <div className='w-[70%] mx-auto ml-[max(5vw,25px)] my-8 text-ink'>
+      {!isBareLayout && <Navbar/>}
+      {!isBareLayout && <hr className='border-line'/>}
+      <div className={isBareLayout ? '' : 'flex w-full'}>
+        {!isBareLayout && <Sidebar/>}
+        <div className={isBareLayout ? '' : 'w-[70%] mx-auto ml-[max(5vw,25px)] my-8 text-ink'}>
           <Routes>
-            <Route path='/' element={<Navigate to='/analytics' replace/>}/>
+            <Route path='/login' element={<Login/>}/>
+            <Route path='/' element={<Navigate to='/login' replace/>}/>
             <Route path='/analytics' element={<Analytics/>}/>
             <Route path='/vendor-approval' element={<VendorApproval/>}/>
             <Route path='/refunds' element={<RefundQueue/>}/>
