@@ -139,3 +139,23 @@ export const getMyPayoutsService = async ({ userId }) => {
 
     return results;
 };
+// Returns approved vendors that have at least one address matching the
+// provided city and/or state. At least one of the two must be supplied.
+export const getVendorsByAddressService = async ({ city, state }) => {
+    if (!city && !state)
+        throw new AppError("Provide at least one of: city, state", 400);
+
+    const addressMatch = {};
+    if (city)  addressMatch.city  = { $regex: new RegExp(`^${city.trim()}$`,  'i') };
+    if (state) addressMatch.state = { $regex: new RegExp(`^${state.trim()}$`, 'i') };
+
+    const vendors = await Vendor.find({
+        isApproved: true,
+        addresses: { $elemMatch: addressMatch },
+    })
+        .select("-commission -addresses")
+        .populate("categories", "name slug")
+        .lean();
+
+    return vendors;
+};

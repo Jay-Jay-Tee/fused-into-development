@@ -13,7 +13,7 @@ import { uploadFields } from '../middleware/upload.js';
 router.get(
     '/application/status',
     auth,
-    role('buyer', 'vendor'),
+    role('buyer'),
     asyncHandler(vendorController.getApplicationStatus)
 );
 
@@ -68,9 +68,12 @@ router.put(
     asyncHandler(vendorController.updateVendorCommission)
 );
 
-// ----- PUBLIC ROUTES (no auth required) ------------------
+// ----- PUBLIC ROUTES -------------------------
 
-// Does NOT return sensitive fields like commission rate or addresses.
+router.get(
+    '/search/by-address',
+    asyncHandler(vendorController.getVendorsByAddress)
+);
 
 router.get(
     '/:id',

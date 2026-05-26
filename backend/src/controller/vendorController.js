@@ -8,6 +8,7 @@ import {
     getApplicationStatusService,
     updateVendorCommissionService,
     getMyPayoutsService,
+    getVendorsByAddressService,
 } from "../services/vendorService.js";
 import { AppError } from "../utils/appError.js";
 
@@ -77,7 +78,14 @@ const getMyPayouts = async (req, res) => {
     return res.status(200).json(data);
 };
 
+const getVendorsByAddress = async (req, res) => {
+    const { city, state } = req.query;
+    const data = await getVendorsByAddressService({ city, state });
+    return res.status(200).json(data);
+};
+
 export const vendorController = {
+    getVendorsByAddress,
     getVendorProfile,
     getMyVendorProfile,
     registerVendor,

@@ -5,9 +5,9 @@ import { AppError } from "../utils/appError.js";
 
 export const getProductsService = async (query) => {
     const { page, limit, skip } = paginate(query);
-
+ 
     const filter = { isActive: true };
-
+ 
     if (query.category) filter.category = query.category;
     if (query.minPrice || query.maxPrice) {
         filter.price = {};
@@ -16,16 +16,34 @@ export const getProductsService = async (query) => {
     }
     if (query.minRating) filter.averageRating = { $gte: Number(query.minRating) };
     if (query.search) filter.$text = { $search: query.search };
-
+ 
+    // Filter by a specific vendor (used by vendor shop pages).
+    if (query.vendor) filter.vendor = query.vendor;
+ 
+    // Filter by vendor location — resolves matching vendor IDs first,
+    // then constrains the product query to those vendors.
+    if (query.city || query.state) {
+        const addressMatch = {};
+        if (query.city)  addressMatch.city  = { $regex: new RegExp(`^${query.city.trim()}$`,  'i') };
+        if (query.state) addressMatch.state = { $regex: new RegExp(`^${query.state.trim()}$`, 'i') };
+ 
+        const matchingVendors = await Vendor.find({
+            isApproved: true,
+            addresses: { $elemMatch: addressMatch },
+        }).select('_id').lean();
+ 
+        filter.vendor = { $in: matchingVendors.map(v => v._id) };
+    }
+ 
     const products = await Product.find(filter)
         .skip(skip)
         .limit(limit)
         .populate("vendor", "storeName averageRating")
         .populate("category", "name slug")
         .lean();
-
+ 
     const total = await Product.countDocuments(filter);
-
+ 
     return {
         products,
         pagination: { total, page, pages: Math.ceil(total / limit) },
