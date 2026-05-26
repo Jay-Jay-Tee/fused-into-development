@@ -2,6 +2,13 @@ import { Product } from "../models/Product.js";
 import { Vendor } from "../models/Vendor.js";
 import { paginate } from "../utils/paginate.js";
 import { AppError } from "../utils/appError.js";
+import { cloudinary } from "../middleware/upload.js";
+
+// extracts Cloudinary public_id from a full URL
+const extractPublicId = (url) => {
+    const match = url.match(/\/upload\/(?:v\d+\/)?(.+)\.[^.]+$/);
+    return match ? match[1] : null;
+};
 
 export const getProductsService = async (query) => {
     const { page, limit, skip } = paginate(query);
@@ -87,6 +94,14 @@ export const updateProductService = async ({ vendor, productId, updateData }) =>
 
     if (product.vendor.toString() !== vendor._id.toString())
         throw new AppError("Not authorised to edit this product", 403);
+
+    if (updateData.images) {
+        const removed = product.images.filter(url => !updateData.images.includes(url));
+        await Promise.all(removed.map(url => {
+            const publicId = extractPublicId(url);
+            return publicId ? cloudinary.uploader.destroy(publicId) : Promise.resolve();
+        }));
+    }
 
     const allowed = ['name', 'description', 'images', 'price', 'stock', 'category'];
     for (const key of allowed) {
