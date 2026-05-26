@@ -51,13 +51,6 @@ const verifyPayment = async (req, res) => {
         });
     }
 
-    if (paymentType === "cashfree" && !cashfreeOrderId) {
-        return res.status(400).json({
-            success: false,
-            message: "cashfreeOrderId is required for Cashfree payments",
-        });
-    }
-
     if (paymentType !== "cashfree" &&
         (!razorpayOrderId || !razorpayPaymentId || !razorpaySignature)) {
         return res.status(400).json({

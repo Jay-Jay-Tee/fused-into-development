@@ -24,6 +24,7 @@ export const createRefundService = async ({ userId, orderId, itemId, reason }) =
     // check no existing pending/approved refund for this item in this order
     const existingRefund = await Refund.findOne({
         order: orderId,
+        refundScope: "item",
         "item.product": itemId,
         status: { $in: ["pending", "approved"] },
     });
@@ -38,6 +39,8 @@ export const createRefundService = async ({ userId, orderId, itemId, reason }) =
         order: orderId,
         item,
         reason,
+        refundScope: "item",
+        source: "buyer",
         refundAmount,
         buyer: userId,
         status: "pending",
