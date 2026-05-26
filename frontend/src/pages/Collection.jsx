@@ -12,7 +12,6 @@ const Collection = () => {
     const [showFilter, setShowFilter] = useState(false);
     const [filterProducts, setFilterProducts] = useState([]);
     const [category, setCategory] = useState([]);
-    const [subCategory, setSubCategory] = useState([]);
     const [sortType, setSortType] = useState('relevant');
     const [location, setLocation] = useState('');
     const [priceRange, setPriceRange] = useState(1000000);
@@ -20,6 +19,9 @@ const Collection = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [view, setView] = useState('grid');
     const productsPerPage = 8;
+
+    const uniqueCategories = [...new Set(products.map(p => p.category).filter(Boolean))].sort();
+
     const toggleCategory=(e)=>{
         if (category.includes(e.target.value)){
             setCategory(prev=>prev.filter(item=>item!==e.target.value))
@@ -27,45 +29,21 @@ const Collection = () => {
             setCategory(prev => [...prev, e.target.value])
         }
     }
-    const toggleSubCategory=(e)=>{
-        if (subCategory.includes(e.target.value)){
-            setSubCategory(prev=>prev.filter(item=>item!==e.target.value))
-        }else {
-            setSubCategory(prev=>[...prev,e.target.value])
-        }
-    }
 
 
     const applyFilter=()=>{
         let productsCopy = products.slice();
-            if (showSearch && search.trim() !== '') {
-
-            const activeTerms = [search.toLowerCase()];
-
-            productsCopy = productsCopy.filter(item => {
-
-                const searchableText = `
-                    ${item.name}
-                    ${item.vendor}
-                    ${item.location}
-                `.toLowerCase();
-
-                return activeTerms.some(term =>
-                    searchableText.includes(term.toLowerCase())
-                );
-            });
-            }
+        if (showSearch && search.trim() !== '') {
+            const term = search.toLowerCase();
+            productsCopy = productsCopy.filter(item =>
+                `${item.name} ${item.vendor}`.toLowerCase().includes(term)
+            );
+        }
         if(category.length>0){
             productsCopy=productsCopy.filter(item=> category.includes(item.category));
         }
-        if (subCategory.length>0){
-            productsCopy=productsCopy.filter(item=>subCategory.includes(item.subCategory));
-        }
-        if (location.trim()!==''){
-            productsCopy=productsCopy.filter(item=>item.location.toLowerCase().includes(location.toLowerCase()));
-        }
         productsCopy=productsCopy.filter(item=>item.price<=priceRange);
-        productsCopy=productsCopy.filter(item=>(item.averageRating||0)>=minRating);
+        productsCopy=productsCopy.filter(item=>(item.rating||0)>=minRating);
         setFilterProducts(productsCopy);
         setCurrentPage(1);
     }
@@ -89,16 +67,7 @@ const Collection = () => {
 
     useEffect(()=>{
         applyFilter();
-    },[
-        category,
-        subCategory,
-        location,
-        priceRange,
-        minRating,
-        search,
-        showSearch,
-        products
-    ])
+    },[category, priceRange, minRating, search, showSearch, products])
     useEffect(()=>{
         sortProduct();
     },[sortType])
@@ -118,26 +87,13 @@ const Collection = () => {
                 <div className={`border border-line pl-5 py-3 mt-6 ${showFilter ? '' : 'hidden'} sm:block`}>
                     <p className='mb-3 text-sm font-medium'>CATEGORIES</p>
                     <div className='flex flex-col gap-2 text-sm font-light text-ink-soft'>
-                        <p className='flex gap-2'><input type='checkbox' className='w-3 accent-navy' value={'Clothing'} onChange={toggleCategory}/> Clothing</p>
-                        <p className='flex gap-2'><input type='checkbox' className='w-3 accent-navy' value={'Home'} onChange={toggleCategory}/> Home</p>
-                        <p className='flex gap-2'><input type='checkbox' className='w-3 accent-navy' value={'Accessories'} onChange={toggleCategory}/> Accessories</p>
-                        <p className='flex gap-2'><input type='checkbox' className='w-3 accent-navy' value={'Stationery'} onChange={toggleCategory}/> Stationery</p>
+                        {uniqueCategories.map(cat => (
+                            <p key={cat} className='flex gap-2'>
+                                <input type='checkbox' className='w-3 accent-navy' value={cat} onChange={toggleCategory}/> {cat}
+                            </p>
+                        ))}
+                        {uniqueCategories.length === 0 && <p className='text-xs'>Loading...</p>}
                     </div>
-                </div>
-                <div className={`border border-line pl-5 py-3 my-5 ${showFilter ? '' : 'hidden'} sm:block`}>
-                    <p className='mb-3 text-sm font-medium'>TYPE</p>
-                    <div className='flex flex-col gap-2 text-sm font-light text-ink-soft'>
-                        <p className='flex gap-2'><input type='checkbox' className='w-3 accent-navy' value={'Topwear'} onChange={toggleSubCategory}/> Topwear</p>
-                        <p className='flex gap-2'><input type='checkbox' className='w-3 accent-navy' value={'Lighting'} onChange={toggleSubCategory}/> Lighting</p>
-                        <p className='flex gap-2'><input type='checkbox' className='w-3 accent-navy' value={'Kitchen'} onChange={toggleSubCategory}/> Kitchen</p>
-                        <p className='flex gap-2'><input type='checkbox' className='w-3 accent-navy' value={'Furniture'} onChange={toggleSubCategory}/> Furniture</p>
-                        <p className='flex gap-2'><input type='checkbox' className='w-3 accent-navy' value={'Wallets'} onChange={toggleSubCategory}/> Wallets</p>
-                        <p className='flex gap-2'><input type='checkbox' className='w-3 accent-navy' value={'Bags'} onChange={toggleSubCategory}/> Bags</p>
-                    </div>
-                </div>
-                <div className={`border border-line pl-5 pr-3 py-3 my-5 ${showFilter ? '' : 'hidden'} sm:block`}>
-                    <p className='mb-3 text-sm font-medium'>LOCATION</p>
-                    <input type='text' value={location} onChange={(e)=>setLocation(e.target.value)} placeholder='Search by city...' className='w-full text-sm border border-line px-2 py-1 outline-none focus:border-navy'/>
                 </div>
                 <div className={`border border-line pl-5 pr-3 py-3 my-5 ${showFilter ? '' : 'hidden'} sm:block`}>
                     <p className='mb-3 text-sm font-medium'>MAX PRICE: {formatINR(priceRange)}</p>
@@ -177,8 +133,8 @@ const Collection = () => {
                 </div>
                 <p className='text-sm text-ink-soft mb-4'>
                     {view === 'map'
-                        ? `Showing ${Object.keys(filterProducts.reduce((acc,p)=>({...acc,[p.vendor]:1}),{})).length} vendor${filterProducts.length===1?'':'s'}`
-                        : `Showing ${filterProducts.length===0 ? 0 : indexOfFirst+1}-${Math.min(indexOfLast,filterProducts.length)} of ${filterProducts.length} products`
+                        ? `${[...new Set(filterProducts.map(p=>p.vendorId).filter(Boolean))].length} vendor(s)`
+                        : `Showing ${filterProducts.length===0 ? 0 : indexOfFirst+1}–${Math.min(indexOfLast,filterProducts.length)} of ${filterProducts.length} products`
                     }
                 </p>
 
@@ -190,7 +146,7 @@ const Collection = () => {
                                     {productsLoading
                                         ? [...Array(productsPerPage)].map((_, i) => <ProductCardSkeleton key={i} />)
                                         : currentProducts.map((item, index) => (
-                                            <ProductItem key={index} id={item._id} image={item.image[0]} name={item.name} price={item.price} vendor={item.vendor} location={item.location}/>
+                                            <ProductItem key={index} id={item._id} image={item.image[0]} name={item.name} price={item.price} vendor={item.vendor} vendorId={item.vendorId}/>
                                         ))
                                     }
                                 </div>

@@ -6,8 +6,10 @@ const BestSeller=()=>{
     const {products}=useContext(ShopContext);
     const [bestSeller,setBestSeller]=useState([]);
     useEffect(()=>{
-        const bestProduct =products.filter((item)=>(item.bestseller));
-        setBestSeller(bestProduct.slice(0,5));
+        const top = [...products]
+            .sort((a,b) => (b.rating||0) - (a.rating||0))
+            .slice(0,5);
+        setBestSeller(top);
     },[products])
     return(
         <div className='my-10'>
@@ -20,7 +22,7 @@ const BestSeller=()=>{
             <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 gap-y-6'>
                 {
                     bestSeller.map((item,index)=>(
-                        <ProductItem key={index} id={item._id} image={item.image[0]} name={item.name} price={item.price} vendor={item.vendor} location={item.location}/>
+                        <ProductItem key={index} id={item._id} image={item.image[0]} name={item.name} price={item.price} vendor={item.vendor} vendorId={item.vendorId}/>
                     ))
                 }
             </div>

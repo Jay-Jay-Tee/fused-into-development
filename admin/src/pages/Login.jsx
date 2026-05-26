@@ -17,7 +17,13 @@ const Login = () => {
             const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
             const res = await axios.post(`${API}/auth/login`, { email, password });
             const { accessToken } = res.data;
-            const payload = JSON.parse(atob(accessToken.split('.')[1]));
+            let payload;
+            try {
+                payload = JSON.parse(atob(accessToken.split('.')[1]));
+            } catch {
+                toast.error('Invalid token received');
+                return;
+            }
             if (payload.role !== 'admin') {
                 toast.error('Access denied');
                 return;

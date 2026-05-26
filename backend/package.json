@@ -5,6 +5,7 @@
     "private": true,
     "dependencies": {
         "bcrypt": "^6.0.0",
+        "cashfree-pg": "^6.0.4",
         "cloudinary": "^1.41.3",
         "cors": "^2.8.6",
         "dotenv": "^17.4.2",
