@@ -2,6 +2,8 @@ import crypto from "node:crypto";
 import Razorpay from "razorpay";
 import { Cashfree, CFEnvironment } from "cashfree-pg";
 import { AppError } from "./appError.js";
+import { Order } from "../models/Order.js";
+import { Payment } from "../models/Payment.js";
 
 const CASHFREE_API_VERSION = "2023-08-01";
 
@@ -175,6 +177,65 @@ export const createGatewayRefund = async ({ payment, refund, orderId }) => {
     );
 
     return { gatewayRefundId: razorpayRefund.id };
+};
+
+// -- Payment DB persistence --------------------------------------------------
+// Kept here because these are the "write the gateway result" counterpart
+// to the session/signature helpers above.
+
+export const findPaymentByGatewayTransaction = async ({ method, transactionId }) => {
+    if (!transactionId)
+        return null;
+
+    return Payment.findOne({ method, transactionId });
+};
+
+export const persistOrderPayment = async ({ order, method, status, transactionId }) => {
+    const paymentData = {
+        amount: order.totalAmount,
+        method,
+        order: order._id,
+        status,
+        transactionType: "order",
+        user: order.buyer,
+    };
+
+    if (transactionId)
+        paymentData.transactionId = transactionId;
+
+    const existingPayment = order.payment;
+    const isPopulated = existingPayment?.constructor?.modelName === "Payment";
+    let payment = isPopulated
+        ? existingPayment
+        : existingPayment
+            ? await Payment.findById(existingPayment)
+            : null;
+
+    if (!payment) {
+        try {
+            payment = await Payment.create(paymentData);
+        } catch (error) {
+            if (error.code !== 11000)
+                throw error;
+
+            payment = await findPaymentByGatewayTransaction({ method, transactionId });
+        }
+
+        if (!payment)
+            throw new AppError("Payment could not be persisted", 500);
+
+        await Order.updateOne({ _id: order._id }, { $set: { payment: payment._id } });
+        return payment;
+    }
+
+    Object.assign(payment, {
+        ...paymentData,
+        gatewayOrderId: undefined,
+        paymentSessionId: undefined,
+    });
+
+    await payment.save();
+    return payment;
 };
 
 export { buildCashfreeOrderId };

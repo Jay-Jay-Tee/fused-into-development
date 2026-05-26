@@ -1,6 +1,7 @@
 import { Order } from "../models/Order.js";
 import { Payment } from "../models/Payment.js";
 import { Product } from "../models/Product.js";
+import { Refund } from "../models/Refund.js";
 import { AppError } from "./appError.js";
 
 export const RESERVATION_TTL_MS = 10 * 60 * 1000;
@@ -92,4 +93,35 @@ export const startReservationCleanupLoop = () => {
         cleanupTimer.unref();
 
     return cleanupTimer;
+};
+
+// -- Late-payment / refund DB helpers ----------------------------------------
+// These are called only in the expiry edge-case path and sit here because
+// they reason about the same cancelled-order state that reservation expiry
+// produces.
+
+export const getExistingRefundPayment = async (refund) =>
+    Payment.findOne({ refund: refund._id, transactionType: "refund" });
+
+const SYSTEM_ORDER_REFUND_REASON = "Late payment captured after reservation expiry";
+
+export const ensureSystemOrderRefund = async (order) => {
+    const existing = await Refund.findOne({
+        order: order._id,
+        refundScope: "order",
+        source: "system",
+    });
+
+    if (existing)
+        return existing;
+
+    return Refund.create({
+        buyer: order.buyer,
+        order: order._id,
+        reason: SYSTEM_ORDER_REFUND_REASON,
+        refundAmount: order.totalAmount,
+        refundScope: "order",
+        source: "system",
+        status: "approved",
+    });
 };
