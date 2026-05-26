@@ -41,14 +41,14 @@ const createProduct = async (req, res) => {
 };
 
 const updateProduct = async (req, res) => {
-    const images = req.files && req.files.length > 0
-        ? req.files.map(f => f.path)
-        : undefined;
+    const kept = req.body.existingImages ? [].concat(req.body.existingImages) : [];
+    const uploaded = req.files ? req.files.map(f => f.path) : [];
+    const images = [...kept, ...uploaded];
 
     const data = await updateProductService({
         vendor: req.resolvedVendor,
         productId: req.params.id,
-        updateData: { ...req.body, ...(images && { images }) },
+        updateData: { ...req.body, images },
     });
     return res.status(200).json(data);
 };

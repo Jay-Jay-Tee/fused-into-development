@@ -256,13 +256,14 @@ const Collection = () => {
                         ) : (
                             <>
                                 <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 gap-y-6'>
-                                    {
-                                        currentProducts.map((item,index)=>(
+                                    {loading
+                                        ? [...Array(productsPerPage)].map((_, i) => <ProductCardSkeleton key={i} />)
+                                        : currentProducts.map((item, index) => (
                                             <ProductItem key={index} id={item._id} image={item.image[0]} name={item.name} price={item.price} vendor={item.vendor} location={item.location}/>
                                         ))
                                     }
                                 </div>
-                                {filterProducts.length===0 && (
+                                {!loading && filterProducts.length===0 && (
                                     <div className='text-center py-20 text-ink-soft'>
                                         <p>No products match your filters.</p>
                                     </div>

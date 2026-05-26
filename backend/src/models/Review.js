@@ -64,6 +64,9 @@ reviewSchema.pre("validate", function (next) {
     next();
 });
 
+reviewSchema.index({ reviewer: 1, product: 1, reviewType: 1 }, { unique: true, sparse: true });
+reviewSchema.index({ reviewer: 1, vendor: 1, reviewType: 1 }, { unique: true, sparse: true });
+
 const Review = mongoose.model("Review", reviewSchema);
 
 export { Review };

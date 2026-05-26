@@ -65,6 +65,7 @@ const Edit = () => {
             formData.append('price', toPaise(Number(price)));
             formData.append('stock', stock);
             if (categoryId) formData.append('category', categoryId);
+            existingImages.forEach(url => formData.append('existingImages', url));
             newImages.forEach(img => {
                 if (img) formData.append('images', img);
             });
@@ -91,19 +92,33 @@ const Edit = () => {
         );
     }
 
+    const removeExisting = (i) => {
+        setExistingImages(prev => prev.filter((_, idx) => idx !== i));
+    };
+
     return (
         <form onSubmit={onSubmit} className='flex flex-col w-full items-start gap-3'>
 
             <div>
                 <p className='mb-2 text-sm font-medium'>Images</p>
                 {existingImages.length > 0 && (
-                    <div className='flex flex-wrap gap-2 mb-3'>
-                        {existingImages.map((src, i) => (
-                            <img key={i} src={src} className='w-20 h-20 object-cover border border-line' alt=""/>
-                        ))}
-                    </div>
+                    <>
+                        <p className='text-xs text-ink-soft mb-2'>Current images — click × to remove</p>
+                        <div className='flex flex-wrap gap-2 mb-3'>
+                            {existingImages.map((src, i) => (
+                                <div key={i} className='relative w-20 h-20'>
+                                    <img src={src} className='w-20 h-20 object-cover border border-line' alt=""/>
+                                    <button
+                                        type='button'
+                                        onClick={() => removeExisting(i)}
+                                        className='absolute top-0 right-0 bg-ink text-paper text-xs w-5 h-5 flex items-center justify-center leading-none hover:bg-red-600'
+                                    >×</button>
+                                </div>
+                            ))}
+                        </div>
+                    </>
                 )}
-                <p className='text-xs text-ink-soft mb-2'>Upload to replace current images</p>
+                <p className='text-xs text-ink-soft mb-2'>Add new images</p>
                 <div className='flex gap-2'>
                     {newImages.map((img, i) => (
                         <label key={i} htmlFor={`newImage${i}`}>

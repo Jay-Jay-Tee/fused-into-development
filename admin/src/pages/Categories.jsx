@@ -108,6 +108,7 @@ const Categories = () => {
 
     const deleteSubCategory = async (parentId, subId) => {
         const cat = categories.find(c => c._id === parentId);
+        if (!cat) return;
         const sub = cat.subcategories.find(s => s._id === subId);
         if (sub.productCount > 0){
             toast.error(`Can't delete — ${sub.productCount} product(s) in this subcategory`);

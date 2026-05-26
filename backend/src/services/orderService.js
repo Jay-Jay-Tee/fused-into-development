@@ -109,7 +109,9 @@ export const getOrderByIdService = async ({ userId, vendorId, orderId }) => {
         throw new AppError("Order not found", 404);
 
     const isBuyer     = order.buyer._id.toString() === userId;
-    const vendorItems = order.items.filter(item => item.vendor.toString() === vendorId.toString());
+    const vendorItems = vendorId
+        ? order.items.filter(item => item.vendor.toString() === vendorId.toString())
+        : [];
     const isVendor    = vendorItems.length > 0;
 
     if (!isBuyer && !isVendor)

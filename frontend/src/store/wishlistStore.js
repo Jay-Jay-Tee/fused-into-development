@@ -2,7 +2,7 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
 // same as cart store but wishlist implementation
-const useCartStore = create(
+const useWishlistStore = create(
   persist(
     (set) => ({
       items: [],
@@ -45,4 +45,4 @@ const useCartStore = create(
   )
 )
 
-export default useCartStore
+export default useWishlistStore

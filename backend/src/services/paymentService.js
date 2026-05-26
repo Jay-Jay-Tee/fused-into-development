@@ -105,7 +105,7 @@ export const verifyPaymentService = async ({
     await Product.bulkWrite(
         updated.items.map(item => ({
             updateOne: {
-                filter: { _id: item.product },
+                filter: { _id: item.product, stock: { $gte: item.quantity } },
                 update: { $inc: { stock: -item.quantity } },
             },
         }))
@@ -243,7 +243,7 @@ export const handleWebhookService = async ({
     await Product.bulkWrite(
         updated.items.map(item => ({
             updateOne: {
-                filter: { _id: item.product },
+                filter: { _id: item.product, stock: { $gte: item.quantity } },
                 update: { $inc: { stock: -item.quantity } },
             },
         }))

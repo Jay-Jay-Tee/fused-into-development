@@ -28,7 +28,7 @@ const userSchema = new mongoose.Schema(
         // stores hashed password, never plaintext
         password: {
             type: String,
-            required: [true, 'passsword is required'],
+            required: [true, 'password is required'],
             select: false
         },
         role: {
@@ -39,9 +39,10 @@ const userSchema = new mongoose.Schema(
         },
         phone: {
             type: String,
-            required: [true, 'Please enter your phone number'],
+            required: false,
             match: [/^\d{10}$/, 'Phone number must be 10 digits'],
-            unique: true
+            unique: true,
+            sparse: true
         },
         addresses: [addressSchema],
 
