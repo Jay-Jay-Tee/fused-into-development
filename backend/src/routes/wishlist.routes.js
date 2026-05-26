@@ -12,22 +12,23 @@ import { role }               from '../middleware/role.js';
 router.get(
     '/',
     auth,
-    role('buyer'),
+    role("buyer", "vendor"),
     asyncHandler(wishlistController.getWishlist)
 );
 
 router.post(
     '/items',
     auth,
-    role('buyer'),
+    role("buyer", "vendor"),
     asyncHandler(wishlistController.addToWishlist)
 );
 
 router.delete(
     '/items/:productId',
     auth,
-    role('buyer'),
+    role("buyer", "vendor"),
     asyncHandler(wishlistController.removeFromWishlist)
 );
 
 export { router as wishlistRoutes };
+

@@ -15,7 +15,7 @@ router.post('/search', asyncHandler(aiController.expandSearch));
 router.post(
     '/recommendations',
     auth,
-    role("buyer"),
+    role("buyer", "vendor"),
     asyncHandler(aiController.getRecommendations)
 );
 

@@ -26,14 +26,14 @@ router.get(
 router.post(
     '/product/:id',
     auth,
-    role('buyer'),
+    role("buyer"),
     asyncHandler(reviewController.createProductReview)
 );
 
 router.post(
     '/vendor/:id',
     auth,
-    role('buyer'),
+    role("buyer"),
     asyncHandler(reviewController.createVendorReview)
 );
 

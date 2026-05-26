@@ -15,13 +15,13 @@ router.post('/webhook', asyncHandler(paymentController.handleWebhook));
 router.post(
   '/create-order',
   auth,
-  role('buyer'),
+  role("buyer", "vendor"),
   asyncHandler(paymentController.createOrder)
 );
 router.post(
   '/verify',
   auth,
-  role('buyer'),
+  role("buyer", "vendor"),
   asyncHandler(paymentController.verifyPayment)
 );
 router.post(
@@ -34,7 +34,7 @@ router.post(
 router.get(
   '/my',
   auth,
-  role('buyer'),
+  role("buyer", "vendor"),
   asyncHandler(paymentController.getPaymentHistory)
 );
 router.get(

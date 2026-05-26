@@ -6,10 +6,10 @@ import { asyncHandler }     from '../middleware/asyncHandler.js';
 import { auth }             from '../middleware/auth.js';
 import { role }             from '../middleware/role.js';
 
-// because its all for buyers,
+// because its all for buyers, and all vendors are buyers
 router.use(
     auth,
-    role('buyer')
+    role("buyer", "vendor")
 );
 
 router.get(

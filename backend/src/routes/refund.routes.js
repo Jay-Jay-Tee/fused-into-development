@@ -13,7 +13,7 @@ import { role }              from '../middleware/role.js';
 router.post(
     '/',
     auth,
-    role("buyer"),
+    role("buyer", "vendor"),
     asyncHandler(refundController.raiseRefund)
 );
 
@@ -27,14 +27,14 @@ router.get(
 router.get(
     '/my',
     auth,
-    role("buyer"),
+    role("buyer", "vendor"),
     asyncHandler(refundController.getBuyerRefunds)
 );
 
 router.get(
     '/:id',
     auth,
-    role("buyer", "admin"),
+    role("buyer", "vendor", "admin"),
     asyncHandler(refundController.getRefundById)
 );
 

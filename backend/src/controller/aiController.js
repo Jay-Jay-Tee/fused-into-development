@@ -51,8 +51,7 @@ const getPriceSuggestion = async (req, res) => {
         category,
     });
 
-    // suggestProductPrice returns null if the AI call fails entirely.
-    // Surface that as a 503 so the frontend knows to hide the suggestion UI.
+    // suggestProductPrice returns null if the AI call fails entirely
     if (!suggestion) {
         return res.status(503).json({
             success: false,

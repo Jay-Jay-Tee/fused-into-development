@@ -13,28 +13,28 @@ import { role }           from '../middleware/role.js';
 router.get(
     '/',
     auth,
-    role('buyer'),
+    role("buyer", "vendor"),
     asyncHandler(cartController.getCart)
 );
 
 router.post(
     '/items',
     auth,
-    role('buyer'),
+    role("buyer", "vendor"),
     asyncHandler(cartController.addToCart)
 );
 
 router.put(
     '/items/:productId',
     auth,
-    role('buyer'),
+    role("buyer", "vendor"),
     asyncHandler(cartController.updateCartItem)
 );
 
 router.delete(
     '/items/:productId',
     auth,
-    role('buyer'),
+    role("buyer", "vendor"),
     asyncHandler(cartController.removeCartItem)
 );
 
@@ -42,7 +42,7 @@ router.delete(
 router.delete(
     '/',
     auth,
-    role('buyer'),
+    role("buyer", "vendor"),
     asyncHandler(cartController.clearCart)
 );
 

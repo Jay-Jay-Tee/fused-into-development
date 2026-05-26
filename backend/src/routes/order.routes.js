@@ -13,14 +13,14 @@ import { role }              from '../middleware/role.js';
 router.post(
     '/',
     auth,
-    role("buyer"),
+    role("buyer", "vendor"),
     asyncHandler(orderController.createOrder)
 )
 
 router.get(
     '/my',
     auth,
-    role("buyer"),
+    role("buyer", "vendor"),
     asyncHandler(orderController.getMyOrders)
 )
 

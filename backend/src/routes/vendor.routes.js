@@ -13,7 +13,7 @@ import { uploadFields } from '../middleware/upload.js';
 router.get(
     '/application/status',
     auth,
-    role('buyer'),
+    role('buyer', 'vendor'),
     asyncHandler(vendorController.getApplicationStatus)
 );
 
