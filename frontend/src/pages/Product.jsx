@@ -4,18 +4,27 @@ import { ShopContext } from '../context/ShopContext'
 import { assets } from '../assets/assets'
 import RelatedProducts from '../components/RelatedProducts'
 import { formatINR } from '../utils/money'
+import axios from 'axios'
+
+const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
 
 const ReviewsList = ({productId}) => {
     const [reviews, setReviews] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     useEffect(()=>{
-        const stored = JSON.parse(localStorage.getItem('vendorhub_reviews') || '{}');
-        setReviews(stored[productId] || []);
+        if (!productId) return;
+        axios.get(`${API}/reviews/product/${productId}`)
+            .then(res => setReviews(res.data || []))
+            .catch(() => {})
+            .finally(() => setLoading(false));
     },[productId])
+
+    if (loading) return <p className='text-center py-6 text-ink-soft text-sm'>Loading reviews...</p>;
 
     if (reviews.length === 0){
         return (
-            <div className='text-center py-10'>
+            <div className='text-center py-10 text-ink-soft'>
                 <p>No reviews yet. Be the first to review.</p>
             </div>
         )
@@ -24,10 +33,10 @@ const ReviewsList = ({productId}) => {
     return (
         <div className='flex flex-col gap-4'>
             {reviews.map((r) => (
-                <div key={r.id} className='border-b border-line last:border-b-0 pb-4 last:pb-0'>
+                <div key={r._id} className='border-b border-line last:border-b-0 pb-4 last:pb-0'>
                     <div className='flex items-center gap-3 mb-2'>
                         <p className='text-mustard'>{'★'.repeat(r.rating)}<span className='text-ink-soft/30'>{'★'.repeat(5-r.rating)}</span></p>
-                        <p className='text-xs text-ink-soft'>{r.buyerName} · {new Date(r.createdAt).toLocaleDateString('en-IN', {day:'numeric', month:'short', year:'numeric'})}</p>
+                        <p className='text-xs text-ink-soft'>{r.reviewer?.name || 'Buyer'} · {new Date(r.createdAt).toLocaleDateString('en-IN', {day:'numeric', month:'short', year:'numeric'})}</p>
                     </div>
                     <p className='text-sm text-ink'>{r.comment}</p>
                 </div>
@@ -76,8 +85,8 @@ const Product=()=>{
                 <div className='flex-1'>
                     <h1 className='font-medium text-2xl mt-2'>{productData.name}</h1>
                     <div className='flex items-center gap-1 mt-2 text-sm text-ink-soft'>
-                        <p className='text-mustard'>★★★★★</p>
-                        <p className='pl-2'>{productData.rating} ({Math.floor(productData.rating*23)} reviews)</p>
+                        <p className='text-mustard'>{'★'.repeat(Math.round(productData.rating))}<span className='text-ink-soft/30'>{'★'.repeat(5-Math.round(productData.rating))}</span></p>
+                        <p className='pl-2'>{productData.rating} ({productData.totalReviews} review{productData.totalReviews !== 1 ? 's' : ''})</p>
                     </div>
                     <p className='mt-5 text-3xl font-medium'>{formatINR(productData.price)}</p>
                     <p className='mt-5 text-ink-soft md:w-4/5'>{productData.description}</p>
@@ -87,7 +96,7 @@ const Product=()=>{
                             <p className='font-medium'>{productData.vendor}</p>
                             <p className='text-sm text-ink-soft'>📍 {productData.location}</p>
                         </div>
-                        <button onClick={()=>navigate(`/vendor/${encodeURIComponent(productData.vendor)}`)} className='text-sm border border-ink px-4 py-2 hover:bg-ink hover:text-paper transition-colors'>
+                        <button onClick={()=>{ if(productData.vendorId) navigate(`/vendor/${productData.vendorId}`)}} className='text-sm border border-ink px-4 py-2 hover:bg-ink hover:text-paper transition-colors'>
                             View Shop
                         </button>
                     </div>
@@ -124,7 +133,7 @@ const Product=()=>{
             <div className='mt-20'>
                 <div className='flex'>
                     <b onClick={()=>setActiveTab('description')} className={`border border-line px-5 py-3 text-sm cursor-pointer ${activeTab==='description' ? 'bg-ink text-paper' : ''}`}>Description</b>
-                    <p onClick={()=>setActiveTab('reviews')} className={`border border-line px-5 py-3 text-sm cursor-pointer ${activeTab==='reviews' ? 'bg-ink text-paper' : ''}`}>Reviews ({Math.floor(productData.rating*23)})</p>
+                    <p onClick={()=>setActiveTab('reviews')} className={`border border-line px-5 py-3 text-sm cursor-pointer ${activeTab==='reviews' ? 'bg-ink text-paper' : ''}`}>Reviews ({productData.totalReviews})</p>
                 </div>
                 <div className='flex flex-col gap-4 border border-line px-6 py-6 text-sm text-ink-soft'>
                     {activeTab==='description' ? (
@@ -141,7 +150,7 @@ const Product=()=>{
                 <p className='text-xs text-ink-soft mb-1'>RECOMMENDED FOR YOU</p>
                 <p className='text-sm'>Personalized picks based on your browsing history. <span className='text-ink-soft'>(Sign in to see suggestions)</span></p>
             </div>
-            <RelatedProducts category={productData.category} subCategory={productData.subCategory}/>
+            <RelatedProducts category={productData.category}/>
         </div>
     ):<div className='opacity-0'></div>
 }

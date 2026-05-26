@@ -11,11 +11,10 @@ const normalizeProduct = (p) => ({
     ...p,
     image: p.images || [],
     rating: p.averageRating || 0,
+    totalReviews: p.totalReviews || 0,
     vendor: p.vendor?.storeName || p.vendor || '',
     vendorId: p.vendor?._id || null,
     category: p.category?.name || p.category || '',
-    location: '',
-    subCategory: '',
 });
 
 const ShopContextProvider = (props) => {

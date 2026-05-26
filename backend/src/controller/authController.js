@@ -3,7 +3,7 @@ import { AppError } from "../utils/appError.js";
 
 const register = async (req, res) => {
     const { name, userName, email, phone, password } = req.body;
-    if (!name || !userName || !email || !phone || !password)
+    if (!name || !userName || !email || !password)
         throw new AppError("Insufficient auth info", 400);
     const data = await registerService({ name, userName, email, phone, password });
     return res.status(201).json(data);

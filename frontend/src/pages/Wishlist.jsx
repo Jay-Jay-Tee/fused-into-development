@@ -29,7 +29,7 @@ const Wishlist = () => {
                     <p className='text-sm text-ink-soft mb-6'>{wishlistedProducts.length} item{wishlistedProducts.length !== 1 ? 's' : ''} saved</p>
                     <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 gap-y-6'>
                         {wishlistedProducts.map((item)=>(
-                            <ProductItem key={item._id} id={item._id} image={item.image[0]} name={item.name} price={item.price} vendor={item.vendor} location={item.location}/>
+                            <ProductItem key={item._id} id={item._id} image={item.image[0]} name={item.name} price={item.price} vendor={item.vendor} vendorId={item.vendorId}/>
                         ))}
                     </div>
                 </>

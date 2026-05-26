@@ -3,7 +3,7 @@ import { ShopContext } from '../context/ShopContext'
 import { Link, useNavigate } from 'react-router-dom'
 import { formatINR } from '../utils/money'
 
-const ProductItem = ({id, image, name, price, vendor, location}) => {
+const ProductItem = ({id, image, name, price, vendor, vendorId}) => {
     const {wishlist, toggleWishlist} = useContext(ShopContext);
     const isWishlisted = wishlist.includes(id);
     const navigate = useNavigate();
@@ -28,10 +28,10 @@ const ProductItem = ({id, image, name, price, vendor, location}) => {
             </div>
             <p className='pt-3 pb-1 text-sm font-medium'>{name}</p>
             <p
-                onClick={(e)=>{e.preventDefault(); e.stopPropagation(); navigate(`/vendor/${encodeURIComponent(vendor)}`)}}
+                onClick={(e)=>{e.preventDefault(); e.stopPropagation(); if(vendorId) navigate(`/vendor/${vendorId}`)}}
                 className='text-xs text-ink-soft mb-1 hover:text-ink hover:underline cursor-pointer'
             >
-                {vendor} · {location}
+                {vendor}
             </p>
             <p className='text-sm font-semibold'>{formatINR(price)}</p>
         </Link>
