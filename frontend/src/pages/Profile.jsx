@@ -17,7 +17,7 @@ const Profile = () => {
 
     const fetchAddresses = () => {
         api.get('/users/me')
-            .then(res => setAddresses(res.data.addresses || []))
+            .then(res => setAddresses(res.data.user?.addresses || []))
             .catch(() => toast.error('Could not load profile'))
             .finally(() => setLoading(false));
     };
