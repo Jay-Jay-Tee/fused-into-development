@@ -2,9 +2,9 @@ import express from 'express';
 const router = express.Router();
 
 import { paymentController } from '../controller/paymentController.js';
-import { asyncHandler }      from '../middleware/asyncHandler.js';
-import { auth }              from '../middleware/auth.js';
-import { role }              from '../middleware/role.js';
+import { asyncHandler } from '../middleware/asyncHandler.js';
+import { auth } from '../middleware/auth.js';
+import { role } from '../middleware/role.js';
 
 // ----- PUBLIC ROUTES (no auth required) ------------------
 router.post('/webhook', asyncHandler(paymentController.handleWebhook));
@@ -44,24 +44,24 @@ router.get(
   asyncHandler(paymentController.getPaymentHistoryById)
 );
 router.post(
-    '/upi/:orderId',
-    auth,
-    role("buyer", "vendor"),
-    asyncHandler(paymentController.payUPI)
+  '/upi/:orderId',
+  auth,
+  role("buyer", "vendor"),
+  asyncHandler(paymentController.payUPI)
 );
 
 router.post(
-    '/upi/:orderId/submit',
-    auth,
-    role('buyer', 'vendor'),
-    asyncHandler(paymentController.submitUPITransaction)
+  '/upi/:orderId/submit',
+  auth,
+  role('buyer', 'vendor'),
+  asyncHandler(paymentController.submitUPITransaction)
 );
 
 router.patch(
-    '/upi/:paymentId/approve',
-    auth,
-    role('admin'),
-    asyncHandler(paymentController.approveUPIPayment)
+  '/upi/:paymentId/approve',
+  auth,
+  role('admin'),
+  asyncHandler(paymentController.approveUPIPayment)
 );
 
 export { router as paymentRoutes };
