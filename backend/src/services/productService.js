@@ -126,6 +126,11 @@ export const deleteProductService = async ({ userId, productId }) => {
     if (product.vendor.toString() !== vendor._id.toString())
         throw new AppError("Not authorised to delete this product", 403);
 
+    await Promise.all(product.images.map(url => {
+        const publicId = extractPublicId(url);
+        return publicId ? cloudinary.uploader.destroy(publicId) : Promise.resolve();
+    }));
+
     product.isActive = false;
     await product.save();
 
