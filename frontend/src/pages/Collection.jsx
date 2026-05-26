@@ -3,19 +3,12 @@ import { ShopContext } from '../context/ShopContext'
 import { assets } from '../assets/assets'
 import Title from '../components/Title'
 import ProductItem from '../components/ProductItem'
-import useDebounce from '../hooks/useDebounce';
-import { expandSearchQuery } from '../api/ai';
 import ProductCardSkeleton from '../components/ProductCardSkeleton';
 import { formatINR } from '../utils/money'
 import VendorMap from '../components/VendorMap'
 
 const Collection = () => {
     const {products, productsLoading, search, showSearch} = useContext(ShopContext);
-    //delay
-    const debouncedSearch = useDebounce(search, 400);
-    const [expandedTerms, setExpandedTerms] = useState([]);
-    //cache to avoid repeated api acalled
-    const searchCache = useRef(new Map());
     const [showFilter, setShowFilter] = useState(false);
     const [filterProducts, setFilterProducts] = useState([]);
     const [category, setCategory] = useState([]);
@@ -42,64 +35,12 @@ const Collection = () => {
         }
     }
 
-    useEffect(() => {
-
-        const getExpandedTerms = async () => {
-
-            // reset if search cleared
-            if (!showSearch || debouncedSearch.trim().length < 3) {
-                setExpandedTerms([]);
-                return;
-            }
-
-            const normalizedQuery = debouncedSearch.trim().toLowerCase();
-
-            // cache hit
-            if (searchCache.current.has(normalizedQuery)) {
-                setExpandedTerms(
-                    searchCache.current.get(normalizedQuery)
-                );
-                return;
-            }
-
-            try {
-
-                const terms = await expandSearchQuery(normalizedQuery);
-
-                const uniqueTerms = [
-                    normalizedQuery,
-                    ...terms
-                ];
-
-                const deduped = [...new Set(uniqueTerms)];
-
-                searchCache.current.set(
-                    normalizedQuery,
-                    deduped
-                );
-
-                setExpandedTerms(deduped);
-
-            } catch (error) {
-
-                console.error('AI Search Expansion Error:', error);
-
-                setExpandedTerms([normalizedQuery]);
-            }
-        };
-
-        getExpandedTerms();
-
-    }, [debouncedSearch, showSearch]);
 
     const applyFilter=()=>{
         let productsCopy = products.slice();
             if (showSearch && search.trim() !== '') {
 
-            const activeTerms =
-                expandedTerms.length > 0
-                    ? expandedTerms
-                    : [search.toLowerCase()];
+            const activeTerms = [search.toLowerCase()];
 
             productsCopy = productsCopy.filter(item => {
 
@@ -156,8 +97,7 @@ const Collection = () => {
         minRating,
         search,
         showSearch,
-        products,
-        expandedTerms
+        products
     ])
     useEffect(()=>{
         sortProduct();
