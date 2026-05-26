@@ -14,6 +14,7 @@ import { buildOrderItems, buildShippingAddress } from '../utils/checkout'
 const PlaceOrder = () => {
     const [method, setMethod] = useState('razorpay');
     const [loading, setLoading] = useState(false);
+    const [saveAddress, setSaveAddress] = useState(false);
     const [formData, setFormData] = useState({
         firstName: '', lastName: '', email: '',
         street: '', city: '', state: '', pincode: '', country: 'India', phone: '',
@@ -22,8 +23,9 @@ const PlaceOrder = () => {
     const { cartItems, setCartItems, getCartAmount, token } = useContext(ShopContext);
     const navigate = useNavigate();
     const {
-        savedAddresses, selectedAddressId, setSelectedAddressId,
+        savedAddresses, selectedAddressIndex, setSelectedAddressIndex,
         useNewAddress, setUseNewAddress,
+        loading: addressesLoading,
     } = useSavedAddresses();
     const { pay } = useRazorpayCheckout();
 
@@ -43,7 +45,7 @@ const PlaceOrder = () => {
         if (items.length === 0) { toast.error('Your cart is empty'); return; }
 
         const shippingAddress = buildShippingAddress({
-            useNewAddress, savedAddresses, selectedAddressId, formData,
+            useNewAddress, savedAddresses, selectedAddressIndex, formData,
         });
 
         setLoading(true);
@@ -52,6 +54,11 @@ const PlaceOrder = () => {
             await pay(order);
             setCartItems({});
             toast.success('Payment successful! Order confirmed.');
+            if (useNewAddress && saveAddress) {
+                api.post('/users/me/addresses', shippingAddress).catch(() => {
+                    toast.warn('Order placed but address could not be saved');
+                });
+            }
             navigate('/orders');
         } catch (err) {
             toast.error(err.response?.data?.message || err.message || 'Failed to place order');
@@ -62,6 +69,32 @@ const PlaceOrder = () => {
 
     const showSavedList = savedAddresses.length > 0 && !useNewAddress;
 
+    let addressSection;
+    if (addressesLoading) {
+        addressSection = <p className='text-sm text-ink-soft'>Loading addresses...</p>;
+    } else if (showSavedList) {
+        addressSection = (
+            <SavedAddressList
+                addresses={savedAddresses}
+                selectedIndex={selectedAddressIndex}
+                onSelect={setSelectedAddressIndex}
+                onUseNewAddress={() => setUseNewAddress(true)}
+            />
+        );
+    } else {
+        addressSection = (
+            <NewAddressForm
+                formData={formData}
+                onChange={onChangeHandler}
+                hasSavedAddresses={savedAddresses.length > 0}
+                onBack={() => setUseNewAddress(false)}
+                canSave={!!token}
+                saveAddress={saveAddress}
+                onToggleSave={(e) => setSaveAddress(e.target.checked)}
+            />
+        );
+    }
+
     return (
         <form onSubmit={onSubmitHandler} className='flex flex-col sm:flex-row justify-between gap-4 pt-5 sm:pt-14 min-h-[80vh] border-t border-line'>
 
@@ -70,21 +103,7 @@ const PlaceOrder = () => {
                     <Title text1={'DELIVERY'} text2={'ADDRESS'}/>
                 </div>
 
-                {showSavedList ? (
-                    <SavedAddressList
-                        addresses={savedAddresses}
-                        selectedId={selectedAddressId}
-                        onSelect={setSelectedAddressId}
-                        onUseNewAddress={() => setUseNewAddress(true)}
-                    />
-                ) : (
-                    <NewAddressForm
-                        formData={formData}
-                        onChange={onChangeHandler}
-                        hasSavedAddresses={savedAddresses.length > 0}
-                        onBack={() => setUseNewAddress(false)}
-                    />
-                )}
+                {addressSection}
             </div>
 
             <div className='mt-8'>

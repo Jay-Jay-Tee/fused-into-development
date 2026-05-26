@@ -16,7 +16,11 @@ const Field = ({ name, value, onChange, type = 'text', placeholder, pattern, tit
     />
 );
 
-const NewAddressForm = ({ formData, onChange, hasSavedAddresses, onBack }) => (
+const NewAddressForm = ({
+    formData, onChange,
+    hasSavedAddresses, onBack,
+    canSave, saveAddress, onToggleSave,
+}) => (
     <>
         {hasSavedAddresses && (
             <button
@@ -57,6 +61,17 @@ const NewAddressForm = ({ formData, onChange, hasSavedAddresses, onBack }) => (
             pattern='[6-9][0-9]{9}'
             title='10-digit Indian mobile number'
         />
+        {canSave && (
+            <label className='flex items-center gap-2 text-sm text-ink-soft cursor-pointer mt-1'>
+                <input
+                    type='checkbox'
+                    checked={saveAddress}
+                    onChange={onToggleSave}
+                    className='accent-navy'
+                />
+                <span>Save this address to my profile</span>
+            </label>
+        )}
     </>
 );
 

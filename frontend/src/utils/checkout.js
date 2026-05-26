@@ -9,32 +9,21 @@ export const buildOrderItems = (cartItems) => {
     return items;
 };
 
-const normalizeSavedAddress = (addr) => ({
-    firstName: addr.firstName,
-    lastName: addr.lastName,
-    street: addr.street,
-    city: addr.city,
-    state: addr.state,
-    pincode: addr.zipcode || addr.pincode,
-    country: addr.country,
-    phone: addr.phone,
+const pickAddressFields = (src) => ({
+    firstName: src.firstName,
+    lastName: src.lastName,
+    street: src.street,
+    city: src.city,
+    state: src.state,
+    pincode: src.pincode,
+    country: src.country,
+    phone: src.phone,
 });
 
-const normalizeFormAddress = (form) => ({
-    firstName: form.firstName,
-    lastName: form.lastName,
-    street: form.street,
-    city: form.city,
-    state: form.state,
-    pincode: form.pincode,
-    country: form.country,
-    phone: form.phone,
-});
-
-export const buildShippingAddress = ({ useNewAddress, savedAddresses, selectedAddressId, formData }) => {
-    if (!useNewAddress && selectedAddressId) {
-        const addr = savedAddresses.find(a => a.id === selectedAddressId);
-        if (addr) return normalizeSavedAddress(addr);
+export const buildShippingAddress = ({ useNewAddress, savedAddresses, selectedAddressIndex, formData }) => {
+    if (!useNewAddress && selectedAddressIndex !== null) {
+        const addr = savedAddresses[selectedAddressIndex];
+        if (addr) return pickAddressFields(addr);
     }
-    return normalizeFormAddress(formData);
+    return pickAddressFields(formData);
 };
