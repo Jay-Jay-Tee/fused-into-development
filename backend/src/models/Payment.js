@@ -8,7 +8,7 @@ const paymentSchema = new mongoose.Schema(
         },
         method: {
             type: String,
-            enum: ["bank_transfer", "razorpay"],
+            enum: ["bank_transfer", "razorpay", "upi"],
             required: true
         },
         transactionType: {
@@ -37,7 +37,7 @@ const paymentSchema = new mongoose.Schema(
         },
         status: {
             type: String,
-            enum: ["pending", "paid", "failed"],
+            enum: ["pending", "paid", "failed", "pending_verification"],
             required: true,
             default: "pending"
         }

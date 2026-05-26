@@ -21,17 +21,17 @@ export const createPaymentOrderService = async ({ orderId, userId }) => {
     const order = await Order.findById(orderId).populate("payment");
 
     if (!order) {
-         throw new AppError("Order not found", 404);
+        throw new AppError("Order not found", 404);
     }
 
     // Only the buyer who placed the order can pay for it.
     if (order.buyer.toString() !== userId) {
-         throw new AppError("Not authorized for this order", 403);
+        throw new AppError("Not authorized for this order", 403);
     }
 
     // If a Payment document exists and is already paid, reject.
     if (order.payment?.status === "paid") {
-         throw new AppError("Order already paid", 409);
+        throw new AppError("Order already paid", 409);
     }
 
     const razorpayOrder = await getRazorpay().orders.create({
@@ -60,10 +60,10 @@ export const verifyPaymentService = async ({
 }) => {
     const order = await Order.findById(orderId).populate("payment");
 
-    if (!order) 
+    if (!order)
         throw new AppError("Order not found", 404);
-    
-    if(order.buyer.toString() !== userId)
+
+    if (order.buyer.toString() !== userId)
         throw new AppError("Unauthorised attempt at verification", 401);
 
     if (order.orderStatus === "confirmed") {
@@ -77,7 +77,7 @@ export const verifyPaymentService = async ({
         .digest("hex");
 
     if (expectedSignature !== razorpaySignature) {
-         throw new AppError("Invalid payment signature", 401);
+        throw new AppError("Invalid payment signature", 401);
     }
 
     const payment = await Payment.create({
@@ -90,7 +90,7 @@ export const verifyPaymentService = async ({
         status: "paid",
     });
 
-    // Atomic update — only succeeds if order is still pending.
+    // only succeeds if order is still pending.
     // Prevents double-processing if webhook fires at the same time.
     const updated = await Order.findOneAndUpdate(
         { _id: orderId, orderStatus: "pending" },
@@ -125,17 +125,17 @@ export const triggerRefundService = async ({ refundId }) => {
     });
 
     if (!refund) {
-         throw new AppError("Refund request not found", 404);
+        throw new AppError("Refund request not found", 404);
     }
 
     if (refund.status !== "approved") {
-         throw new AppError("Refund must be approved before triggering payment", 400);
+        throw new AppError("Refund must be approved before triggering payment", 400);
     }
 
     const originalPayment = refund.order.payment;
 
     if (originalPayment?.status !== "paid") {
-         throw new AppError("Original payment not found or not paid", 400);
+        throw new AppError("Original payment not found or not paid", 400);
     }
 
     // initiate refund via Razorpay using original payment's transactionId
@@ -283,4 +283,68 @@ export const payUPIService = async ({ user, orderId }) => {
         amount,
         upiUrl,
     };
+};
+
+export const submitUPITransactionService = async ({
+    user,
+    orderId,
+    utr,
+}) => {
+    const order = await Order.findById(orderId);
+
+    if (!order)
+        throw new AppError('Order not found', 404);
+
+    if (order.customer.toString() !== user._id.toString())
+        throw new AppError('Not authorised', 403);
+
+    if (!utr || utr.trim().length < 8)
+        throw new AppError('Invalid transaction ID', 400);
+
+    const existingUTR = await Payment.findOne({ utr });
+
+    if (existingUTR)
+        throw new AppError('Transaction ID already used', 400);
+
+    let payment = await Payment.findOne({ order: order._id });
+
+    if (payment) {
+        if (payment.status === 'paid' || payment.status === "pending_verification")
+            throw new AppError('Order already paid', 400);
+
+        await payment.deleteOne();
+    }
+
+    payment = await Payment.create({
+        order: order._id,
+        amount: order.totalAmount,
+        method: 'upi',
+        status: 'pending_verification',
+        transactionId: utr.toString()
+    });
+
+    return payment;
+};
+
+export const approveUPIPaymentService = async ({
+    admin,
+    paymentId,
+}) => {
+    const payment = await Payment.findById(paymentId)
+        .populate('order');
+
+    if (!payment)
+        throw new AppError('Payment not found', 404);
+
+    payment.status = 'paid';
+
+    await payment.save();
+
+    if (payment.order) {
+        payment.order.orderStatus = 'confirmed';
+        payment.status = "paid";
+        await payment.order.save();
+    }
+
+    return payment;
 };

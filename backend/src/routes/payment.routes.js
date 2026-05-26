@@ -46,7 +46,22 @@ router.get(
 router.post(
     '/upi/:orderId',
     auth,
+    role("buyer", "vendor"),
     asyncHandler(paymentController.payUPI)
+);
+
+router.post(
+    '/upi/:orderId/submit',
+    auth,
+    role('buyer', 'vendor'),
+    asyncHandler(paymentController.submitUPITransaction)
+);
+
+router.patch(
+    '/upi/:paymentId/approve',
+    auth,
+    role('admin'),
+    asyncHandler(paymentController.approveUPIPayment)
 );
 
 export { router as paymentRoutes };

@@ -5,7 +5,9 @@ import {
     getPaymentsByOrderService,
     getMyPaymentsService,
     handleWebhookService,
-    payUPIService
+    payUPIService,
+    submitUPITransactionService,
+    approveUPIPaymentService
 } from "../services/paymentService.js";
 
 const createOrder = async (req, res) => {
@@ -137,6 +139,23 @@ const payUPI = async (req, res) => {
     return res.status(200).json(data);
 };
 
+const submitUPITransaction = async (req, res) => {
+    const data = await submitUPITransactionService({
+        user: req.user,
+        orderId: req.params.orderId,
+        utr: req.body.utr,
+    });
+    return res.status(200).json(data);
+};
+
+const approveUPIPayment = async (req, res) => {
+    const data = await approveUPIPaymentService({
+        admin: req.user,
+        paymentId: req.params.paymentId,
+    });
+    return res.status(200).json(data);
+};
+
 export const paymentController = {
     createOrder,
     verifyPayment,
@@ -144,5 +163,7 @@ export const paymentController = {
     getPaymentHistoryById,
     getPaymentHistory,
     handleWebhook,
-    payUPI
+    payUPI,
+    submitUPITransaction,
+    approveUPIPayment
 };
