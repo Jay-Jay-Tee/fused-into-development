@@ -251,3 +251,36 @@ export const handleWebhookService = async ({
 
     return { success: true, payment };
 };
+
+export const payUPIService = async ({ user, orderId }) => {
+    const order = await Order.findById(orderId);
+
+    if (!order)
+        throw new AppError('Order not found', 404);
+
+    if (order.customer.toString() !== user._id.toString())
+        throw new AppError('Not authorised to access this order', 403);
+
+    const txnId = crypto.randomUUID();
+
+    const amount =
+        process.env.NODE_ENV === 'development'
+            ? 1
+            : order.totalAmount;
+
+    const upiUrl =
+        `upi://pay?` +
+        `pa=${process.env.UPI_ID}` +
+        `&pn=${encodeURIComponent(process.env.UPI_NAME || 'VendorHub')}` +
+        `&tr=${txnId}` +
+        `&tn=${encodeURIComponent(`Order-${order._id}`)}` +
+        `&am=${1}` +
+        `&cu=INR`;
+
+    return {
+        orderId: order._id,
+        txnId,
+        amount,
+        upiUrl,
+    };
+};

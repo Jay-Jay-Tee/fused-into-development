@@ -5,6 +5,7 @@ import {
     getPaymentsByOrderService,
     getMyPaymentsService,
     handleWebhookService,
+    payUPIService
 } from "../services/paymentService.js";
 
 const createOrder = async (req, res) => {
@@ -128,6 +129,14 @@ const handleWebhook = async (req, res) => {
     });
 };
 
+const payUPI = async (req, res) => {
+    const data = await payUPIService({
+        user: req.user,
+        orderId: req.params.orderId,
+    });
+    return res.status(200).json(data);
+};
+
 export const paymentController = {
     createOrder,
     verifyPayment,
@@ -135,4 +144,5 @@ export const paymentController = {
     getPaymentHistoryById,
     getPaymentHistory,
     handleWebhook,
+    payUPI
 };

@@ -43,5 +43,10 @@ router.get(
   role('buyer', 'admin', 'vendor'),
   asyncHandler(paymentController.getPaymentHistoryById)
 );
+router.post(
+    '/upi/:orderId',
+    auth,
+    asyncHandler(paymentController.payUPI)
+);
 
 export { router as paymentRoutes };
