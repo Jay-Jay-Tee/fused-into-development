@@ -49,6 +49,11 @@ const userSchema = new mongoose.Schema(
         vendorApplication: {
             status: { type: String, enum: ['none', 'approved', 'pending', 'rejected'], default: 'none' },
             rejectionNote: { type: String, default: null }
+        },
+
+        isBanned: {
+            type: Boolean,
+            default: false
         }
     },
 

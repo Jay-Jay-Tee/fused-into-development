@@ -6,7 +6,11 @@ import {
     disbursePayoutService,
     getPayoutsService,
     updateCategoryService,
-    deleteCategoryService
+    deleteCategoryService,
+    getUsersService,
+    getUserByIdService,
+    banUserService,
+    getAdminOrdersService,
 } from "../services/adminService.js";
 import { AppError } from "../utils/appError.js";
 
@@ -54,6 +58,29 @@ const deleteCategory = async (req, res) => {
     return res.status(200).json(data);
 };
 
+const getUsers = async (req, res) => {
+    const { role, isBanned } = req.query;
+    const data = await getUsersService({ role, isBanned, query: req.query });
+    return res.status(200).json(data);
+};
+
+const getUserById = async (req, res) => {
+    const data = await getUserByIdService({ userId: req.params.id });
+    return res.status(200).json(data);
+};
+
+const banUser = async (req, res) => {
+    const ban = req.body.ban !== false;
+    const data = await banUserService({ userId: req.params.id, ban });
+    return res.status(200).json(data);
+};
+
+const getAdminOrders = async (req, res) => {
+    const { status, from, to } = req.query;
+    const data = await getAdminOrdersService({ status, from, to, query: req.query });
+    return res.status(200).json(data);
+};
+
 export const adminController = {
     getAnalytics,
     getPendingVendors,
@@ -62,5 +89,9 @@ export const adminController = {
     disbursePayout,
     getPayouts,
     updateCategory,
-    deleteCategory 
+    deleteCategory,
+    getUsers,
+    getUserById,
+    banUser,
+    getAdminOrders,
 };

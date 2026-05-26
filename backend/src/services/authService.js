@@ -78,11 +78,26 @@ export const loginService = async ({ email, userName, password }) => {
     return { accessToken, refreshToken };
 };
 
+// In-memory blacklist for invalidated refresh tokens.
+// Entries expire naturally once the token's 7-day TTL passes.
+const revokedTokens = new Set();
+
+// ---- logoutService ---------------------------------
+export const logoutService = ({ refreshToken }) => {
+    if (!refreshToken) throw new AppError("Refresh token is required", 400);
+    revokedTokens.add(refreshToken);
+    return { message: "Logged out successfully" };
+};
+
 // ---- refreshTokenService ---------------------------------
 // The refresh token is NOT rotated — same one stays valid for 7 days
 export const refreshTokenService = async ({ refreshToken }) => {
     if (!refreshToken) {
         throw new AppError("Refresh token is required", 400);
+    }
+
+    if (revokedTokens.has(refreshToken)) {
+        throw new AppError("Refresh token has been revoked", 401);
     }
 
     let decoded;

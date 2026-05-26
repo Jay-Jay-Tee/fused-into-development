@@ -9,9 +9,7 @@ import { asyncHandler }      from '../middleware/asyncHandler.js';
 router.post("/register", asyncHandler(authController.register));
 router.post("/login", asyncHandler(authController.login));
 router.post("/refresh-token", asyncHandler(authController.refreshToken));
-
-// maybe make in V2
-// router.post("/logout", asyncHandler(orderController.logout));  
+router.post("/logout", asyncHandler(authController.logout));
 
 // ----- PROTECTED ROUTES -----------------------------------
 

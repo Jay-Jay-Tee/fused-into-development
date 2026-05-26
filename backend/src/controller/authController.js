@@ -1,4 +1,4 @@
-import { loginService, refreshTokenService, registerService } from "../services/authService.js";
+import { loginService, logoutService, refreshTokenService, registerService } from "../services/authService.js";
 import { AppError } from "../utils/appError.js";
 
 const register = async (req, res) => {
@@ -19,8 +19,14 @@ const login = async (req, res) => {
     return res.status(200).json(data);
 };
 
+const logout = (req, res) => {
+    const data = logoutService({ refreshToken: req.body.refreshToken });
+    return res.status(200).json(data);
+};
+
 export const authController = {
     register,
     refreshToken,
-    login
+    login,
+    logout,
 };

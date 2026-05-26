@@ -2,9 +2,11 @@ import { Order }                from "../models/Order.js";
 import { VendorPayout }         from "../models/VendorPayouts.js";
 import { Vendor }               from "../models/Vendor.js";
 import { Category }             from "../models/Category.js";
+import { User }                 from "../models/User.js";
 import { calculateCommission }  from "../utils/calculateCommission.js";
 import { Payment }              from "../models/Payment.js";
 import { AppError }             from "../utils/appError.js";
+import { paginate }             from "../utils/paginate.js";
 
 // analytics service
 export const getAnalyticsService = async () => {
@@ -170,6 +172,64 @@ export const getPayoutsService = async ({ vendorId, status }) => {
         .populate("paymentInfo", "amount status transactionId")
         .sort({ year: -1, month: -1 })
         .lean();
+};
+
+export const getUsersService = async ({ role, isBanned, query }) => {
+    const { skip, limit, page } = paginate(query);
+    const filter = {};
+    if (role)              filter.role     = role;
+    if (isBanned != null)  filter.isBanned = isBanned === "true";
+
+    const [users, total] = await Promise.all([
+        User.find(filter)
+            .select("-password")
+            .skip(skip)
+            .limit(limit)
+            .sort({ createdAt: -1 })
+            .lean(),
+        User.countDocuments(filter),
+    ]);
+
+    return { users, pagination: { total, page, pages: Math.ceil(total / limit) } };
+};
+
+export const getUserByIdService = async ({ userId }) => {
+    const user = await User.findById(userId).select("-password").lean();
+    if (!user) throw new AppError("User not found", 404);
+    return user;
+};
+
+export const banUserService = async ({ userId, ban }) => {
+    const user = await User.findById(userId);
+    if (!user)                 throw new AppError("User not found", 404);
+    if (user.role === "admin") throw new AppError("Cannot ban an admin account", 403);
+    user.isBanned = ban;
+    await user.save();
+    return { message: ban ? "User banned" : "User unbanned", userId: user._id };
+};
+
+export const getAdminOrdersService = async ({ status, from, to, query }) => {
+    const { skip, limit, page } = paginate(query);
+    const filter = {};
+    if (status) filter.orderStatus = status;
+    if (from || to) {
+        filter.createdAt = {};
+        if (from) filter.createdAt.$gte = new Date(from);
+        if (to)   filter.createdAt.$lte = new Date(to);
+    }
+
+    const [orders, total] = await Promise.all([
+        Order.find(filter)
+            .skip(skip)
+            .limit(limit)
+            .populate("buyer", "name email")
+            .populate("items.product", "name")
+            .sort({ createdAt: -1 })
+            .lean(),
+        Order.countDocuments(filter),
+    ]);
+
+    return { orders, pagination: { total, page, pages: Math.ceil(total / limit) } };
 };
 
 export const updateCategoryService = async ({ categoryId, updateData }) => {
