@@ -4,13 +4,19 @@ import CartTotal from '../components/CartTotal'
 import { ShopContext } from '../context/ShopContext'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
+import {
+    createOrder as createBackendOrder,
+    createRazorpayOrder,
+    verifyRazorpayPayment,
+} from '../api/payments'
 
 const STORAGE_KEY = 'vendorhub_addresses';
 
 const PlaceOrder = () => {
 
     const [method, setMethod]=useState('cod');
-    const {setCartItems, getCartAmount} = useContext(ShopContext);
+    const [submitting, setSubmitting] = useState(false);
+    const {cartItems, setCartItems, getCartAmount, token, products, delivery_fee} = useContext(ShopContext);
     const navigate = useNavigate();
 
     const [savedAddresses, setSavedAddresses] = useState([]);
@@ -50,13 +56,81 @@ const PlaceOrder = () => {
         setFormData(data => ({...data, [name]:value}));
     }
 
-    const onSubmitHandler = (event) => {
+    const buildOrderItems = () => {
+        const items = [];
+        for (const productId in cartItems) {
+            const product = products.find(p => p._id === productId);
+            if (!product) continue;
+            let quantity = 0;
+            for (const size in cartItems[productId]) {
+                quantity += cartItems[productId][size];
+            }
+            if (quantity > 0) {
+                items.push({ product: productId, quantity });
+            }
+        }
+        return items;
+    }
+
+    const openRazorpayCheckout = ({ orderId, razorpayOrderId, amount, currency, address }) => {
+        return new Promise((resolve, reject) => {
+            if (typeof window.Razorpay === 'undefined') {
+                reject(new Error('Razorpay SDK failed to load'));
+                return;
+            }
+
+            const options = {
+                key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+                amount,
+                currency,
+                name: 'VendorHub',
+                description: 'Order Payment',
+                order_id: razorpayOrderId,
+                prefill: {
+                    name: `${address.firstName || ''} ${address.lastName || ''}`.trim(),
+                    email: address.email || '',
+                    contact: address.phone || '',
+                },
+                theme: { color: '#1e3a5f' },
+                handler: async (response) => {
+                    try {
+                        await verifyRazorpayPayment({
+                            orderId,
+                            razorpayOrderId: response.razorpay_order_id,
+                            razorpayPaymentId: response.razorpay_payment_id,
+                            razorpaySignature: response.razorpay_signature,
+                            token,
+                        });
+                        resolve();
+                    } catch (err) {
+                        reject(err);
+                    }
+                },
+                modal: {
+                    ondismiss: () => reject(new Error('Payment cancelled')),
+                },
+            };
+
+            const rzp = new window.Razorpay(options);
+            rzp.on('payment.failed', (response) => {
+                reject(new Error(response.error?.description || 'Payment failed'));
+            });
+            rzp.open();
+        });
+    }
+
+    const onSubmitHandler = async (event) => {
         event.preventDefault();
+
+        if (!token) {
+            toast.error('Please log in to place an order');
+            navigate('/login');
+            return;
+        }
         if (getCartAmount() === 0){
             toast.error('Your cart is empty');
             return;
         }
-        // Backend wiring later - get final address either from selection or form
         const finalAddress = useNewAddress
             ? formData
             : savedAddresses.find(a => a.id === selectedAddressId);
@@ -64,10 +138,51 @@ const PlaceOrder = () => {
             toast.error('Select or enter an address');
             return;
         }
-        console.log('Placing order with address:', finalAddress, 'payment:', method);
-        toast.success('Order placed');
-        setCartItems({});
-        navigate('/orders');
+
+        const items = buildOrderItems();
+        if (items.length === 0) {
+            toast.error('Your cart is empty');
+            return;
+        }
+
+        const shippingAddress = {
+            addressLine1: finalAddress.street,
+            city: finalAddress.city,
+            state: finalAddress.state,
+            pinCode: finalAddress.zipcode,
+            country: finalAddress.country,
+        };
+
+        setSubmitting(true);
+        try {
+            const order = await createBackendOrder({ items, shippingAddress, token });
+            const orderId = order._id || order.data?._id;
+
+            if (method === 'razorpay') {
+                const rzpOrder = await createRazorpayOrder({ orderId, token });
+                await openRazorpayCheckout({
+                    orderId,
+                    razorpayOrderId: rzpOrder.razorpayOrderId,
+                    amount: rzpOrder.amount,
+                    currency: rzpOrder.currency,
+                    address: finalAddress,
+                });
+                toast.success('Payment successful');
+            } else if (method === 'cod') {
+                toast.success('Order placed (Cash on delivery)');
+            } else {
+                toast.info(`${method.toUpperCase()} payment is not yet configured`);
+                return;
+            }
+
+            setCartItems({});
+            navigate('/orders');
+        } catch (err) {
+            const message = err.response?.data?.message || err.message || 'Something went wrong';
+            toast.error(message);
+        } finally {
+            setSubmitting(false);
+        }
     }
 
     return (
@@ -155,8 +270,8 @@ const PlaceOrder = () => {
                         </div>
                     </div>
                     <div className='w-full text-end mt-8'>
-                        <button type='submit' className='bg-ink text-paper px-16 py-3 text-sm hover:bg-navy transition-colors'>
-                            PLACE ORDER
+                        <button type='submit' disabled={submitting} className='bg-ink text-paper px-16 py-3 text-sm hover:bg-navy transition-colors disabled:opacity-60 disabled:cursor-not-allowed'>
+                            {submitting ? 'PROCESSING...' : 'PLACE ORDER'}
                         </button>
                     </div>
                 </div>
