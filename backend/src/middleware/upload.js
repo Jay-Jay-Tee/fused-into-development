@@ -9,33 +9,36 @@ cloudinary.config({
     api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-const makeStorage = (folder) => new CloudinaryStorage({
+const makeStorage = () => new CloudinaryStorage({
     cloudinary,
-    params: {
-        folder,
+    params: async (req) => ({
+        folder: req.uploadFolder,
         allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
-        transformation:  [{ quality: 'auto', fetch_format: 'auto' }],
-    },
+        transformation: [{ quality: 'auto', fetch_format: 'auto' }],
+    }),
 });
 
 const fileFilter = (req, file, multerCallback) => {
     const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/webp'];
-
     if (allowedMimeTypes.includes(file.mimetype)) {
         multerCallback(null, true);
     } else {
-        const err = new AppError('Only JPEG, PNG, and WebP images are allowed', 400);
-        multerCallback(err);
+        multerCallback(new AppError('Only JPEG, PNG, and WebP images are allowed', 400));
     }
 };
 
 const limits = { fileSize: 5 * 1024 * 1024 };
 
-const uploadSingle   = multer({ storage: makeStorage('products'),       fileFilter, limits }).single('image');
-const uploadMultiple = multer({ storage: makeStorage('products'),       fileFilter, limits }).array('images', 5);
-const uploadFields   = multer({ storage: makeStorage('vendor-profile'), fileFilter, limits }).fields([
+// Single shared storage instance — folder is driven by req.uploadFolder at request time.
+const storage = makeStorage();
+
+// Products: up to 5 images. Controller sets req.uploadFolder before this runs.
+const uploadMultiple = multer({ storage, fileFilter, limits }).array('images', 5);
+
+// Vendor profile: logo + bannerImage. Controller sets req.uploadFolder before this runs.
+const uploadFields = multer({ storage, fileFilter, limits }).fields([
     { name: 'logo',        maxCount: 1 },
     { name: 'bannerImage', maxCount: 1 },
 ]);
 
-export { uploadSingle, uploadMultiple, uploadFields };
+export { uploadMultiple, uploadFields };

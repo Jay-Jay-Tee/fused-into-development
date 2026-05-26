@@ -2,46 +2,44 @@ import express from 'express';
 const router = express.Router();
 
 import { productController } from '../controller/productController.js';
-import { asyncHandler }      from '../middleware/asyncHandler.js';
-import { auth }              from '../middleware/auth.js';
-import { role }              from '../middleware/role.js';
-import { uploadMultiple }    from '../middleware/upload.js';
+import { asyncHandler } from '../middleware/asyncHandler.js';
+import { auth } from '../middleware/auth.js';
+import { role } from '../middleware/role.js';
+import { uploadMultiple } from '../middleware/upload.js';
 
-
-// ----- PROTECTED ROUTES -------------------------------
-
-router.get('/my', 
-    auth,
-    role('vendor'),
-    asyncHandler(productController.getMyProducts)
+// ----- PROTECTED ROUTES -----------------------------------
+router.get(
+  '/my',
+  auth,
+  role('vendor'),
+  asyncHandler(productController.getMyProducts)
 );
 
 // ----- PUBLIC ROUTES (no auth required) ------------------
-
-// get all products
 router.get('/', asyncHandler(productController.getProducts));
-// get product by id
 router.get('/:id', asyncHandler(productController.getProductById));
 
 // ----- PROTECTED ROUTES -----------------------------------
 
-// add product
+
 router.post(
   '/',
   auth,
   role('vendor'),
+  asyncHandler(productController.resolveProductFolder),
   uploadMultiple,
   asyncHandler(productController.createProduct)
 );
-// update product by id
+
 router.put(
   '/:id',
   auth,
   role('vendor'),
+  asyncHandler(productController.resolveProductFolder),
   uploadMultiple,
   asyncHandler(productController.updateProduct)
 );
-// delete product by id
+
 router.delete(
   '/:id',
   auth,

@@ -15,7 +15,6 @@ export const getProductsService = async (query) => {
         if (query.maxPrice) filter.price.$lte = Number(query.maxPrice);
     }
     if (query.minRating) filter.averageRating = { $gte: Number(query.minRating) };
-
     if (query.search) filter.$text = { $search: query.search };
 
     const products = await Product.find(filter)
@@ -29,14 +28,9 @@ export const getProductsService = async (query) => {
 
     return {
         products,
-        pagination: {
-            total,
-            page,
-            pages: Math.ceil(total / limit),
-        },
+        pagination: { total, page, pages: Math.ceil(total / limit) },
     };
 };
-
 
 // returns full product detail including vendor info and category
 export const getProductByIdService = async ({ productId }) => {
@@ -51,22 +45,14 @@ export const getProductByIdService = async ({ productId }) => {
     return product;
 };
 
-
-
-// images are Cloudinary URLs - upload handled by upload middleware
-// before this service is called, URLs passed in via productData
-export const createProductService = async ({ userId, productData }) => {
-    const vendor = await Vendor.findOne({ user: userId });
-
-    if (!vendor) {
-        throw new AppError("Vendor profile not found", 404);
-    }
-
-    if (!vendor.isApproved) {
-        throw new AppError("Vendor account is not approved yet", 403);
-    }
-
+export const createProductService = async ({ vendor, productData }) => {
     const { name, description, images, price, stock, category } = productData;
+
+    // Reject duplicate product names within the same vendor's catalogue.
+    const existing = await Product.findOne({ vendor: vendor._id, name });
+    if (existing)
+        throw new AppError(`You already have a product named "${name}"`, 409);
+
     const product = await Product.create({
         name, description, images, price, stock, category,
         vendor: vendor._id,
@@ -75,24 +61,14 @@ export const createProductService = async ({ userId, productData }) => {
     return product.toObject();
 };
 
-// Vendor updates one of their own products
-// Ownership check: product.vendor must match the requesting vendor's _id
-export const updateProductService = async ({ userId, productId, updateData }) => {
-    const vendor = await Vendor.findOne({ user: userId });
-
-    if (!vendor) {
-        throw new AppError("Vendor profile not found", 404);
-    }
-
+export const updateProductService = async ({ vendor, productId, updateData }) => {
     const product = await Product.findById(productId);
 
-    if (!product) {
+    if (!product)
         throw new AppError("Product not found", 404);
-    }
 
-    if (product.vendor.toString() !== vendor._id.toString()) {
+    if (product.vendor.toString() !== vendor._id.toString())
         throw new AppError("Not authorised to edit this product", 403);
-    }
 
     const allowed = ['name', 'description', 'images', 'price', 'stock', 'category'];
     for (const key of allowed) {
@@ -106,19 +82,16 @@ export const updateProductService = async ({ userId, productId, updateData }) =>
 export const deleteProductService = async ({ userId, productId }) => {
     const vendor = await Vendor.findOne({ user: userId });
 
-    if (!vendor) {
+    if (!vendor)
         throw new AppError("Vendor profile not found", 404);
-    }
 
     const product = await Product.findById(productId);
 
-    if (!product) {
+    if (!product)
         throw new AppError("Product not found", 404);
-    }
 
-    if (product.vendor.toString() !== vendor._id.toString()) {
+    if (product.vendor.toString() !== vendor._id.toString())
         throw new AppError("Not authorised to delete this product", 403);
-    }
 
     product.isActive = false;
     await product.save();
@@ -129,9 +102,8 @@ export const deleteProductService = async ({ userId, productId }) => {
 export const getMyProductsService = async ({ userId }) => {
     const vendor = await Vendor.findOne({ user: userId });
 
-    if (!vendor) {
+    if (!vendor)
         throw new AppError("Vendor profile not found", 404);
-    }
 
     const products = await Product.find({ vendor: vendor._id })
         .populate("vendor", "storeName averageRating")
