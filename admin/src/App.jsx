@@ -7,6 +7,8 @@ import RefundQueue from './pages/RefundQueue'
 import Categories from './pages/Categories'
 import Commission from './pages/Commission'
 import Analytics from './pages/Analytics'
+import Users from './pages/Users'
+import Orders from './pages/Orders'
 import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import NotFound from './pages/NotFound'
@@ -33,6 +35,8 @@ const App = () => {
             <Route path='/refunds' element={<RefundQueue/>}/>
             <Route path='/categories' element={<Categories/>}/>
             <Route path='/commission' element={<Commission/>}/>
+            <Route path='/users' element={<Users/>}/>
+            <Route path='/orders' element={<Orders/>}/>
             <Route path='*' element={<NotFound/>}/>
           </Routes>
         </div>

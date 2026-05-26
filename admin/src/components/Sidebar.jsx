@@ -29,6 +29,14 @@ const Sidebar = () => {
                 <p className='hidden md:block'>Commission</p>
             </NavLink>
 
+            <NavLink to='/users' className={linkClass}>
+                <p className='hidden md:block'>Users</p>
+            </NavLink>
+
+            <NavLink to='/orders' className={linkClass}>
+                <p className='hidden md:block'>Orders</p>
+            </NavLink>
+
         </div>
     </div>
   )
