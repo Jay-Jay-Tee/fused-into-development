@@ -41,4 +41,4 @@ const uploadFields = multer({ storage, fileFilter, limits }).fields([
     { name: 'bannerImage', maxCount: 1 },
 ]);
 
-export { uploadMultiple, uploadFields };
+export { uploadMultiple, uploadFields, cloudinary };
