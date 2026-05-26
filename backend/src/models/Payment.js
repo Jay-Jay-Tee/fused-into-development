@@ -8,7 +8,7 @@ const paymentSchema = new mongoose.Schema(
         },
         method: {
             type: String,
-            enum: ["bank_transfer", "razorpay", "upi"],
+            enum: ["bank_transfer", "razorpay", "upi", "cashfree"],
             required: true
         },
         transactionType: {
