@@ -16,6 +16,7 @@ import Orders from './pages/Orders'
 import Wishlist from './pages/Wishlist'
 import Profile from './pages/Profile'
 import VendorShop from './pages/VendorShop'
+import PrivacyPolicy from './pages/PrivacyPolicy'
 import SearchBar from './components/SearchBar'
 import Footer from './components/Footer'
 
@@ -38,6 +39,7 @@ const App = () => {
             <Route path='/wishlist' element={<Wishlist/>} />
             <Route path='/profile' element={<Profile/>} />
             <Route path='/vendor/:vendorName' element={<VendorShop/>} />
+            <Route path='/privacy-policy' element={<PrivacyPolicy/>} />
             <Route path="*" element={<NotFound />} />
         </Routes>
         <Footer/>

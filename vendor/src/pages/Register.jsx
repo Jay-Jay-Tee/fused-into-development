@@ -11,6 +11,7 @@ const Register = () => {
         // Step 1 - personal info
         firstName: '',
         lastName: '',
+        userName: '',
         email: '',
         password: '',
         phone: '',
@@ -82,6 +83,7 @@ const Register = () => {
                                 <input required onChange={onChangeHandler} name='firstName' value={formData.firstName} type='text' placeholder='First name' className='flex-1 px-3 py-2 border border-line outline-none focus:border-navy bg-paper'/>
                                 <input required onChange={onChangeHandler} name='lastName' value={formData.lastName} type='text' placeholder='Last name' className='flex-1 px-3 py-2 border border-line outline-none focus:border-navy bg-paper'/>
                             </div>
+                            <input required onChange={onChangeHandler} name='userName' value={formData.userName} type='text' placeholder='Username (no spaces)' pattern='[a-zA-Z0-9_]+' title='Letters, numbers, and underscores only' className='px-3 py-2 border border-line outline-none focus:border-navy bg-paper'/>
                             <input required onChange={onChangeHandler} name='email' value={formData.email} type='email' placeholder='Email' className='px-3 py-2 border border-line outline-none focus:border-navy bg-paper'/>
                             <input required onChange={onChangeHandler} name='password' value={formData.password} type='password' placeholder='Password (min 8 characters)' minLength={8} className='px-3 py-2 border border-line outline-none focus:border-navy bg-paper'/>
                             <input required onChange={onChangeHandler} name='phone' value={formData.phone} type='tel' placeholder='10-digit phone number' pattern='[6-9][0-9]{9}' title='Indian mobile number starts with 6, 7, 8, or 9 and has 10 digits' className='px-3 py-2 border border-line outline-none focus:border-navy bg-paper'/>

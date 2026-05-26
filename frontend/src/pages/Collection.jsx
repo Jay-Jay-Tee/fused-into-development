@@ -10,7 +10,7 @@ import { formatINR } from '../utils/money'
 import VendorMap from '../components/VendorMap'
 
 const Collection = () => {
-    const {products, search, showSearch} = useContext(ShopContext);
+    const {products, productsLoading, search, showSearch} = useContext(ShopContext);
     //delay
     const debouncedSearch = useDebounce(search, 400);
     const [expandedTerms, setExpandedTerms] = useState([]);
@@ -26,7 +26,6 @@ const Collection = () => {
     const [minRating, setMinRating] = useState(0);
     const [currentPage, setCurrentPage] = useState(1);
     const [view, setView] = useState('grid');
-    const [loading, setLoading] = useState(true);
     const productsPerPage = 8;
     const toggleCategory=(e)=>{
         if (category.includes(e.target.value)){
@@ -147,14 +146,6 @@ const Collection = () => {
         }
     }
 
-    useEffect(() => {
-
-        if (products.length > 0) {
-            setLoading(false);
-        }
-
-    }, [products]);
-
     useEffect(()=>{
         applyFilter();
     },[
@@ -256,14 +247,14 @@ const Collection = () => {
                         ) : (
                             <>
                                 <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 gap-y-6'>
-                                    {loading
+                                    {productsLoading
                                         ? [...Array(productsPerPage)].map((_, i) => <ProductCardSkeleton key={i} />)
                                         : currentProducts.map((item, index) => (
                                             <ProductItem key={index} id={item._id} image={item.image[0]} name={item.name} price={item.price} vendor={item.vendor} location={item.location}/>
                                         ))
                                     }
                                 </div>
-                                {!loading && filterProducts.length===0 && (
+                                {!productsLoading && filterProducts.length===0 && (
                                     <div className='text-center py-20 text-ink-soft'>
                                         <p>No products match your filters.</p>
                                     </div>

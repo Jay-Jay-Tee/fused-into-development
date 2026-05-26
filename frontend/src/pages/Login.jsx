@@ -27,8 +27,9 @@ const Login = () => {
                 setCurrentState('Login');
             } else {
                 const res = await axios.post(`${API}/auth/login`, { email, password });
-                const { accessToken } = res.data;
+                const { accessToken, refreshToken } = res.data;
                 localStorage.setItem('token', accessToken);
+                localStorage.setItem('refreshToken', refreshToken);
                 setToken(accessToken);
                 navigate('/');
             }
@@ -49,7 +50,7 @@ const Login = () => {
                 <>
                     <input onChange={(e)=>setName(e.target.value)} value={name} type='text' className='w-full px-3 py-2 border border-line outline-none focus:border-navy' placeholder='Name' required/>
                     <input onChange={(e)=>setUserName(e.target.value)} value={userName} type='text' className='w-full px-3 py-2 border border-line outline-none focus:border-navy' placeholder='Username' required/>
-                    <input onChange={(e)=>setPhone(e.target.value)} value={phone} type='tel' className='w-full px-3 py-2 border border-line outline-none focus:border-navy' placeholder='Phone' required/>
+                    <input onChange={(e)=>setPhone(e.target.value)} value={phone} type='tel' className='w-full px-3 py-2 border border-line outline-none focus:border-navy' placeholder='Phone (optional)'/>
                 </>
             )}
             <input onChange={(e)=>setEmail(e.target.value)} value={email} type='email' className='w-full px-3 py-2 border border-line outline-none focus:border-navy' placeholder='Email' required/>

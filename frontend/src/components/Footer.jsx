@@ -1,4 +1,5 @@
 import React from 'react'
+import { Link } from 'react-router-dom'
 import { assets } from '../assets/assets'
 
 const Footer = () => {
@@ -14,23 +15,22 @@ const Footer = () => {
             <div>
                 <p className='text-xl font-medium mb-5 text-ink'>COMPANY</p>
                 <ul className='flex flex-col gap-1 text-ink-soft'>
-                    <li className='cursor-pointer hover:text-ink'>Home</li>
-                    <li className='cursor-pointer hover:text-ink'>About us</li>
-                    <li className='cursor-pointer hover:text-ink'>Delivery</li>
-                    <li className='cursor-pointer hover:text-ink'>Privacy policy</li>
+                    <li><Link to='/' className='hover:text-ink'>Home</Link></li>
+                    <li><Link to='/about' className='hover:text-ink'>About us</Link></li>
+                    <li><Link to='/privacy-policy' className='hover:text-ink'>Privacy policy</Link></li>
                 </ul>
             </div>
             <div>
                 <p className='text-xl font-medium mb-5 text-ink'>GET IN TOUCH</p>
                 <ul className='flex flex-col gap-1 text-ink-soft'>
                     <li>+91 98765 43210</li>
-                    <li>hello@vendorhub.in</li>
+                    <li><Link to='/contact' className='hover:text-ink'>Contact us</Link></li>
                 </ul>
             </div>
         </div>
         <div>
             <hr className='border-line'/>
-            <p className='py-5 text-sm text-center text-ink-soft'>Copyright 2026 @ vendorhub.in — All rights reserved.</p>
+            <p className='py-5 text-sm text-center text-ink-soft'>Copyright 2026 @ VendorHub - All rights reserved.</p>
         </div>
     </div>
   )

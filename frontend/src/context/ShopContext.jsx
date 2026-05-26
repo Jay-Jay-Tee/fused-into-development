@@ -1,6 +1,7 @@
 import React, { createContext, useState, useMemo, useEffect } from 'react'
 import { toast } from 'react-toastify'
 import axios from 'axios'
+import api from '../api/axiosInstance'
 
 export const ShopContext = createContext();
 
@@ -25,12 +26,22 @@ const ShopContextProvider = (props) => {
     const [cartItems, setCartItems] = useState({});
     const [wishlist, setWishlist] = useState([]);
     const [token, setToken] = useState(localStorage.getItem('token') || null);
+
+    useEffect(() => {
+        const onStorage = (e) => {
+            if (e.key === 'token') setToken(e.newValue);
+        };
+        window.addEventListener('storage', onStorage);
+        return () => window.removeEventListener('storage', onStorage);
+    }, []);
     const [products, setProducts] = useState([]);
+    const [productsLoading, setProductsLoading] = useState(true);
 
     useEffect(() => {
         axios.get(`${API}/products?limit=50`)
             .then(res => setProducts(res.data.products.map(normalizeProduct)))
-            .catch(() => {});
+            .catch(() => {})
+            .finally(() => setProductsLoading(false));
     }, []);
 
     useEffect(() => {
@@ -39,13 +50,12 @@ const ShopContextProvider = (props) => {
             setCartItems({});
             return;
         }
-        const headers = { Authorization: `Bearer ${token}` };
 
-        axios.get(`${API}/wishlist`, { headers })
+        api.get('/wishlist')
             .then(res => setWishlist(res.data.items.map(i => i.product._id.toString())))
             .catch(() => {});
 
-        axios.get(`${API}/cart`, { headers })
+        api.get('/cart')
             .then(res => {
                 const cartData = {};
                 for (const item of res.data.items) {
@@ -67,13 +77,9 @@ const ShopContextProvider = (props) => {
 
         try {
             if (inWishlist) {
-                await axios.delete(`${API}/wishlist/items/${itemId}`, {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
+                await api.delete(`/wishlist/items/${itemId}`);
             } else {
-                await axios.post(`${API}/wishlist/items`, { productId: itemId }, {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
+                await api.post('/wishlist/items', { productId: itemId });
             }
         } catch {
             setWishlist(prev =>
@@ -85,6 +91,7 @@ const ShopContextProvider = (props) => {
 
     const logout = () => {
         localStorage.removeItem('token');
+        localStorage.removeItem('refreshToken');
         setToken(null);
         setWishlist([]);
         setCartItems({});
@@ -107,9 +114,7 @@ const ShopContextProvider = (props) => {
 
         if (!token) return;
         try {
-            await axios.post(`${API}/cart/items`, { productId: itemId, quantity }, {
-                headers: { Authorization: `Bearer ${token}` },
-            });
+            await api.post('/cart/items', { productId: itemId, quantity });
         } catch {
             // local state intact, backend out of sync — reconciles on next load
         }
@@ -137,13 +142,9 @@ const ShopContextProvider = (props) => {
         if (!token) return;
         try {
             if (quantity === 0) {
-                await axios.delete(`${API}/cart/items/${itemId}`, {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
+                await api.delete(`/cart/items/${itemId}`);
             } else {
-                await axios.put(`${API}/cart/items/${itemId}`, { quantity }, {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
+                await api.put(`/cart/items/${itemId}`, { quantity });
             }
         } catch {
             // local state intact
@@ -169,6 +170,7 @@ const ShopContextProvider = (props) => {
 
     const value = useMemo(() => ({
         products,
+        productsLoading,
         currency,
         delivery_fee,
         search, setSearch,
@@ -181,7 +183,7 @@ const ShopContextProvider = (props) => {
         wishlist, toggleWishlist,
         token, setToken,
         logout,
-    }), [search, showSearch, cartItems, wishlist, token, products]);
+    }), [search, showSearch, cartItems, wishlist, token, products, productsLoading]);
 
     return (
         <ShopContext.Provider value={value}>
