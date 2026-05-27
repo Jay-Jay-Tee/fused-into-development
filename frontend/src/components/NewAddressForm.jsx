@@ -28,7 +28,7 @@ const NewAddressForm = ({
                 onClick={onBack}
                 className='text-sm text-ink-soft hover:text-ink underline text-left mb-2'
             >
-                ← Use a saved address
+                &lt; Use a saved address
             </button>
         )}
         <div className='flex gap-3'>

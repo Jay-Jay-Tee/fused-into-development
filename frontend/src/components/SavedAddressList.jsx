@@ -11,7 +11,7 @@ const AddressCard = ({ addr, index, selected, onClick }) => (
                 <p className='text-xs font-medium tracking-wider text-ink-soft mb-1'>ADDRESS {index + 1}</p>
                 <p className='font-medium text-sm'>{addr.firstName} {addr.lastName}</p>
                 <p className='text-sm text-ink-soft'>{addr.street}, {addr.city}, {addr.state} {addr.pincode}</p>
-                <p className='text-sm text-ink-soft mt-1'>📞 {addr.phone}</p>
+                <p className='text-sm text-ink-soft mt-1'>Ph: {addr.phone}</p>
             </div>
         </div>
     </div>

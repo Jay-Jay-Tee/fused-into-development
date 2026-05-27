@@ -63,7 +63,7 @@ const Categories = () => {
     const deleteCategory = async (id) => {
         const cat = categories.find(c => c._id === id);
         if (cat.productCount > 0){
-            toast.error(`Can't delete — ${cat.productCount} product(s) in this category`);
+            toast.error(`Can't delete  -  ${cat.productCount} product(s) in this category`);
             return;
         }
         const token = localStorage.getItem('token');
@@ -111,7 +111,7 @@ const Categories = () => {
         if (!cat) return;
         const sub = cat.subcategories.find(s => s._id === subId);
         if (sub.productCount > 0){
-            toast.error(`Can't delete — ${sub.productCount} product(s) in this subcategory`);
+            toast.error(`Can't delete  -  ${sub.productCount} product(s) in this subcategory`);
             return;
         }
         const token = localStorage.getItem('token');
@@ -164,9 +164,9 @@ const Categories = () => {
                         <div className='flex items-center justify-between p-4 border-b border-line'>
                             <div>
                                 <p className='font-medium'>{cat.name}</p>
-                                <p className='text-xs text-ink-soft mt-1'>/{cat.slug} · {cat.productCount} products</p>
+                                <p className='text-xs text-ink-soft mt-1'>/{cat.slug}  -  {cat.productCount} products</p>
                             </div>
-                            <button onClick={()=>deleteCategory(cat._id)} className='text-lg cursor-pointer hover:text-brick transition-colors'>×</button>
+                            <button onClick={()=>deleteCategory(cat._id)} className='text-lg cursor-pointer hover:text-brick transition-colors'>x</button>
                         </div>
 
                         {/* Subcategories */}
@@ -176,7 +176,7 @@ const Categories = () => {
                                     <div key={sub._id} className='flex items-center gap-2 border border-line px-3 py-1 text-sm bg-paper'>
                                         <span>{sub.name}</span>
                                         <span className='text-xs text-ink-soft'>({sub.productCount})</span>
-                                        <button onClick={()=>deleteSubCategory(cat._id, sub._id)} className='text-ink-soft hover:text-brick'>×</button>
+                                        <button onClick={()=>deleteSubCategory(cat._id, sub._id)} className='text-ink-soft hover:text-brick'>x</button>
                                     </div>
                                 ))}
                             </div>

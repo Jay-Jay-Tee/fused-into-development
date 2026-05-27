@@ -57,20 +57,12 @@ const refundSchema = new mongoose.Schema(
     }
 );
 
-refundSchema.pre("validate", function (next) {
-    if (this.refundScope === "item" && !this.item) {
-        return next(
-            new Error("Item refund must include the refunded order item")
-        );
-    }
+refundSchema.pre("validate", async function () {
+    if (this.refundScope === "item" && !this.item)
+        throw new Error("Item refund must include the refunded order item");
 
-    if (this.refundScope === "order" && this.item) {
-        return next(
-            new Error("Order refund cannot include an item payload")
-        );
-    }
-
-    next();
+    if (this.refundScope === "order" && this.item)
+        throw new Error("Order refund cannot include an item payload");
 });
 
 const Refund = mongoose.model("Refund", refundSchema);

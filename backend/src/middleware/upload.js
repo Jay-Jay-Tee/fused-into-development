@@ -29,7 +29,7 @@ const fileFilter = (req, file, multerCallback) => {
 
 const limits = { fileSize: 5 * 1024 * 1024 };
 
-// Single shared storage instance — folder is driven by req.uploadFolder at request time.
+// Single shared storage instance  -  folder is driven by req.uploadFolder at request time.
 const storage = makeStorage();
 
 // Products: up to 5 images. Controller sets req.uploadFolder before this runs.

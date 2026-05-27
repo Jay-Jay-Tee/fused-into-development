@@ -96,12 +96,12 @@ const Earnings = () => {
 
             {/* Revenue chart */}
             <div className='border border-line p-6 mb-8 bg-paper'>
-                <p className='text-sm font-medium mb-4'>Revenue — last 7 days</p>
+                <p className='text-sm font-medium mb-4'>Revenue  -  last 7 days</p>
                 <ResponsiveContainer width='100%' height={280}>
                     <LineChart data={chartData}>
                         <CartesianGrid strokeDasharray='3 3' stroke='#E8E2D3'/>
                         <XAxis dataKey='day' stroke='#5C5A56' style={{ fontSize: '12px' }}/>
-                        <YAxis stroke='#5C5A56' style={{ fontSize: '12px' }} tickFormatter={(v)=>`₹${(v/1000).toFixed(0)}k`}/>
+                        <YAxis stroke='#5C5A56' style={{ fontSize: '12px' }} tickFormatter={(v)=>`Rs. ${(v/1000).toFixed(0)}k`}/>
                         <Tooltip
                             contentStyle={{ backgroundColor: '#1A1A1A', border: 'none', color: '#FDFAF1' }}
                             labelStyle={{ color: '#FDFAF1' }}
@@ -114,7 +114,7 @@ const Earnings = () => {
 
             {/* Top selling products bar chart */}
             <div className='border border-line p-6 mb-8 bg-paper'>
-                <p className='text-sm font-medium mb-4'>Top selling products — units sold</p>
+                <p className='text-sm font-medium mb-4'>Top selling products  -  units sold</p>
                 <ResponsiveContainer width='100%' height={220}>
                     <BarChart data={topProducts} layout='vertical' margin={{ left: 16, right: 16 }}>
                         <CartesianGrid strokeDasharray='3 3' stroke='#E8E2D3' horizontal={false}/>

@@ -149,7 +149,7 @@ const Collection = () => {
                 <p className='text-sm text-ink-soft mb-4'>
                     {view === 'map'
                         ? `${[...new Set(filterProducts.map(p=>p.vendorId).filter(Boolean))].length} vendor(s)`
-                        : `Showing ${filterProducts.length===0 ? 0 : indexOfFirst+1}–${Math.min(indexOfLast,filterProducts.length)} of ${filterProducts.length} products`
+                        : `Showing ${filterProducts.length===0 ? 0 : indexOfFirst+1}-${Math.min(indexOfLast,filterProducts.length)} of ${filterProducts.length} products`
                     }
                 </p>
 

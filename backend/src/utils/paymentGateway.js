@@ -35,12 +35,12 @@ export const createGatewaySession = async ({ order, paymentType = "razorpay" }) 
         const cashfreeOrderId = buildCashfreeOrderId(order._id);
         const { data } = await Cashfree.PGCreateOrder(CASHFREE_API_VERSION, {
             order_id: cashfreeOrderId,
-            order_amount: Number(order.totalAmount.toFixed(2)), // already in rupees
+            order_amount: Number((order.totalAmount / 100).toFixed(2)), // totalAmount is in paise; Cashfree expects rupees
             order_currency: "INR",
             customer_details: {
                 customer_id: order.buyer.toString(),
                 customer_email: order.buyerEmail || "customer@example.com",
-                customer_phone: order.buyerPhone || "9999999999",
+                customer_phone: order.shippingAddress?.phone || order.buyerPhone || "9999999999",
             },
         });
 
@@ -54,7 +54,7 @@ export const createGatewaySession = async ({ order, paymentType = "razorpay" }) 
     }
 
     const razorpayOrder = await getRazorpay().orders.create({
-        amount: Math.round(order.totalAmount * 100), // rupees → paise
+        amount: Math.round(order.totalAmount), // already in paise
         currency: "INR",
         receipt: `order_${order._id}`,
     });
@@ -158,7 +158,7 @@ export const createGatewayRefund = async ({ payment, refund, orderId }) => {
             CASHFREE_API_VERSION,
             buildCashfreeOrderId(resolvedOrderId),
             {
-                refund_amount: Number(refund.refundAmount.toFixed(2)), // already in rupees
+                refund_amount: Number((refund.refundAmount / 100).toFixed(2)), // refundAmount is in paise; Cashfree expects rupees
                 refund_id: refundId,
                 refund_note: refund.reason,
             }
@@ -174,7 +174,7 @@ export const createGatewayRefund = async ({ payment, refund, orderId }) => {
 
     const razorpayRefund = await getRazorpay().payments.refund(
         payment.transactionId,
-        { amount: Math.round(refund.refundAmount * 100) } // rupees → paise
+        { amount: Math.round(refund.refundAmount) } // already in paise
     );
 
     return { gatewayRefundId: razorpayRefund.id };

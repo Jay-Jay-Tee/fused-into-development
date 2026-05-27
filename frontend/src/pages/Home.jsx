@@ -12,7 +12,7 @@ import ProductCardSkeleton from '../components/ProductCardSkeleton'
 import { ShopContext } from '../context/ShopContext'
 import { getRecommendations } from '../api/ai'
 
-const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
+import { API } from '../api/config.js'
 
 const FeaturedCategories = () => {
     const [categories, setCategories] = useState([]);
@@ -78,6 +78,26 @@ const RecommendedSection = () => {
     );
 };
 
+const VendorCTA = () => (
+    <div className='my-16 border border-line bg-paper'>
+        <div className='flex flex-col md:flex-row items-center justify-between gap-6 px-8 py-10'>
+            <div>
+                <p className='text-xs text-ink-soft tracking-wider mb-2'>FOR SELLERS</p>
+                <h2 className='text-2xl font-medium mb-2'>Sell on VendorHub</h2>
+                <p className='text-ink-soft text-sm max-w-md'>Have a small business? Reach thousands of buyers in your city. Setup takes 5 minutes  -  list your first product today.</p>
+            </div>
+            <a
+                href={`${import.meta.env.VITE_VENDOR_URL || 'http://localhost:5174'}/register`}
+                target='_blank'
+                rel='noreferrer'
+                className='shrink-0 bg-ink text-paper px-8 py-3 text-sm hover:bg-navy transition-colors'
+            >
+                Become a Vendor
+            </a>
+        </div>
+    </div>
+);
+
 const Home = () => {
   return (
     <div>
@@ -87,6 +107,7 @@ const Home = () => {
         <RecommendedSection />
         <BestSeller />
         <OurPolicy/>
+        <VendorCTA />
         <NewsletterBox/>
     </div>
   )

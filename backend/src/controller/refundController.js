@@ -19,7 +19,8 @@ const raiseRefund = async (req, res) => {
 };
 
 const getAllRefunds = async (req, res) => {
-    const data = await getAllRefundsService({ status: req.query.status });
+    const { status, page, limit } = req.query;
+    const data = await getAllRefundsService({ status, page, limit });
     return res.status(200).json(data);
 };
 

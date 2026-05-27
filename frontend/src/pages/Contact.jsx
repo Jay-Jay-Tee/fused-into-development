@@ -27,9 +27,14 @@ const Contact = () => {
                 </p>
                 <p className='font-semibold text-xl text-ink'>Sell on VendorHub</p>
                 <p className='text-ink-soft'>Have a small business and want to reach customers in your city? We're onboarding vendors every week.</p>
-                <button className='border border-ink px-8 py-4 text-sm hover:bg-ink hover:text-paper transition-colors'>
+                <a
+                    href={`${import.meta.env.VITE_VENDOR_URL || 'http://localhost:5174'}/register`}
+                    target='_blank'
+                    rel='noreferrer'
+                    className='inline-block border border-ink px-8 py-4 text-sm hover:bg-ink hover:text-paper transition-colors'
+                >
                     Become a Vendor
-                </button>
+                </a>
             </div>
         </div>
 

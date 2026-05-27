@@ -48,7 +48,7 @@ const triggerRefund = async (req, res) => {
 };
 
 const getPaymentHistoryById = async (req, res) => {
-    const data = await getPaymentsByOrderService({ orderId: req.params.orderId });
+    const data = await getPaymentsByOrderService({ orderId: req.params.orderId, userId: req.user.id });
     res.status(200).json({ success: true, data });
 };
 

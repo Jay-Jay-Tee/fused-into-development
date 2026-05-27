@@ -54,7 +54,7 @@ const Cart = () => {
                             <div className='bg-paper border-b border-line px-4 py-3 flex items-center justify-between'>
                                 <div>
                                     <p className='text-xs text-ink-soft'>SOLD BY</p>
-                                    <p className='font-medium'>{vendor} <span className='text-ink-soft text-sm font-normal'>· 📍 {groupedByVendor[vendor].location}</span></p>
+                                    <p className='font-medium'>{vendor}</p>
                                 </div>
                                 <p className='text-xs text-ink-soft'>{groupedByVendor[vendor].items.length} item(s)</p>
                             </div>

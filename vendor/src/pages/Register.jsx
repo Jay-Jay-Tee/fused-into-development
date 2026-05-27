@@ -78,19 +78,17 @@ const Register = () => {
         <div className='min-h-screen flex items-center justify-center px-4 py-10'>
             <div className='w-full max-w-2xl border border-line bg-paper p-8 md:p-12'>
 
-                {/* Header */}
                 <div className='mb-8'>
                     <p className='text-xs text-ink-soft tracking-wider mb-2'>SELLER APPLICATION</p>
                     <h1 className='font-display text-3xl md:text-4xl'>Become a vendor</h1>
                     <p className='text-sm text-ink-soft mt-3'>List your products to thousands of buyers. Setup takes 5 minutes.</p>
                 </div>
 
-                {/* Step indicator */}
                 <div className='flex items-center gap-2 mb-8'>
                     {[1,2,3].map((s) => (
                         <React.Fragment key={s}>
                             <div className={`w-8 h-8 flex items-center justify-center text-sm font-medium ${s===step ? 'bg-ink text-paper' : s<step ? 'bg-mustard text-ink' : 'border border-line text-ink-soft'}`}>
-                                {s<step ? '✓' : s}
+                                {s<step ? 'v' : s}
                             </div>
                             {s !== 3 && <div className={`flex-1 h-[1px] ${s<step ? 'bg-mustard' : 'bg-line'}`}></div>}
                         </React.Fragment>
@@ -98,12 +96,11 @@ const Register = () => {
                 </div>
 
                 <p className='text-sm text-ink-soft mb-6'>
-                    Step {step} of 3 — {step===1 ? 'Personal info' : step===2 ? 'Shop details' : 'Bank details'}
+                    Step {step} of 3 - {step===1 ? 'Personal info' : step===2 ? 'Shop details' : 'Bank details'}
                 </p>
 
                 <form onSubmit={step===3 ? submitApplication : nextStep} className='flex flex-col gap-4'>
 
-                    {/* Step 1 */}
                     {step===1 && (
                         <>
                             <div className='flex gap-3'>
@@ -117,18 +114,16 @@ const Register = () => {
                         </>
                     )}
 
-                    {/* Step 2 */}
                     {step===2 && (
                         <>
                             <input required onChange={onChangeHandler} name='shopName' value={formData.shopName} type='text' placeholder='Shop name' className='px-3 py-2 border border-line outline-none focus:border-navy bg-paper'/>
                             <textarea required onChange={onChangeHandler} name='description' value={formData.description} rows={3} placeholder='What do you sell? (1-2 sentences)' className='px-3 py-2 border border-line outline-none focus:border-navy bg-paper'/>
                             <input required onChange={onChangeHandler} name='city' value={formData.city} type='text' placeholder='City' className='px-3 py-2 border border-line outline-none focus:border-navy bg-paper'/>
                             <input onChange={onChangeHandler} name='gstin' value={formData.gstin} type='text' placeholder='GSTIN (optional)' pattern='[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[A-Z0-9]{1}Z[A-Z0-9]{1}' title='15-character GSTIN format' className='px-3 py-2 border border-line outline-none focus:border-navy bg-paper font-mono uppercase'/>
-                            <p className='text-xs text-ink-soft'>GSTIN is required only if you sell more than ₹20 lakhs per year. Skip if not applicable.</p>
+                            <p className='text-xs text-ink-soft'>GSTIN is required only if you sell more than Rs. 20 lakhs per year. Skip if not applicable.</p>
                         </>
                     )}
 
-                    {/* Step 3 */}
                     {step===3 && (
                         <>
                             <input required onChange={onChangeHandler} name='accountName' value={formData.accountName} type='text' placeholder='Account holder name' className='px-3 py-2 border border-line outline-none focus:border-navy bg-paper'/>
@@ -138,7 +133,6 @@ const Register = () => {
                         </>
                     )}
 
-                    {/* Navigation */}
                     <div className='flex justify-between mt-6'>
                         {step > 1 ? (
                             <button type='button' onClick={prevStep} className='px-6 py-2 text-sm border border-line hover:bg-line transition-colors'>

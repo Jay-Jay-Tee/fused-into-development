@@ -54,8 +54,8 @@ const refreshToken = async (req, res) => {
     return res.status(200).json(data);
 };
 
-const logout = (req, res) => {
-    const data = logoutService({ refreshToken: req.body.refreshToken });
+const logout = async (req, res) => {
+    const data = await logoutService({ refreshToken: req.body.refreshToken });
     return res.status(200).json(data);
 };
 

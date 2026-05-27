@@ -21,7 +21,7 @@ const ProductItem = ({id, image, name, price, vendor, vendorId}) => {
                 className='absolute top-2 right-2 z-10 w-8 h-8 bg-paper border border-line flex items-center justify-center hover:bg-mustard transition-colors'
                 aria-label={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
             >
-                <span className={isWishlisted ? 'text-brick' : 'text-ink-soft'}>{isWishlisted ? '♥' : '♡'}</span>
+                <span className={isWishlisted ? 'text-brick' : 'text-ink-soft'}>{isWishlisted ? 'saved' : 'save'}</span>
             </button>
             <div className='overflow-hidden bg-line aspect-[3/4]'>
                 <img className='w-full h-full object-cover group-hover:scale-105 transition-transform duration-300' src={image} alt={name} />

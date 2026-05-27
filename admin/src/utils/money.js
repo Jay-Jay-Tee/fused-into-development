@@ -9,7 +9,7 @@ export const toPaise = (rupees) => {
 }
 
 export const formatINR = (paise) => {
-    if (paise == null) return '₹0';
+    if (paise == null) return 'Rs. 0';
     const rupees = paise / 100;
-    return `₹${rupees.toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
+    return `Rs. ${rupees.toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
 }

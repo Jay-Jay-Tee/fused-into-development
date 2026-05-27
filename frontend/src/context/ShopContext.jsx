@@ -5,7 +5,7 @@ import api from '../api/axiosInstance'
 
 export const ShopContext = createContext();
 
-const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
+import { API } from '../api/config.js'
 
 const normalizeProduct = (p) => ({
     ...p,
@@ -18,8 +18,8 @@ const normalizeProduct = (p) => ({
 });
 
 const ShopContextProvider = (props) => {
-    const currency = '₹';
-    const delivery_fee = 4900;
+    const currency = 'Rs.';
+    const delivery_fee = 0;
     const [search, setSearch] = useState('');
     const [showSearch, setShowSearch] = useState(false);
     const [cartItems, setCartItems] = useState({});
@@ -115,7 +115,7 @@ const ShopContextProvider = (props) => {
         try {
             await api.post('/cart/items', { productId: itemId, quantity });
         } catch {
-            // local state intact, backend out of sync — reconciles on next load
+            // local state intact, backend out of sync - reconciles on next load
         }
     };
 

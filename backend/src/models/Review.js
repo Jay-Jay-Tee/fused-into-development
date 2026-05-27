@@ -41,27 +41,18 @@ const reviewSchema = new mongoose.Schema(
         timestamps: true
     }
 );
-reviewSchema.pre("validate", function (next) {
-
+reviewSchema.pre("validate", async function () {
     const hasProduct = !!this.product;
     const hasVendor = !!this.vendor;
 
     if (hasProduct === hasVendor)
-        return next(
-            new AppError("Review must reference either product or vendor, but not both", 400)
-        );
+        throw new AppError("Review must reference either product or vendor, but not both", 400);
 
     if (this.reviewType === "product" && !hasProduct)
-        return next(
-            new AppError("Product review requires product field", 400)
-        );
+        throw new AppError("Product review requires product field", 400);
 
     if (this.reviewType === "vendor" && !hasVendor)
-        return next(
-            new AppError("Vendor review requires vendor field", 400)
-        );
-
-    next();
+        throw new AppError("Vendor review requires vendor field", 400);
 });
 
 reviewSchema.index({ reviewer: 1, product: 1, reviewType: 1 }, { unique: true, sparse: true });

@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useContext } from 'react'
 import Title from '../components/Title'
 import { toast } from 'react-toastify'
+import { useNavigate } from 'react-router-dom'
 import api from '../api/axiosInstance'
+import { ShopContext } from '../context/ShopContext'
 
 const emptyForm = {
     label: '', firstName: '', lastName: '',
@@ -9,20 +11,42 @@ const emptyForm = {
 };
 
 const Profile = () => {
-    const [addresses, setAddresses]   = useState([]);
-    const [showForm, setShowForm]     = useState(false);
-    const [editingIdx, setEditingIdx] = useState(null); // null = new, number = editing index
-    const [formData, setFormData]     = useState(emptyForm);
-    const [loading, setLoading]       = useState(true);
+    const { logout } = useContext(ShopContext);
+    const navigate = useNavigate();
+    const [addresses, setAddresses]         = useState([]);
+    const [showForm, setShowForm]           = useState(false);
+    const [editingIdx, setEditingIdx]       = useState(null);
+    const [formData, setFormData]           = useState(emptyForm);
+    const [loading, setLoading]             = useState(true);
+    const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
+    const [togglingTwoFactor, setTogglingTwoFactor] = useState(false);
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    const [deletingAccount, setDeletingAccount] = useState(false);
 
     const fetchAddresses = () => {
         api.get('/users/me')
-            .then(res => setAddresses(res.data.user?.addresses || []))
+            .then(res => {
+                setAddresses(res.data.user?.addresses || []);
+                setTwoFactorEnabled(res.data.user?.twoFactorEnabled || false);
+            })
             .catch(() => toast.error('Could not load profile'))
             .finally(() => setLoading(false));
     };
 
     useEffect(() => { fetchAddresses(); }, []);
+
+    const toggleTwoFactor = async () => {
+        setTogglingTwoFactor(true);
+        try {
+            const res = await api.put('/auth/2fa/toggle');
+            setTwoFactorEnabled(res.data.twoFactorEnabled);
+            toast.success(res.data.message);
+        } catch (err) {
+            toast.error(err.response?.data?.message || 'Could not update 2FA setting');
+        } finally {
+            setTogglingTwoFactor(false);
+        }
+    };
 
     const resetForm = () => {
         setFormData(emptyForm);
@@ -78,6 +102,20 @@ const Profile = () => {
         }
     };
 
+    const deleteAccount = async () => {
+        setDeletingAccount(true);
+        try {
+            await api.delete('/users/me');
+            logout();
+            toast.success('Account deleted.');
+            navigate('/');
+        } catch (err) {
+            toast.error(err.response?.data?.message || 'Could not delete account');
+            setDeletingAccount(false);
+            setShowDeleteConfirm(false);
+        }
+    };
+
     if (loading) {
         return (
             <div className='border-t border-line pt-14 text-center py-20 text-ink-soft'>
@@ -90,6 +128,26 @@ const Profile = () => {
         <div className='border-t border-line pt-14'>
             <div className='text-2xl mb-6'>
                 <Title text1={'MY'} text2={'PROFILE'}/>
+            </div>
+
+            <div className='mb-12 border border-line bg-paper p-6'>
+                <div className='flex items-center justify-between'>
+                    <div>
+                        <p className='text-lg font-medium'>Two-Factor Authentication</p>
+                        <p className='text-sm text-ink-soft mt-1'>
+                            {twoFactorEnabled
+                                ? 'Enabled - a verification code will be required at each login.'
+                                : 'Disabled - enable to secure your account with a verification code at login.'}
+                        </p>
+                    </div>
+                    <button
+                        onClick={toggleTwoFactor}
+                        disabled={togglingTwoFactor}
+                        className={`shrink-0 px-5 py-2 text-sm transition-colors disabled:opacity-50 ${twoFactorEnabled ? 'border border-ink hover:bg-line' : 'bg-ink text-paper hover:bg-navy'}`}
+                    >
+                        {togglingTwoFactor ? '...' : (twoFactorEnabled ? 'Disable' : 'Enable')}
+                    </button>
+                </div>
             </div>
 
             <div className='mb-12'>
@@ -122,7 +180,7 @@ const Profile = () => {
                             <p className='text-sm text-ink-soft mt-1'>{addr.street}</p>
                             <p className='text-sm text-ink-soft'>{addr.city}, {addr.state} {addr.pincode}</p>
                             <p className='text-sm text-ink-soft'>{addr.country}</p>
-                            <p className='text-sm text-ink-soft mt-2'>📞 {addr.phone}</p>
+                            <p className='text-sm text-ink-soft mt-2'>Ph: {addr.phone}</p>
                         </div>
                     ))}
                 </div>
@@ -157,6 +215,40 @@ const Profile = () => {
                     </form>
                 )}
             </div>
+            <div className='mb-12 border border-brick/30 bg-paper p-6'>
+                <div className='flex items-center justify-between'>
+                    <div>
+                        <p className='text-lg font-medium text-brick'>Delete Account</p>
+                        <p className='text-sm text-ink-soft mt-1'>Permanently delete your account and all associated data. This cannot be undone.</p>
+                    </div>
+                    {!showDeleteConfirm ? (
+                        <button
+                            onClick={() => setShowDeleteConfirm(true)}
+                            className='shrink-0 px-5 py-2 text-sm border border-brick text-brick hover:bg-brick hover:text-paper transition-colors'
+                        >
+                            Delete account
+                        </button>
+                    ) : (
+                        <div className='flex items-center gap-3 shrink-0'>
+                            <p className='text-sm text-ink-soft'>Are you sure?</p>
+                            <button
+                                onClick={deleteAccount}
+                                disabled={deletingAccount}
+                                className='px-5 py-2 text-sm bg-brick text-paper hover:opacity-80 transition-opacity disabled:opacity-50'
+                            >
+                                {deletingAccount ? 'Deleting...' : 'Yes, delete'}
+                            </button>
+                            <button
+                                onClick={() => setShowDeleteConfirm(false)}
+                                className='px-5 py-2 text-sm border border-line hover:bg-line transition-colors'
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                    )}
+                </div>
+            </div>
+
         </div>
     );
 };
