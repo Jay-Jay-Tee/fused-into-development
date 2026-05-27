@@ -37,6 +37,7 @@ const assertOrderOwnership = (order, userId) => {
 
 const isActiveReservation = (order) =>
     order.orderStatus === "payment_pending" &&
+    order.reservationExpiresAt &&
     order.reservationExpiresAt > new Date() &&
     order.payment?.status === "pending";
 

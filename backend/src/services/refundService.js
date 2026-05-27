@@ -17,7 +17,7 @@ export const createRefundService = async ({ userId, orderId, itemId, reason }) =
     if (order.orderStatus !== "delivered")
         throw new AppError("Refunds can only be raised for delivered orders", 403);
 
-    // Find the specific item within the order by matching product id.
+    // find the specific item within the order by matching product ID
     const item = order.items.find(i => i.product.toString() === itemId);
 
     if (!item)
@@ -88,7 +88,7 @@ export const approveRefundService = async ({ refundId, adminNote }) => {
 
     if (refund.status !== "pending")
         throw new AppError(`Refund is already ${refund.status}`, 400);
-    
+
     refund.status = "approved";
     if (adminNote) refund.adminNote = adminNote;
     await refund.save();

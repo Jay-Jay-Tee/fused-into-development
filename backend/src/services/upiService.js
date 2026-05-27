@@ -78,7 +78,7 @@ export const approveUPIPaymentService = async ({ admin, paymentId }) => {
     if (payment.order) {
         payment.order.orderStatus = "confirmed";
         await payment.order.save();
-    }
+    }   
 
     return payment;
 };

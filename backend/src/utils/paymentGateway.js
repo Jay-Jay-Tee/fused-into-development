@@ -199,17 +199,15 @@ export const persistOrderPayment = async ({ order, method, status, transactionId
         status,
         transactionType: "order",
         user: order.buyer,
+        transactionId,
     };
 
-    if (transactionId)
-        paymentData.transactionId = transactionId;
-
-    const existingPayment = order.payment;
-    const isPopulated = existingPayment?.constructor?.modelName === "Payment";
-    let payment = isPopulated
-        ? existingPayment
-        : existingPayment
-            ? await Payment.findById(existingPayment)
+    const existingRef = order.payment;
+    const isPopulated = existingRef?.constructor?.modelName === "Payment";
+    let payment = isPopulated ?
+        existingRef
+        : existingRef ?
+            await Payment.findById(existingRef)
             : null;
 
     if (!payment) {
@@ -223,18 +221,18 @@ export const persistOrderPayment = async ({ order, method, status, transactionId
         }
 
         if (!payment)
-            throw new AppError("Payment could not be created", 500);
+            throw new AppError("Payment could not be persisted", 500);
 
         await Order.updateOne({ _id: order._id }, { $set: { payment: payment._id } });
         return payment;
     }
 
-    Object.assign(payment, {
-        ...paymentData,
-        gatewayOrderId: undefined,
-        paymentSessionId: undefined,
-    });
-
+    payment.amount = paymentData.amount;
+    payment.method = paymentData.method;
+    payment.status = paymentData.status;
+    payment.transactionId = paymentData.transactionId;
+    payment.gatewayOrderId = undefined;
+    payment.paymentSessionId = undefined;
     await payment.save();
     return payment;
 };
