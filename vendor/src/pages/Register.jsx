@@ -1,10 +1,14 @@
 import React, { useState } from 'react'
 import { toast } from 'react-toastify'
 import { useNavigate } from 'react-router-dom'
+import axios from 'axios'
+
+const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
 
 const Register = () => {
 
     const [step, setStep] = useState(1);
+    const [submitting, setSubmitting] = useState(false);
     const navigate = useNavigate();
 
     const [formData, setFormData] = useState({
@@ -42,9 +46,32 @@ const Register = () => {
 
     const submitApplication = async (e) => {
         e.preventDefault();
-        // Backend wiring later
-        toast.success('Application submitted');
-        navigate('/pending');
+        setSubmitting(true);
+        try {
+            const { firstName, lastName, userName, email, phone, password, shopName, description } = formData;
+            await axios.post(`${API}/auth/register`, {
+                name: `${firstName} ${lastName}`.trim(),
+                userName,
+                email,
+                phone,
+                password,
+            });
+            const loginRes = await axios.post(`${API}/auth/login`, { email, password });
+            const token = loginRes.data.accessToken;
+            const vendorFormData = new FormData();
+            vendorFormData.append('storeName', shopName);
+            vendorFormData.append('storeDescription', description);
+            vendorFormData.append('phone', phone);
+            await axios.post(`${API}/vendors/register`, vendorFormData, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            toast.success('Application submitted');
+            navigate('/pending');
+        } catch (err) {
+            toast.error(err.response?.data?.message || 'Registration failed');
+        } finally {
+            setSubmitting(false);
+        }
     }
 
     return (
@@ -118,8 +145,8 @@ const Register = () => {
                                 Back
                             </button>
                         ) : <div/>}
-                        <button type='submit' className='px-6 py-2 bg-ink text-paper text-sm hover:bg-navy transition-colors'>
-                            {step===3 ? 'Submit application' : 'Next'}
+                        <button type='submit' disabled={submitting} className='px-6 py-2 bg-ink text-paper text-sm hover:bg-navy transition-colors disabled:opacity-50'>
+                            {step===3 ? (submitting ? 'Submitting...' : 'Submit application') : 'Next'}
                         </button>
                     </div>
                 </form>

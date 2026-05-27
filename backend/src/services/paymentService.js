@@ -29,7 +29,7 @@ Cashfree.XEnvironment =
 
 const _createRazorpayOrder = async (order) => {
     const razorpayOrder = await getRazorpay().orders.create({
-        amount: Math.round(order.totalAmount), // already in paise
+        amount: Math.round(order.totalAmount * 100), // convert rupees → paise
         currency: "INR",
         receipt: `order_${order._id}`,
     });
