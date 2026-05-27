@@ -39,7 +39,8 @@ export const reserveStockForOrder = async (order) => {
     }
 };
 
-export const releaseExpiredReservations = async ({ now = new Date() } = {}) => {
+export const releaseExpiredReservations = async () => {
+    const now = new Date();
     const expiringOrders = await Order.find({
         orderStatus: "payment_pending",
         reservationExpiresAt: { $lte: now },

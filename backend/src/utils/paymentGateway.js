@@ -27,6 +27,7 @@ Cashfree.XEnvironment =
         ? CFEnvironment.PRODUCTION
         : CFEnvironment.SANDBOX;
 
+// a very small function that returns order ID
 const buildCashfreeOrderId = (orderId) => `cf_${orderId}`;
 
 export const createGatewaySession = async ({ order, paymentType = "razorpay" }) => {
@@ -222,7 +223,7 @@ export const persistOrderPayment = async ({ order, method, status, transactionId
         }
 
         if (!payment)
-            throw new AppError("Payment could not be persisted", 500);
+            throw new AppError("Payment could not be created", 500);
 
         await Order.updateOne({ _id: order._id }, { $set: { payment: payment._id } });
         return payment;

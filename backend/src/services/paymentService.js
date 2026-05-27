@@ -28,6 +28,9 @@ const assertOrderOwnership = (order, userId) => {
     if (!order)
         throw new AppError("Order not found", 404);
 
+    if (!userId)
+        throw new AppError("User not found", 404);
+
     if (order.buyer.toString() !== userId)
         throw new AppError("Not authorized for this order", 403);
 };
@@ -82,12 +85,7 @@ const confirmReservedOrder = async ({ order, method, transactionId }) => {
 
 const resolveVerifiedPayment = async ({ orderId, method, transactionId, userId }) => {
     let order = await getOrderWithPayment(orderId);
-
-    if (!order)
-        throw new AppError("Order not found", 404);
-
-    if (userId && order.buyer.toString() !== userId)
-        throw new AppError("Unauthorised attempt at verification", 401);
+    assertOrderOwnership(order, userId);
 
     if (order.orderStatus === "payment_pending" && order.reservationExpiresAt <= new Date()) {
         await releaseExpiredReservations();
