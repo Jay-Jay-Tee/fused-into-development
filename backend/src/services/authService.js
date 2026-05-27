@@ -4,8 +4,6 @@ import { User } from "../models/User.js";
 import { AppError } from "../utils/appError.js";
 
 // ---- registerService --------------------------
-
-// Addresses are not collected at registration — added later via profile
 export const registerService = async ({ name, userName, email, phone, password }) => {
     const existingEmail    = await User.findOne({ email });
     const existingUserName = await User.findOne({ userName });
@@ -78,8 +76,6 @@ export const loginService = async ({ email, userName, password }) => {
     return { accessToken, refreshToken };
 };
 
-// In-memory blacklist for invalidated refresh tokens.
-// Entries expire naturally once the token's 7-day TTL passes.
 const revokedTokens = new Set();
 
 // ---- logoutService ---------------------------------
@@ -90,7 +86,7 @@ export const logoutService = ({ refreshToken }) => {
 };
 
 // ---- refreshTokenService ---------------------------------
-// The refresh token is NOT rotated — same one stays valid for 7 days
+// The refresh token is NOT rotated, same one stays valid for 7 days
 export const refreshTokenService = async ({ refreshToken }) => {
     if (!refreshToken) {
         throw new AppError("Refresh token is required", 400);
