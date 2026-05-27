@@ -11,15 +11,21 @@ const Commission = () => {
     const [categoryRates, setCategoryRates] = useState([]);
 
     const fetchCommission = async () => {
-        // Backend wiring later
-        setDefaultRate(10);
-        setSavedDefault(10);
-        setCategoryRates([
-            { _id: 'cr001', category: 'Clothing', rate: 8 },
-            { _id: 'cr002', category: 'Home', rate: 10 },
-            { _id: 'cr003', category: 'Accessories', rate: 12 },
-            { _id: 'cr004', category: 'Stationery', rate: 7 },
-        ]);
+        const token = localStorage.getItem('token');
+        try {
+            const [commissionRes, categoriesRes] = await Promise.all([
+                axios.get(`${API}/admin/commission`, { headers: { Authorization: `Bearer ${token}` } }),
+                axios.get(`${API}/categories`),
+            ]);
+            setDefaultRate(commissionRes.data.commissionPercent);
+            setSavedDefault(commissionRes.data.commissionPercent);
+            const rates = categoriesRes.data
+                .filter(c => !c.parentCategory)
+                .map(c => ({ _id: c._id, category: c.name, rate: c.commission ?? commissionRes.data.commissionPercent }));
+            setCategoryRates(rates);
+        } catch {
+            // keep defaults on error
+        }
     }
 
     const saveDefault = async () => {
@@ -45,14 +51,21 @@ const Commission = () => {
         ));
     }
 
-    const saveCategoryRate = (id) => {
+    const saveCategoryRate = async (id) => {
         const cat = categoryRates.find(c => c._id === id);
-        if (cat.rate < 0 || cat.rate > 50){
+        if (cat.rate < 0 || cat.rate > 50) {
             toast.error('Rate must be between 0 and 50');
             return;
         }
-        // Backend wiring later
-        toast.success(`${cat.category} rate updated to ${cat.rate}%`);
+        const token = localStorage.getItem('token');
+        try {
+            await axios.put(`${API}/admin/categories/${id}`, { commission: cat.rate }, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            toast.success(`${cat.category} rate updated to ${cat.rate}%`);
+        } catch (err) {
+            toast.error(err.response?.data?.message || 'Failed to save rate');
+        }
     }
 
     useEffect(()=>{

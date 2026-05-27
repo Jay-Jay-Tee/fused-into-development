@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { ShopContext } from '../context/ShopContext'
 import { assets } from '../assets/assets'
 import RelatedProducts from '../components/RelatedProducts'
+import ReviewForm from '../components/ReviewForm'
 import { formatINR } from '../utils/money'
 import axios from 'axios'
 
@@ -48,12 +49,15 @@ const ReviewsList = ({productId}) => {
 const Product=()=>{
     const {productId} = useParams();
     const navigate = useNavigate();
-    const {products, addToCart} = useContext(ShopContext);
+    const {products, addToCart, token} = useContext(ShopContext);
     const [productData, setProductData] = useState(false);
     const [image, setImage] = useState('');
     const [size, setSize] = useState('');
     const [quantity, setQuantity] = useState(1);
     const [activeTab, setActiveTab] = useState('description');
+    const [showReviewForm, setShowReviewForm] = useState(false);
+    const [reviewRefresh, setReviewRefresh] = useState(0);
+
     const fetchProductData=async()=>{
         products.map((item)=>{
             if (item._id===productId){
@@ -67,6 +71,13 @@ const Product=()=>{
         fetchProductData();
         window.scrollTo(0,0);
     },[productId,products])
+
+    useEffect(() => {
+        if (!productId) return;
+        const recent = JSON.parse(localStorage.getItem('recentlyViewed') || '[]');
+        const updated = [productId, ...recent.filter(id => id !== productId)].slice(0, 10);
+        localStorage.setItem('recentlyViewed', JSON.stringify(updated));
+    }, [productId]);
     return productData ? (
         <div className='border-t border-line pt-10 transition-opacity ease-in duration-500 opacity-100'>
             <div className='flex gap-12 sm:gap-12 flex-col sm:flex-row'>
@@ -142,13 +153,29 @@ const Product=()=>{
                             <p>This product is made and shipped by {productData.vendor}, a verified seller from {productData.location}. Every product on VendorHub is quality-checked and authentic.</p>
                         </>
                     ) : (
-                        <ReviewsList productId={productData._id}/>
+                        <>
+                            {token && !showReviewForm && (
+                                <div className='mb-2'>
+                                    <button
+                                        onClick={() => setShowReviewForm(true)}
+                                        className='border border-line text-sm font-medium px-4 py-2 hover:bg-ink hover:text-paper transition-colors'
+                                    >
+                                        Write a review
+                                    </button>
+                                    <p className='text-xs text-ink-soft mt-1'>Only available for verified purchases.</p>
+                                </div>
+                            )}
+                            {showReviewForm && (
+                                <ReviewForm
+                                    productId={productData._id}
+                                    productName={productData.name}
+                                    onClose={() => { setShowReviewForm(false); setReviewRefresh(r => r + 1); }}
+                                />
+                            )}
+                            <ReviewsList key={reviewRefresh} productId={productData._id}/>
+                        </>
                     )}
                 </div>
-            </div>
-            <div className='mt-20 border-l-4 border-mustard pl-4 py-2 bg-paper'>
-                <p className='text-xs text-ink-soft mb-1'>RECOMMENDED FOR YOU</p>
-                <p className='text-sm'>Personalized picks based on your browsing history. <span className='text-ink-soft'>(Sign in to see suggestions)</span></p>
             </div>
             <RelatedProducts category={productData.category}/>
         </div>

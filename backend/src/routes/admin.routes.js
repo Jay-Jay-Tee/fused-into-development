@@ -32,6 +32,13 @@ router.post(
     asyncHandler(adminController.addCategory)
 );
 
+router.get(
+    '/commission',
+    auth,
+    role("admin"),
+    asyncHandler(adminController.getCommission)
+);
+
 router.put(
     '/commission',
     auth,
