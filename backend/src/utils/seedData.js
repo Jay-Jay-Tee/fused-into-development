@@ -346,6 +346,8 @@ export const seedData = async () => {
 
 // Allow running directly: node src/utils/seedData.js
 if (process.argv[1].includes("seedData")) {
+    const { default: dotenv } = await import("dotenv");
+    dotenv.config();
     const { connectDB } = await import("../config/db.js");
     await connectDB();
     await seedData();
