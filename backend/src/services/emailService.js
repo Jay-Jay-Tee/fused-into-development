@@ -3,15 +3,23 @@ import bcrypt from 'bcrypt';
 import { Otp } from '../models/Otp.js';
 import { AppError } from '../utils/appError.js';
 
-const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: parseInt(process.env.SMTP_PORT),
-    secure: false,
-    auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-    },
-});
+let transporter;
+
+const getTransporter = () => {
+    if (!transporter) {
+        transporter = nodemailer.createTransport({
+            host: process.env.SMTP_HOST,
+            port: parseInt(process.env.SMTP_PORT, 10),
+            secure: false,
+            auth: {
+                user: process.env.SMTP_USER,
+                pass: process.env.SMTP_PASS,
+            },
+        });
+    }
+
+    return transporter;
+};
 
 export const sendEmailOtp = async (email) => {
     const code = String(Math.floor(100000 + Math.random() * 900000));
@@ -25,7 +33,7 @@ export const sendEmailOtp = async (email) => {
     });
 
     try {
-        await transporter.sendMail({
+        await getTransporter().sendMail({
             from: `"VendorHub" <${process.env.SMTP_USER}>`,
             to: email,
             subject: 'Your VendorHub verification code',
