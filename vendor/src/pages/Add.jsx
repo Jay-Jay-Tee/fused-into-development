@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { assets } from '../assets/assets'
 import { toast } from 'react-toastify'
 import { toPaise } from '../utils/money'
@@ -20,6 +20,9 @@ const Add = () => {
     const [stock, setStock] = useState('');
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [priceSuggestion, setPriceSuggestion] = useState(null);
+    const [suggestionLoading, setSuggestionLoading] = useState(false);
+    const suggestionTimer = useRef(null);
 
     useEffect(() => {
         axios.get(`${API}/categories`)
@@ -29,6 +32,29 @@ const Add = () => {
             })
             .catch(() => toast.error('Could not load categories'));
     }, []);
+
+    useEffect(() => {
+        if (!name.trim() || !categoryId) { setPriceSuggestion(null); return; }
+        clearTimeout(suggestionTimer.current);
+        setSuggestionLoading(true);
+        suggestionTimer.current = setTimeout(async () => {
+            try {
+                const token = localStorage.getItem('token');
+                const categoryName = categories.find(c => c._id === categoryId)?.name || '';
+                const res = await axios.post(
+                    `${API}/ai/price-suggest`,
+                    { productName: name, category: categoryName },
+                    { headers: { Authorization: `Bearer ${token}` } }
+                );
+                setPriceSuggestion(res.data.data || res.data);
+            } catch {
+                setPriceSuggestion(null);
+            } finally {
+                setSuggestionLoading(false);
+            }
+        }, 600);
+        return () => clearTimeout(suggestionTimer.current);
+    }, [name, categoryId]);
 
     const onSubmitHandler = async (e) => {
         e.preventDefault();
@@ -121,6 +147,12 @@ const Add = () => {
                 <div>
                     <p className='mb-2 text-sm font-medium'>Price (₹)</p>
                     <input onChange={(e) => setPrice(e.target.value)} value={price} className='w-full px-3 py-2 sm:w-[120px] border border-line outline-none focus:border-navy bg-paper' type='number' placeholder='500' min='1' required/>
+                    {suggestionLoading && <p className='text-xs text-ink-soft mt-1'>Getting price suggestion...</p>}
+                    {priceSuggestion && !suggestionLoading && (
+                        <p className='text-xs text-ink-soft mt-1' title={priceSuggestion.reason}>
+                            Suggested: ₹{priceSuggestion.min?.toLocaleString('en-IN')} – ₹{priceSuggestion.max?.toLocaleString('en-IN')} · Recommended: ₹{priceSuggestion.recommended?.toLocaleString('en-IN')} ℹ️
+                        </p>
+                    )}
                 </div>
                 <div>
                     <p className='mb-2 text-sm font-medium'>Stock</p>

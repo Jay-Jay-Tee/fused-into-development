@@ -53,13 +53,12 @@ const PlaceOrder = () => {
             const { data: order } = await api.post('/orders', { items, shippingAddress });
             await pay(order);
             setCartItems({});
-            toast.success('Payment successful! Order confirmed.');
             if (useNewAddress && saveAddress) {
                 api.post('/users/me/addresses', shippingAddress).catch(() => {
                     toast.warn('Order placed but address could not be saved');
                 });
             }
-            navigate('/orders');
+            navigate('/order-confirmation', { state: { orderId: order._id, totalAmount: order.totalAmount } });
         } catch (err) {
             toast.error(err.response?.data?.message || err.message || 'Failed to place order');
         } finally {

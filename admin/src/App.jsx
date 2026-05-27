@@ -14,6 +14,17 @@ import 'react-toastify/dist/ReactToastify.css'
 import NotFound from './pages/NotFound'
 import Login from './pages/Login'
 
+const ProtectedRoute = ({ children }) => {
+  const token = localStorage.getItem('token');
+  if (!token) return <Navigate to='/login' replace />;
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    if (payload.role !== 'admin') return <Navigate to='/login' replace />;
+  } catch {
+    return <Navigate to='/login' replace />;
+  }
+  return children;
+};
 
 const App = () => {
   const location = useLocation();
@@ -30,13 +41,13 @@ const App = () => {
           <Routes>
             <Route path='/login' element={<Login/>}/>
             <Route path='/' element={<Navigate to='/login' replace/>}/>
-            <Route path='/analytics' element={<Analytics/>}/>
-            <Route path='/vendor-approval' element={<VendorApproval/>}/>
-            <Route path='/refunds' element={<RefundQueue/>}/>
-            <Route path='/categories' element={<Categories/>}/>
-            <Route path='/commission' element={<Commission/>}/>
-            <Route path='/users' element={<Users/>}/>
-            <Route path='/orders' element={<Orders/>}/>
+            <Route path='/analytics' element={<ProtectedRoute><Analytics/></ProtectedRoute>}/>
+            <Route path='/vendor-approval' element={<ProtectedRoute><VendorApproval/></ProtectedRoute>}/>
+            <Route path='/refunds' element={<ProtectedRoute><RefundQueue/></ProtectedRoute>}/>
+            <Route path='/categories' element={<ProtectedRoute><Categories/></ProtectedRoute>}/>
+            <Route path='/commission' element={<ProtectedRoute><Commission/></ProtectedRoute>}/>
+            <Route path='/users' element={<ProtectedRoute><Users/></ProtectedRoute>}/>
+            <Route path='/orders' element={<ProtectedRoute><Orders/></ProtectedRoute>}/>
             <Route path='*' element={<NotFound/>}/>
           </Routes>
         </div>

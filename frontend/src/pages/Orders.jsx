@@ -12,6 +12,38 @@ const STATUS_COLORS = {
     cancelled: 'bg-brick',
 }
 
+const STEPS = ['pending', 'confirmed', 'shipped', 'delivered'];
+const STEP_LABELS = { pending: 'Placed', confirmed: 'Confirmed', shipped: 'Shipped', delivered: 'Delivered' };
+
+const StatusStepper = ({ currentStatus, createdAt }) => {
+    if (currentStatus === 'cancelled') return null;
+    const currentIdx = STEPS.indexOf(currentStatus);
+    return (
+        <div className='flex items-start px-4 py-4 border-b border-line bg-paper'>
+            {STEPS.map((step, i) => (
+                <React.Fragment key={step}>
+                    <div className='flex flex-col items-center gap-1 min-w-[52px]'>
+                        <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium ${i <= currentIdx ? 'bg-ink text-paper' : 'bg-line text-ink-soft'}`}>
+                            {i < currentIdx ? '✓' : i + 1}
+                        </div>
+                        <p className={`text-[10px] text-center leading-tight ${i <= currentIdx ? 'font-medium text-ink' : 'text-ink-soft'}`}>
+                            {STEP_LABELS[step]}
+                        </p>
+                        {i === 0 && (
+                            <p className='text-[9px] text-ink-soft text-center'>
+                                {new Date(createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
+                            </p>
+                        )}
+                    </div>
+                    {i < STEPS.length - 1 && (
+                        <div className={`flex-1 h-0.5 mt-3 mx-1 ${i < currentIdx ? 'bg-ink' : 'bg-line'}`} />
+                    )}
+                </React.Fragment>
+            ))}
+        </div>
+    );
+};
+
 const Orders = () => {
     const [orders, setOrders] = useState([])
     const [loading, setLoading] = useState(true)
@@ -56,6 +88,9 @@ const Orders = () => {
                             <p className='font-medium text-ink'>{formatINR(order.totalAmount)}</p>
                         </div>
                     </div>
+
+                    {/* Status stepper */}
+                    <StatusStepper currentStatus={order.orderStatus} createdAt={order.createdAt} />
 
                     {/* Items */}
                     <div className='divide-y divide-line'>

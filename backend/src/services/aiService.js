@@ -4,6 +4,7 @@ dotenv.config();
 import OpenAI from 'openai';
 import { Order } from '../models/Order.js';
 import { Product } from '../models/Product.js';
+import { Category } from '../models/Category.js';
 
 let client = null;
 const getClient = () => {
@@ -186,10 +187,12 @@ export const suggestProductPrice = async ({
 
 
   try {
+    const categoryDoc = await Category.findOne({ name: category }).select('_id').lean();
+    const categoryName = category;
 
     const similarProducts = await Product.find({
       isActive: true,
-      category: category
+      ...(categoryDoc && { category: categoryDoc._id })
     })
       .sort({ averageRating: -1 })
       .limit(20)
