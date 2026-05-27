@@ -22,7 +22,7 @@ const VendorCard = ({ vendor, onApprove, onReject }) => {
             <div className='flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-4'>
                 <div>
                     <p className='font-medium text-lg'>{vendor.shopName}</p>
-                    <p className='text-sm text-ink-soft'>{vendor.ownerName}{vendor.city ? ` · 📍 ${vendor.city}` : ''}</p>
+                    <p className='text-sm text-ink-soft'>{vendor.ownerName}{vendor.city ? `  -   ${vendor.city}` : ''}</p>
                 </div>
                 <p className='text-xs text-ink-soft'>Applied {vendor.appliedDate}</p>
             </div>

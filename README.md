@@ -1,12 +1,15 @@
 # VendorHub
 
-A multi-vendor marketplace for Indian artisans and small businesses. Built for DevFusion 2.0 — May 2025.
+**DevFusion: The Developers Hackathon 2.0** | Problem Statement #26ENVH1
 
----
+VendorHub is a hyperlocal multi-vendor e-commerce platform where local sellers list
+products, manage orders, and grow their business -- while buyers get a modern shopping
+experience with AI-powered search and recommendations.
 
-## What it is
-
-VendorHub connects buyers with curated Indian craft vendors. Vendors list handmade and artisanal products. Buyers browse, search, and purchase. Admins manage approvals, refunds, and commissions.
+Live:
+- Buyer storefront: https://fused-into-development.vercel.app/
+- Admin panel: https://fused-into-development-ka5w.vercel.app/login
+- Backend API: https://fused-into-development.onrender.com/api
 
 ---
 
@@ -22,16 +25,53 @@ fused-into-development/
 
 ---
 
+## Features
+
+### Buyer
+- Browse and search products with filters: category, price range, rating, vendor location
+- Product detail page with images, description, seller info, and reviews
+- Cart with quantity management, grouped by vendor
+- Wishlist
+- Checkout with saved address selection and Razorpay sandbox payment
+- Order tracking: Placed > Confirmed > Shipped > Delivered
+- Review and rating submission after delivery
+- Two-factor authentication (email OTP)
+
+### Vendor
+- Register as a vendor (requires admin approval before listing)
+- Add, edit, and delete products with multiple images (Cloudinary)
+- Order management: view incoming orders, mark Confirmed or Shipped
+- Earnings dashboard: total revenue, orders this week, top-selling products
+- Inventory alerts for low stock
+
+### Admin
+- Approve or reject vendor registrations
+- Platform analytics: total sales, revenue, top vendors, top categories
+- Manage product categories and subcategories
+- Handle refund requests: approve or reject
+- Commission rate settings (vendor earnings after platform cut)
+
+### AI
+- AI-powered search: fuzzy matching and synonym expansion via OpenRouter (gpt-4o-mini)
+- Product recommendations on the homepage
+
+### Payments
+- Razorpay sandbox checkout with 10-minute stock reservation
+- Refund flow with admin approval queue
+- Vendor payout history (simulated)
+
+---
+
 ## Tech stack
 
-| Layer    | Stack                                          |
-|----------|------------------------------------------------|
-| Backend  | Node.js, Express 5, MongoDB, Mongoose          |
-| Auth     | JWT (access 15m, refresh 7d), bcrypt           |
-| Payments | Razorpay sandbox                               |
-| Storage  | Cloudinary (product + vendor images)           |
-| Frontend | React 19, Vite 8, Tailwind CSS 4, Zustand      |
-| AI       | OpenRouter — openai/gpt-4o-mini                |
+| Layer    | Stack                                              |
+|----------|----------------------------------------------------|
+| Backend  | Node.js, Express 5, MongoDB, Mongoose              |
+| Auth     | JWT (access 15m, refresh 7d), bcrypt, email OTP    |
+| Payments | Razorpay sandbox                                   |
+| Storage  | Cloudinary (product + vendor images)               |
+| Frontend | React 19, Vite, Tailwind CSS 4                     |
+| AI       | OpenRouter -- openai/gpt-4o-mini                   |
 
 ---
 
@@ -60,7 +100,7 @@ cd backend
 node src/utils/seedData.js
 ```
 
-This creates:
+Creates:
 - 1 admin, 2 buyers, 5 vendors (all approved)
 - 3 root categories + 6 subcategories
 - 30 products across all vendors
@@ -68,18 +108,18 @@ This creates:
 
 **Test credentials:**
 
-| Role    | Email                    | Password     |
-|---------|--------------------------|--------------|
-| Admin   | admin@vendorhub.com      | Password@123 |
-| Buyer   | buyer@vendorhub.com      | Password@123 |
-| Vendor  | vendor1@vendorhub.com    | Password@123 |
+| Role   | Email                 | Password     |
+|--------|-----------------------|--------------|
+| Admin  | admin@vendorhub.com   | Password@123 |
+| Buyer  | buyer@vendorhub.com   | Password@123 |
+| Vendor | vendor1@vendorhub.com | Password@123 |
 
 ### Frontend apps
 
 ```bash
-cd frontend && npm install && npm run dev    # buyer — :5173
-cd vendor   && npm install && npm run dev    # seller dashboard — :5174
-cd admin    && npm install && npm run dev    # admin panel — :5175
+cd frontend && npm install && npm run dev    # buyer -- :5173
+cd vendor   && npm install && npm run dev    # seller dashboard -- :5174
+cd admin    && npm install && npm run dev    # admin panel -- :5175
 ```
 
 ---
@@ -102,34 +142,66 @@ OPENAI_API_KEY=
 CLIENT_URL=http://localhost:5173,http://localhost:5174,http://localhost:5175
 ```
 
+Frontend `.env`:
+```
+VITE_API_URL=http://localhost:5000/api
+VITE_RAZORPAY_KEY_ID=your_razorpay_key_id
+```
+
+---
+
+## Razorpay test details
+
+Use these in the Razorpay sandbox payment modal:
+
+| Field       | Value                |
+|-------------|----------------------|
+| Card number | 4111 1111 1111 1111  |
+| Expiry      | Any future date      |
+| CVV         | Any 3 digits         |
+| OTP         | 1234 (test mode)     |
+
+UPI test ID: `success@razorpay`
+
 ---
 
 ## API overview
 
 All routes are prefixed `/api`.
 
-| Prefix          | Description                            |
-|-----------------|----------------------------------------|
-| `/auth`         | Register, login, token refresh         |
-| `/products`     | Product CRUD, search                   |
-| `/vendors`      | Vendor profiles, approval              |
-| `/orders`       | Place and track orders                 |
-| `/payments`     | Razorpay checkout, webhook             |
-| `/refunds`      | Raise and manage refund requests       |
-| `/reviews`      | Product reviews                        |
-| `/categories`   | Browse categories                      |
-| `/admin`        | Analytics, commission, category mgmt   |
-| `/ai`           | AI-powered search expansion            |
+| Prefix        | Description                            |
+|---------------|----------------------------------------|
+| `/auth`       | Register, login, token refresh, 2FA    |
+| `/products`   | Product CRUD, search, AI search        |
+| `/vendors`    | Vendor profiles, approval              |
+| `/orders`     | Place and track orders                 |
+| `/payments`   | Razorpay checkout, verify, webhook     |
+| `/refunds`    | Raise and manage refund requests       |
+| `/reviews`    | Product reviews and ratings            |
+| `/categories` | Browse categories                      |
+| `/admin`      | Analytics, commission, category mgmt   |
+| `/wishlist`   | Wishlist management                    |
+| `/cart`       | Cart management                        |
+| `/ai`         | AI-powered search expansion            |
+
+---
+
+## Known limitations
+
+- Delivery fee system deferred to V2; all orders currently ship at no delivery charge.
+- Vendor payout history is simulated; no real payout processing.
+- AI recommendations use a basic recency model; collaborative filtering not implemented.
+- Email OTP for 2FA requires a working SMTP config in `.env`.
 
 ---
 
 ## Team
 
-DevFusion 2.0 — 4-person team
+DevFusion: The Developers Hackathon 2.0 | May 2026
 
-| Person | Domain                                      |
-|--------|---------------------------------------------|
-| P1     | Backend services, Razorpay integration      |
-| P2     | Buyer frontend (browsing, cart, checkout)   |
-| P3     | Vendor dashboard, Admin panel               |
-| P4     | Auth, API wiring, Cloudinary, state mgmt    |
+| Name                 | Domain                                       |
+|----------------------|----------------------------------------------|
+| H R Soorya Dev       | Backend services, Razorpay integration       |
+| Satrajit Mondal      | Buyer frontend (browsing, cart, checkout)    |
+| Joshua Jacob Thomas  | Vendor dashboard, Admin panel                |
+| Siddharth Madhavan   | Auth, API wiring, Cloudinary, state mgmt     |

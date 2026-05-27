@@ -14,7 +14,7 @@ const About = () => {
         <div className='my-10 flex flex-col md:flex-row gap-16'>
             <img className='w-full md:max-w-[450px]' src={assets.about_img} alt=""/>
             <div className='flex flex-col justify-center gap-6 md:w-2/4 text-ink-soft'>
-                <p>VendorHub was built on a simple idea — the best products are often the closest ones. Every kurta, every lamp, every wallet sold here ships from a verified local vendor in your city or one nearby.</p>
+                <p>VendorHub was built on a simple idea - the best products are often the closest ones. Every kurta, every lamp, every wallet sold here ships from a verified local vendor in your city or one nearby.</p>
                 <p>We started by talking to small business owners across India who had great products but no way to reach customers online without paying enormous platform fees. VendorHub takes 5% commission per sale. That's it.</p>
                 <b className='text-ink'>Our Mission</b>
                 <p>Make it as easy to buy from the shop down the street as it is to buy from a warehouse halfway across the country.</p>

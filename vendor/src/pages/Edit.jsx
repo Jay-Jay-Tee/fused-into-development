@@ -103,7 +103,7 @@ const Edit = () => {
                 <p className='mb-2 text-sm font-medium'>Images</p>
                 {existingImages.length > 0 && (
                     <>
-                        <p className='text-xs text-ink-soft mb-2'>Current images — click × to remove</p>
+                        <p className='text-xs text-ink-soft mb-2'>Current images  -  click x to remove</p>
                         <div className='flex flex-wrap gap-2 mb-3'>
                             {existingImages.map((src, i) => (
                                 <div key={i} className='relative w-20 h-20'>
@@ -112,7 +112,7 @@ const Edit = () => {
                                         type='button'
                                         onClick={() => removeExisting(i)}
                                         className='absolute top-0 right-0 bg-ink text-paper text-xs w-5 h-5 flex items-center justify-center leading-none hover:bg-red-600'
-                                    >×</button>
+                                    >x</button>
                                 </div>
                             ))}
                         </div>
@@ -154,7 +154,7 @@ const Edit = () => {
                     </select>
                 </div>
                 <div>
-                    <p className='mb-2 text-sm font-medium'>Price (₹)</p>
+                    <p className='mb-2 text-sm font-medium'>Price (Rs. )</p>
                     <input onChange={(e) => setPrice(e.target.value)} value={price} className='w-full px-3 py-2 sm:w-[120px] border border-line outline-none focus:border-navy bg-paper' type='number' placeholder='0' min='0' required/>
                 </div>
                 <div>

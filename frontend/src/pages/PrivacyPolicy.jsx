@@ -20,7 +20,7 @@ const PrivacyPolicy = () => {
 
                 <Section title='1. Information We Collect'>
                     <p>When you create an account we collect your name, email address, phone number, and a hashed password. We never store your password in plain text.</p>
-                    <p>When you place an order we collect your delivery address and payment reference. We do not store full card numbers — payments are processed by Razorpay.</p>
+                    <p>When you place an order we collect your delivery address and payment reference. We do not store full card numbers  -  payments are processed by Razorpay.</p>
                     <p>We collect basic usage data (pages visited, search queries) to improve the platform.</p>
                 </Section>
 
@@ -40,7 +40,7 @@ const PrivacyPolicy = () => {
                 </Section>
 
                 <Section title='5. Data Retention'>
-                    <p>Your account data is kept for as long as your account is active. You can request deletion by contacting us — we will remove your personal information within 30 days.</p>
+                    <p>Your account data is kept for as long as your account is active. You can request deletion by contacting us  -  we will remove your personal information within 30 days.</p>
                 </Section>
 
                 <Section title='6. Your Rights'>

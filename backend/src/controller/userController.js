@@ -6,6 +6,7 @@ import {
     updateAddressService,
     updateProfileService
 } from '../services/userService.js';
+import { User } from '../models/User.js';
 
 const getCurrentUser = async (req, res) => {
     const data = await getCurrentUserService(req.user.id);
@@ -42,11 +43,17 @@ const deleteAddress = async (req, res) => {
     return res.status(200).json(data);
 };
 
+const deleteAccount = async (req, res) => {
+    await User.findByIdAndDelete(req.user.id);
+    return res.status(200).json({ message: 'Account deleted' });
+};
+
 export const userController = {
     getCurrentUser,
     updateProfile,
     changePassword,
     addAddress,
     updateAddress,
-    deleteAddress
+    deleteAddress,
+    deleteAccount
 };

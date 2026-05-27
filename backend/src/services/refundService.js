@@ -57,15 +57,26 @@ export const getMyRefundsService = async ({ userId }) =>
         .sort({ createdAt: -1 })
         .lean();
 
-export const getAllRefundsService = async ({ status }) => {
+export const getAllRefundsService = async ({ status, page, limit }) => {
     const filter = {};
     if (status) filter.status = status;
 
-    return Refund.find(filter)
-        .populate("buyer", "name email")
-        .populate("order", "orderStatus totalAmount")
-        .sort({ createdAt: -1 })
-        .lean();
+    const pageNum  = Math.max(1, parseInt(page, 10) || 1);
+    const pageSize = Math.max(1, Math.min(parseInt(limit, 10) || 20, 100));
+    const skip     = (pageNum - 1) * pageSize;
+
+    const [refunds, total] = await Promise.all([
+        Refund.find(filter)
+            .populate("buyer", "name email")
+            .populate("order", "orderStatus totalAmount")
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(pageSize)
+            .lean(),
+        Refund.countDocuments(filter),
+    ]);
+
+    return { refunds, total, page: pageNum, pages: Math.ceil(total / pageSize) };
 };
 
 export const getRefundByIdService = async ({ refundId }) => {

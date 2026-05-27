@@ -42,7 +42,7 @@ const isActiveReservation = (order) =>
     order.payment?.status === "pending";
 
 const buildPaymentSessionResponse = (payment) => {
-    const base = { amount: payment.amount, currency: "INR", orderId: payment.order };
+    const base = { amount: Math.round(payment.amount), currency: "INR", orderId: payment.order };
 
     if (payment.method === "cashfree") {
         const orderId = payment.order?._id || payment.order;
@@ -84,9 +84,9 @@ const confirmReservedOrder = async ({ order, method, transactionId }) => {
     return { success: true, payment };
 };
 
-const resolveVerifiedPayment = async ({ orderId, method, transactionId, userId }) => {
+const resolveVerifiedPayment = async ({ orderId, method, transactionId, userId, skipOwnershipCheck = false }) => {
     let order = await getOrderWithPayment(orderId);
-    assertOrderOwnership(order, userId);
+    if (!skipOwnershipCheck) assertOrderOwnership(order, userId);
 
     if (order.orderStatus === "payment_pending" && order.reservationExpiresAt <= new Date()) {
         await releaseExpiredReservations();
@@ -211,7 +211,11 @@ export const verifyPaymentService = async ({
     return resolveVerifiedPayment({ orderId, method: "razorpay", transactionId: razorpayPaymentId, userId });
 };
 
-export const getPaymentsByOrderService = async ({ orderId }) => {
+export const getPaymentsByOrderService = async ({ orderId, userId }) => {
+    const order = await Order.findById(orderId).select("buyer").lean();
+    if (!order) throw new AppError("Order not found", 404);
+    if (order.buyer.toString() !== userId) throw new AppError("Not authorized for this order", 403);
+
     const directPayments = await Payment.find({ order: orderId }).lean();
     const refundDocs = await Refund.find({ order: orderId }).select("_id").lean();
     const refundIds = refundDocs.map((r) => r._id);
@@ -241,7 +245,7 @@ export const handleWebhookService = async ({
         if (resolved.eventType !== "PAYMENT_SUCCESS_WEBHOOK")
             return { message: "Event type not processed" };
 
-        return resolveVerifiedPayment({ orderId: resolved.orderId, method: "cashfree", transactionId: resolved.paymentId });
+        return resolveVerifiedPayment({ orderId: resolved.orderId, method: "cashfree", transactionId: resolved.paymentId, skipOwnershipCheck: true });
     }
 
     verifyRazorpayWebhookSignature({ razorpaySignature, webhookBody });
@@ -249,5 +253,5 @@ export const handleWebhookService = async ({
     if (eventType !== "payment.captured")
         return { message: "Event type not processed" };
 
-    return resolveVerifiedPayment({ orderId, method: "razorpay", transactionId: paymentId });
+    return resolveVerifiedPayment({ orderId, method: "razorpay", transactionId: paymentId, skipOwnershipCheck: true });
 };

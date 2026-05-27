@@ -27,7 +27,7 @@ export const getProductsService = async (query) => {
     // Filter by a specific vendor (used by vendor shop pages).
     if (query.vendor) filter.vendor = query.vendor;
  
-    // Filter by vendor location — resolves matching vendor IDs first,
+    // Filter by vendor location  -  resolves matching vendor IDs first,
     // then constrains the product query to those vendors.
     if (query.city || query.state) {
         const addressMatch = {};

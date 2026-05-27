@@ -1,7 +1,7 @@
 import axios from 'axios';
 import api from './axiosInstance';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+import { API as API_URL } from './config.js';
 
 export const expandSearchQuery = async (query) => {
   const response = await axios.post(

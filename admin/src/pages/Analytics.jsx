@@ -94,12 +94,12 @@ const Analytics = () => {
 
                 {/* Revenue chart - 2/3 width on desktop */}
                 <div className='lg:col-span-2 border border-line p-6 bg-paper'>
-                    <p className='text-sm font-medium mb-4'>Revenue — last 7 days</p>
+                    <p className='text-sm font-medium mb-4'>Revenue  -  last 7 days</p>
                     <ResponsiveContainer width='100%' height={280}>
                         <LineChart data={revenueChart}>
                             <CartesianGrid strokeDasharray='3 3' stroke='#E8E2D3'/>
                             <XAxis dataKey='day' stroke='#5C5A56' style={{ fontSize: '12px' }}/>
-                            <YAxis stroke='#5C5A56' style={{ fontSize: '12px' }} tickFormatter={(v)=>`₹${(v/100000).toFixed(0)}k`}/>
+                            <YAxis stroke='#5C5A56' style={{ fontSize: '12px' }} tickFormatter={(v)=>`Rs. ${(v/100000).toFixed(0)}k`}/>
                             <Tooltip
                                 contentStyle={{ backgroundColor: '#1A1A1A', border: 'none', color: '#FDFAF1' }}
                                 labelStyle={{ color: '#FDFAF1' }}

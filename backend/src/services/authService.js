@@ -4,6 +4,7 @@ import { User } from "../models/User.js";
 import { AppError } from "../utils/appError.js";
 import { sendOtp, checkOtp } from "./twilioService.js";
 import { sendEmailOtp, checkEmailOtp } from "./emailService.js";
+import { RevokedToken } from "../models/RevokedToken.js";
 
 // ---- registerService --------------------------
 export const registerService = async ({ name, userName, email, phone, password }) => {
@@ -97,7 +98,7 @@ export const loginService = async ({ email, userName, phone, password }) => {
         throw new AppError("Incorrect password", 401);
     }
 
-    if (user.twoFactorEnabled) {
+    if (user.twoFactorEnabled && user.role !== 'admin') {
         let otpTo, otpChannel;
         if (email) {
             otpTo = user.email;
@@ -118,7 +119,7 @@ export const loginService = async ({ email, userName, phone, password }) => {
 
         const twoFactorToken = jwt.sign(
             { userId: user._id, to: otpTo, channel: otpChannel, purpose: "2fa-login" },
-            process.env.JWT_SECRET,
+            process.env.JWT_2FA_SECRET,
             { expiresIn: "10m" }
         );
 
@@ -148,7 +149,7 @@ export const verifyLogin2FAService = async ({ twoFactorToken, code }) => {
 
     let decoded;
     try {
-        decoded = jwt.verify(twoFactorToken, process.env.JWT_SECRET);
+        decoded = jwt.verify(twoFactorToken, process.env.JWT_2FA_SECRET);
     } catch {
         throw new AppError("2FA token is invalid or expired", 401);
     }
@@ -194,12 +195,16 @@ export const toggle2FAService = async ({ userId }) => {
     };
 };
 
-const revokedTokens = new Set();
-
 // ---- logoutService ---------------------------------
-export const logoutService = ({ refreshToken }) => {
+export const logoutService = async ({ refreshToken }) => {
     if (!refreshToken) throw new AppError("Refresh token is required", 400);
-    revokedTokens.add(refreshToken);
+
+    const decoded = jwt.decode(refreshToken);
+    const expiresAt = decoded?.exp
+        ? new Date(decoded.exp * 1000)
+        : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+
+    await RevokedToken.create({ token: refreshToken, expiresAt }).catch(() => {});
     return { message: "Logged out successfully" };
 };
 
@@ -209,7 +214,8 @@ export const refreshTokenService = async ({ refreshToken }) => {
         throw new AppError("Refresh token is required", 400);
     }
 
-    if (revokedTokens.has(refreshToken)) {
+    const isRevoked = await RevokedToken.exists({ token: refreshToken });
+    if (isRevoked) {
         throw new AppError("Refresh token has been revoked", 401);
     }
 

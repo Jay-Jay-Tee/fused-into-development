@@ -78,7 +78,7 @@ const List = () => {
                         </div>
                         <div className='flex items-center justify-center gap-3'>
                             <p onClick={() => navigate(`/edit/${item._id}`)} className='text-xs text-navy cursor-pointer hover:underline'>Edit</p>
-                            <p onClick={() => removeProduct(item._id)} className='cursor-pointer text-lg hover:text-brick transition-colors'>×</p>
+                            <p onClick={() => removeProduct(item._id)} className='cursor-pointer text-lg hover:text-brick transition-colors'>x</p>
                         </div>
                     </div>
                 ))}

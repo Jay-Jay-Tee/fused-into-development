@@ -21,7 +21,7 @@ export const calculateCommission = async ({ vendorId, month, year }) => {
     .populate("items.product", "category")
     .lean();
 
-    // Build a map of categoryId → commission rate (null means use vendor default)
+    // Build a map of categoryId -> commission rate (null means use vendor default)
     const categories = await Category.find({}).select("_id commission").lean();
     const catRateMap = new Map();
     for (const c of categories) {

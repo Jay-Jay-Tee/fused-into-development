@@ -28,7 +28,7 @@ const ReviewForm = ({ productId, productName, onClose, onSubmitted }) => {
 
     return (
         <div className='border border-line bg-paper p-5 mt-3'>
-            <p className='text-xs text-ink-soft tracking-wider mb-3'>REVIEWING — {productName}</p>
+            <p className='text-xs text-ink-soft tracking-wider mb-3'>REVIEWING - {productName}</p>
 
             <div className='flex gap-1 mb-4'>
                 {[1,2,3,4,5].map((star) => (
@@ -41,7 +41,7 @@ const ReviewForm = ({ productId, productName, onClose, onSubmitted }) => {
                         className='text-2xl leading-none cursor-pointer focus:outline-none'
                         aria-label={`${star} stars`}
                     >
-                        <span className={star <= (hoverRating || rating) ? 'text-mustard' : 'text-ink-soft/30'}>★</span>
+                        <span className={star <= (hoverRating || rating) ? 'text-mustard' : 'text-ink-soft/30'}>*</span>
                     </button>
                 ))}
                 {rating > 0 && <span className='ml-3 text-sm text-ink-soft self-center'>{rating} / 5</span>}

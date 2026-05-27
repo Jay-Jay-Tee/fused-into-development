@@ -38,8 +38,13 @@ router.put(
 );
 
 router.delete(
-    '/me/addresses/:index', 
+    '/me/addresses/:index',
     asyncHandler(userController.deleteAddress)
+);
+
+router.delete(
+    '/me',
+    asyncHandler(userController.deleteAccount)
 );
 
 export { router as userRoutes };

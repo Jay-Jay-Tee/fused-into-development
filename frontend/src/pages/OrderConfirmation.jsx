@@ -12,7 +12,7 @@ const OrderConfirmation = () => {
     return (
         <div className='border-t border-line pt-16 min-h-[70vh] flex flex-col items-center justify-center text-center px-4'>
             <div className='w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mb-6'>
-                <span className='text-green-600 text-3xl'>✓</span>
+                <span className='text-green-600 text-3xl'>&#10003;</span>
             </div>
 
             <div className='text-2xl mb-2'>

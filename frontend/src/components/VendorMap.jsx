@@ -70,7 +70,7 @@ const VendorMap = ({ products }) => {
                         <Popup>
                             <div style={{ minWidth: '200px' }}>
                                 <p style={{ fontWeight: 600, marginBottom: '4px', fontSize: '14px' }}>{vendor.name}</p>
-                                <p style={{ fontSize: '12px', color: '#5C5A56', marginBottom: '10px' }}>📍 {vendor.location} · {vendor.products.length} product{vendor.products.length !== 1 ? 's' : ''}</p>
+                                <p style={{ fontSize: '12px', color: '#5C5A56', marginBottom: '10px' }}>{vendor.location} - {vendor.products.length} product{vendor.products.length !== 1 ? 's' : ''}</p>
 
                                 <div style={{ marginBottom: '10px' }}>
                                     {vendor.products.slice(0,3).map((p) => (
@@ -98,7 +98,7 @@ const VendorMap = ({ products }) => {
                                         cursor: 'pointer',
                                     }}
                                 >
-                                    Visit shop →
+                                    Visit shop &gt;
                                 </button>
                             </div>
                         </Popup>

@@ -51,7 +51,7 @@ const paymentSchema = new mongoose.Schema(
         timestamps: true
     }
 );
-paymentSchema.pre("validate", function (next) {
+paymentSchema.pre("validate", async function () {
     const hasOrder = !!this.order;
     const hasRefund = !!this.refund;
     const hasPayout = this.transactionType === "payout";
@@ -61,54 +61,31 @@ paymentSchema.pre("validate", function (next) {
     const hasGatewayReference = hasGatewayOrderId || hasPaymentSessionId;
 
     if (hasOrder && hasRefund)
-        return next(
-            new Error("Payment cannot reference both an order and a refund")
-        );
+        throw new Error("Payment cannot reference both an order and a refund");
 
     if (hasPayout && (hasOrder || hasRefund))
-        return next(
-            new Error("Payout payment should not reference an order or refund")
-        );
-    if (this.transactionType === "order" && !this.order) {
-        return next(
-            new Error("Order payment must have an order reference")
-        );
-    }
-    if (this.transactionType === "refund" && !this.refund) {
-        return next(
-            new Error("Refund payment must have a refund reference")
-        );
-    }
+        throw new Error("Payout payment should not reference an order or refund");
 
-    if (hasGatewayOrderId && hasPaymentSessionId) {
-        return next(
-            new Error("Payment cannot store both gatewayOrderId and paymentSessionId")
-        );
-    }
+    if (this.transactionType === "order" && !this.order)
+        throw new Error("Order payment must have an order reference");
 
-    if (this.transactionType !== "order" && hasGatewayReference) {
-        return next(
-            new Error("Only order payments can store gateway session details")
-        );
-    }
+    if (this.transactionType === "refund" && !this.refund)
+        throw new Error("Refund payment must have a refund reference");
 
-    if (hasGatewayOrderId && this.method !== "razorpay") {
-        return next(
-            new Error("gatewayOrderId is only valid for Razorpay order payments")
-        );
-    }
+    if (hasGatewayOrderId && hasPaymentSessionId)
+        throw new Error("Payment cannot store both gatewayOrderId and paymentSessionId");
 
-    if (hasPaymentSessionId && this.method !== "cashfree") {
-        return next(
-            new Error("paymentSessionId is only valid for Cashfree order payments")
-        );
-    }
+    if (this.transactionType !== "order" && hasGatewayReference)
+        throw new Error("Only order payments can store gateway session details");
 
-    if (this.transactionType === "order" && hasTransactionId && hasGatewayReference) {
-        return next(
-            new Error("Order payment cannot store transactionId with gateway session details")
-        );
-    }
+    if (hasGatewayOrderId && this.method !== "razorpay")
+        throw new Error("gatewayOrderId is only valid for Razorpay order payments");
+
+    if (hasPaymentSessionId && this.method !== "cashfree")
+        throw new Error("paymentSessionId is only valid for Cashfree order payments");
+
+    if (this.transactionType === "order" && hasTransactionId && hasGatewayReference)
+        throw new Error("Order payment cannot store transactionId with gateway session details");
 
     if (
         this.transactionType === "order" &&
@@ -116,9 +93,7 @@ paymentSchema.pre("validate", function (next) {
         this.method === "razorpay" &&
         !hasGatewayOrderId
     ) {
-        return next(
-            new Error("Pending Razorpay order payment must have gatewayOrderId")
-        );
+        throw new Error("Pending Razorpay order payment must have gatewayOrderId");
     }
 
     if (
@@ -127,9 +102,7 @@ paymentSchema.pre("validate", function (next) {
         this.method === "cashfree" &&
         !hasPaymentSessionId
     ) {
-        return next(
-            new Error("Pending Cashfree order payment must have paymentSessionId")
-        );
+        throw new Error("Pending Cashfree order payment must have paymentSessionId");
     }
 
     const requiresTransactionId =
@@ -139,13 +112,8 @@ paymentSchema.pre("validate", function (next) {
         this.status === "pending_verification" ||
         (this.transactionType === "order" && this.status === "paid");
 
-    if (requiresTransactionId && !hasTransactionId) {
-        return next(
-            new Error("Transaction ID is required for this payment state")
-        );
-    }
-
-    next();
+    if (requiresTransactionId && !hasTransactionId)
+        throw new Error("Transaction ID is required for this payment state");
 });
 
 paymentSchema.index(

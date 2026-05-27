@@ -4,11 +4,13 @@ dotenv.config();
 import { app } from './app.js';
 import { connectDB } from './config/db.js';
 import { startReservationCleanupLoop } from './utils/paymentReservation.js';
+import { Payment } from './models/Payment.js';
 
 const PORT = process.env.PORT || 5000;
 
 try {
   await connectDB();
+  await Payment.syncIndexes();
   startReservationCleanupLoop();
   app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);

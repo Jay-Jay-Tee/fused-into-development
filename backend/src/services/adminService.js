@@ -113,16 +113,14 @@ export const getCommissionService = async () => {
 };
 
 // update commission for everyone
-export const updateCommissionService = async ({
-    commissionPercent
-}) => {
+export const updateCommissionService = async ({ commissionPercent }) => {
+    if (commissionPercent < 0 || commissionPercent > 100) {
+        throw new AppError("Commission must be between 0 and 100", 400);
+    }
 
     const updatedCount = (await Vendor.updateMany({}, {
-        $set: {
-            commission: commissionPercent
-        }
-    })
-    ).modifiedCount;
+        $set: { commission: commissionPercent }
+    })).modifiedCount;
     return updatedCount;
 };
 

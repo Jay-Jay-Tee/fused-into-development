@@ -24,7 +24,7 @@ const StatusStepper = ({ currentStatus, createdAt }) => {
                 <React.Fragment key={step}>
                     <div className='flex flex-col items-center gap-1 min-w-[52px]'>
                         <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium ${i <= currentIdx ? 'bg-ink text-paper' : 'bg-line text-ink-soft'}`}>
-                            {i < currentIdx ? '✓' : i + 1}
+                            {i < currentIdx ? 'v' : i + 1}
                         </div>
                         <p className={`text-[10px] text-center leading-tight ${i <= currentIdx ? 'font-medium text-ink' : 'text-ink-soft'}`}>
                             {STEP_LABELS[step]}
@@ -135,7 +135,7 @@ const Orders = () => {
                     {order.shippingAddress && (
                         <div className='px-4 py-3 border-t border-line text-xs text-ink-soft'>
                             <span className='tracking-wider'>SHIP TO: </span>
-                            {order.shippingAddress.firstName} {order.shippingAddress.lastName} · {order.shippingAddress.street}, {order.shippingAddress.city}, {order.shippingAddress.state} {order.shippingAddress.pincode}
+                            {order.shippingAddress.firstName} {order.shippingAddress.lastName} - {order.shippingAddress.street}, {order.shippingAddress.city}, {order.shippingAddress.state} {order.shippingAddress.pincode}
                         </div>
                     )}
                 </div>

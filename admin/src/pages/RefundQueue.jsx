@@ -27,7 +27,7 @@ const RefundCard = ({ refund, onApprove, onReject }) => {
                         <p className='font-medium'>{refund.itemName}</p>
                         <p className='text-xs text-ink-soft'>Requested {refund.requestedAt}</p>
                     </div>
-                    <p className='text-xs text-ink-soft mb-3'>Qty {refund.quantity} · Order #{refund.orderId}</p>
+                    <p className='text-xs text-ink-soft mb-3'>Qty {refund.quantity}  -  Order #{refund.orderId}</p>
                     <p className='text-sm bg-paper border-l-2 border-mustard pl-3 py-1'>
                         {refund.reason}
                     </p>
@@ -87,7 +87,7 @@ const RefundQueue = () => {
             const res = await axios.get(`${API}/refunds`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
-            const mapped = res.data.map(r => ({
+            const mapped = (res.data.refunds || res.data).map(r => ({
                 _id: r._id,
                 buyerName: r.buyer?.name || 'Unknown',
                 buyerEmail: r.buyer?.email || '',
@@ -141,7 +141,7 @@ const RefundQueue = () => {
         <div>
             <div className='flex items-center justify-between mb-6'>
                 <h3 className='font-medium'>Refund Queue</h3>
-                <p className='text-sm text-ink-soft'>{refunds.length} pending · {formatINR(totalAmount)} at risk</p>
+                <p className='text-sm text-ink-soft'>{refunds.length} pending  -  {formatINR(totalAmount)} at risk</p>
             </div>
 
             <div className='flex flex-col gap-4'>

@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import ProductItem from '../components/ProductItem'
 import axios from 'axios'
 
-const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
+import { API } from '../api/config.js'
 
 const getScoreColor = (score) => {
     if (score >= 80) return 'bg-green-600';
@@ -91,7 +91,7 @@ const VendorShop = () => {
                             <p className='text-xs text-paper/60 tracking-wider'>PRODUCTS</p>
                         </div>
                         <div>
-                            <p className='font-display text-2xl'>{(vendor.averageRating || 0).toFixed(1)}★</p>
+                            <p className='font-display text-2xl'>{(vendor.averageRating || 0).toFixed(1)} stars</p>
                             <p className='text-xs text-paper/60 tracking-wider'>AVG RATING</p>
                         </div>
                         <div>

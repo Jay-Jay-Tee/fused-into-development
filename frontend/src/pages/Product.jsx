@@ -7,7 +7,7 @@ import ReviewForm from '../components/ReviewForm'
 import { formatINR } from '../utils/money'
 import axios from 'axios'
 
-const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
+import { API } from '../api/config.js'
 
 const ReviewsList = ({productId}) => {
     const [reviews, setReviews] = useState([]);
@@ -36,8 +36,8 @@ const ReviewsList = ({productId}) => {
             {reviews.map((r) => (
                 <div key={r._id} className='border-b border-line last:border-b-0 pb-4 last:pb-0'>
                     <div className='flex items-center gap-3 mb-2'>
-                        <p className='text-mustard'>{'★'.repeat(r.rating)}<span className='text-ink-soft/30'>{'★'.repeat(5-r.rating)}</span></p>
-                        <p className='text-xs text-ink-soft'>{r.reviewer?.name || 'Buyer'} · {new Date(r.createdAt).toLocaleDateString('en-IN', {day:'numeric', month:'short', year:'numeric'})}</p>
+                        <p className='text-mustard'>{'*'.repeat(r.rating)}<span className='text-ink-soft/30'>{'*'.repeat(5-r.rating)}</span></p>
+                        <p className='text-xs text-ink-soft'>{r.reviewer?.name || 'Buyer'} - {new Date(r.createdAt).toLocaleDateString('en-IN', {day:'numeric', month:'short', year:'numeric'})}</p>
                     </div>
                     <p className='text-sm text-ink'>{r.comment}</p>
                 </div>
@@ -78,6 +78,7 @@ const Product=()=>{
         const updated = [productId, ...recent.filter(id => id !== productId)].slice(0, 10);
         localStorage.setItem('recentlyViewed', JSON.stringify(updated));
     }, [productId]);
+
     return productData ? (
         <div className='border-t border-line pt-10 transition-opacity ease-in duration-500 opacity-100'>
             <div className='flex gap-12 sm:gap-12 flex-col sm:flex-row'>
@@ -92,11 +93,11 @@ const Product=()=>{
                     <div className='w-full sm:w-[80%]'>
                         <img className='w-full h-auto' src={image} alt="" />
                     </div>
-                </div>  
+                </div>
                 <div className='flex-1'>
                     <h1 className='font-medium text-2xl mt-2'>{productData.name}</h1>
                     <div className='flex items-center gap-1 mt-2 text-sm text-ink-soft'>
-                        <p className='text-mustard'>{'★'.repeat(Math.round(productData.rating))}<span className='text-ink-soft/30'>{'★'.repeat(5-Math.round(productData.rating))}</span></p>
+                        <p className='text-mustard'>{'*'.repeat(Math.round(productData.rating))}<span className='text-ink-soft/30'>{'*'.repeat(5-Math.round(productData.rating))}</span></p>
                         <p className='pl-2'>{productData.rating} ({productData.totalReviews} review{productData.totalReviews !== 1 ? 's' : ''})</p>
                     </div>
                     <p className='mt-5 text-3xl font-medium'>{formatINR(productData.price)}</p>
@@ -105,7 +106,7 @@ const Product=()=>{
                         <div>
                             <p className='text-xs text-ink-soft mb-1'>SOLD BY</p>
                             <p className='font-medium'>{productData.vendor}</p>
-                            <p className='text-sm text-ink-soft'>📍 {productData.location}</p>
+                            <p className='text-sm text-ink-soft'>{productData.location}</p>
                         </div>
                         <button onClick={()=>{ if(productData.vendorId) navigate(`/vendor/${productData.vendorId}`)}} className='text-sm border border-ink px-4 py-2 hover:bg-ink hover:text-paper transition-colors'>
                             View Shop
@@ -124,7 +125,7 @@ const Product=()=>{
                     <div className='flex items-center gap-4 my-6'>
                         <p>Quantity</p>
                         <div className='flex items-center border border-line'>
-                            <button onClick={()=>setQuantity(q=>Math.max(1,q-1))} className='px-3 py-1 hover:bg-line'>−</button>
+                            <button onClick={()=>setQuantity(q=>Math.max(1,q-1))} className='px-3 py-1 hover:bg-line'>-</button>
                             <span className='px-4 py-1 min-w-[40px] text-center'>{quantity}</span>
                             <button onClick={()=>setQuantity(q=>Math.min(productData.stock,q+1))} className='px-3 py-1 hover:bg-line'>+</button>
                         </div>
@@ -135,9 +136,9 @@ const Product=()=>{
                     </button>
                     <hr className='mt-8 sm:w-4/5 border-line'/>
                     <div className='text-sm text-ink-soft mt-5 flex flex-col gap-1'>
-                        <p>✓ 100% Original product</p>
-                        <p>✓ Cash on delivery available</p>
-                        <p>✓ Easy 7-day returns and exchanges</p>
+                        <p>- 100% Original product</p>
+                        <p>- Cash on delivery available</p>
+                        <p>- Easy 7-day returns and exchanges</p>
                     </div>
                 </div>
             </div>

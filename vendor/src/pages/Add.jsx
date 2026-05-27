@@ -145,12 +145,12 @@ const Add = () => {
                     </select>
                 </div>
                 <div>
-                    <p className='mb-2 text-sm font-medium'>Price (₹)</p>
+                    <p className='mb-2 text-sm font-medium'>Price (Rs. )</p>
                     <input onChange={(e) => setPrice(e.target.value)} value={price} className='w-full px-3 py-2 sm:w-[120px] border border-line outline-none focus:border-navy bg-paper' type='number' placeholder='500' min='1' required/>
                     {suggestionLoading && <p className='text-xs text-ink-soft mt-1'>Getting price suggestion...</p>}
                     {priceSuggestion && !suggestionLoading && (
                         <p className='text-xs text-ink-soft mt-1' title={priceSuggestion.reason}>
-                            Suggested: ₹{priceSuggestion.min?.toLocaleString('en-IN')} – ₹{priceSuggestion.max?.toLocaleString('en-IN')} · Recommended: ₹{priceSuggestion.recommended?.toLocaleString('en-IN')} ℹ️
+                            Suggested: Rs. {priceSuggestion.min?.toLocaleString('en-IN')} - Rs. {priceSuggestion.max?.toLocaleString('en-IN')}  -  Recommended: Rs. {priceSuggestion.recommended?.toLocaleString('en-IN')} (i)
                         </p>
                     )}
                 </div>

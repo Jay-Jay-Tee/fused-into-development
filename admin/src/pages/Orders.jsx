@@ -122,7 +122,7 @@ const Orders = () => {
                         >
                             <p className='font-mono text-xs text-ink-soft truncate'>{o._id}</p>
                             <div>
-                                <p className='font-medium'>{o.buyer?.name || '—'}</p>
+                                <p className='font-medium'>{o.buyer?.name || ' - '}</p>
                                 <p className='text-xs text-ink-soft'>{o.buyer?.email || ''}</p>
                             </div>
                             <p className='font-medium'>{formatINR(o.totalAmount)}</p>
@@ -139,7 +139,7 @@ const Orders = () => {
                                 <div className='flex flex-col gap-2'>
                                     {o.items.map((item, i) => (
                                         <div key={i} className='flex justify-between text-sm'>
-                                            <p>{item.name} <span className='text-ink-soft'>× {item.quantity}</span></p>
+                                            <p>{item.name} <span className='text-ink-soft'>x {item.quantity}</span></p>
                                             <p className='font-medium'>{formatINR(item.price * item.quantity)}</p>
                                         </div>
                                     ))}
