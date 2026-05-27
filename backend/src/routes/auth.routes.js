@@ -22,13 +22,22 @@ const otpLimiter = rateLimit({
     legacyHeaders: false,
 });
 
+const resendCooldownLimiter = rateLimit({
+    windowMs: 30 * 1000,
+    max: 1,
+    message: { message: "Please wait 30 seconds before requesting another code" },
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+
 // ----- PUBLIC ROUTES (no auth required) ------------------
 
 router.post("/register",                   authLimiter, asyncHandler(authController.register));
 router.post("/register/verify-otp",        otpLimiter,  asyncHandler(authController.verifyRegistration));
-router.post("/register/resend-otp",        otpLimiter,  asyncHandler(authController.resendRegistrationOtp));
+router.post("/register/resend-otp",        resendCooldownLimiter,  asyncHandler(authController.resendRegistrationOtp));
 router.post("/login",                      authLimiter, asyncHandler(authController.login));
 router.post("/login/verify-2fa",           otpLimiter,  asyncHandler(authController.verifyLogin2FA));
+router.post("/login/resend-2fa",           resendCooldownLimiter,  asyncHandler(authController.resendLogin2FA));
 router.post("/refresh-token",              asyncHandler(authController.refreshToken));
 router.post("/logout",                     asyncHandler(authController.logout));
 

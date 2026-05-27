@@ -41,6 +41,7 @@ export const sendEmailOtp = async (email) => {
             html: `<p>Your verification code is: <strong style="font-size:24px;letter-spacing:4px">${code}</strong></p><p>This code expires in 10 minutes. Do not share it with anyone.</p>`,
         });
     } catch (err) {
+        await Otp.deleteMany({ identifier: email }).catch(() => {});
         throw new AppError(`Failed to send email: ${err.message}`, 502);
     }
 };

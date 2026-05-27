@@ -21,7 +21,18 @@ const ProductItem = ({id, image, name, price, vendor, vendorId}) => {
                 className='absolute top-2 right-2 z-10 w-8 h-8 bg-paper border border-line flex items-center justify-center hover:bg-mustard transition-colors'
                 aria-label={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
             >
-                <span className={isWishlisted ? 'text-brick' : 'text-ink-soft'}>{isWishlisted ? 'saved' : 'save'}</span>
+                <svg
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                    className={`h-4 w-4 transition-colors ${isWishlisted ? 'text-brick' : 'text-ink-soft'}`}
+                    fill={isWishlisted ? 'currentColor' : 'none'}
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                >
+                    <path d="M20.8 4.6c-1.7-1.9-4.5-2-6.3-.3L12 6.7l-2.5-2.4c-1.8-1.7-4.6-1.6-6.3.3-1.9 2-1.8 5.2.2 7.1L12 21l8.6-9.3c2-1.9 2.1-5.1.2-7.1Z" />
+                </svg>
             </button>
             <div className='overflow-hidden bg-line aspect-[3/4]'>
                 <img className='w-full h-full object-cover group-hover:scale-105 transition-transform duration-300' src={image} alt={name} />

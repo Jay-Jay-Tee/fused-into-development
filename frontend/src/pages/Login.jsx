@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react'
+import React, { useState, useContext, useEffect } from 'react'
 import { toast } from 'react-toastify'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
@@ -27,6 +27,14 @@ const Login = () => {
 
     const [twoFactorToken, setTwoFactorToken] = useState('');
     const [twoFactorCode, setTwoFactorCode] = useState('');
+    const [resendCooldown, setResendCooldown] = useState(0);
+
+    useEffect(() => {
+        if (resendCooldown === 0) return;
+
+        const timer = setTimeout(() => setResendCooldown((seconds) => Math.max(seconds - 1, 0)), 1000);
+        return () => clearTimeout(timer);
+    }, [resendCooldown]);
 
     const onSubmitHandler = async (event) => {
         event.preventDefault();
@@ -108,10 +116,23 @@ const Login = () => {
 
     const resendOtp = async () => {
         try {
+            if (resendCooldown > 0) return;
             await axios.post(`${API}/auth/register/resend-otp`, { userId: pendingUserId });
             toast.success('Codes resent');
+            setResendCooldown(30);
         } catch (err) {
             toast.error(err.response?.data?.message || 'Could not resend codes');
+        }
+    };
+
+    const resendTwoFactorCode = async () => {
+        try {
+            if (resendCooldown > 0) return;
+            await axios.post(`${API}/auth/login/resend-2fa`, { twoFactorToken });
+            toast.success('Verification code resent');
+            setResendCooldown(30);
+        } catch (err) {
+            toast.error(err.response?.data?.message || 'Could not resend verification code');
         }
     };
 
@@ -165,7 +186,9 @@ const Login = () => {
                     <p className='text-sm text-ink-soft text-center'>Enter the 6-digit codes sent to your email and phone.</p>
                     <input onChange={(e)=>setEmailCode(e.target.value)} value={emailCode} type='text' inputMode='numeric' maxLength={6} className='w-full px-3 py-2 border border-line outline-none focus:border-navy text-center tracking-widest' placeholder='Email code' required/>
                     <input onChange={(e)=>setPhoneCode(e.target.value)} value={phoneCode} type='text' inputMode='numeric' maxLength={6} className='w-full px-3 py-2 border border-line outline-none focus:border-navy text-center tracking-widest' placeholder='Phone code' required/>
-                    <button type='button' onClick={resendOtp} className='text-sm text-ink-soft hover:text-ink underline'>Resend codes</button>
+                    <button type='button' onClick={resendOtp} disabled={resendCooldown > 0} className='text-sm text-ink-soft hover:text-ink underline disabled:cursor-not-allowed disabled:opacity-50'>
+                        {resendCooldown > 0 ? `Resend codes in ${resendCooldown}s` : 'Resend codes'}
+                    </button>
                 </>
             )}
 
@@ -173,6 +196,9 @@ const Login = () => {
                 <>
                     <p className='text-sm text-ink-soft text-center'>Enter the 6-digit code sent to you.</p>
                     <input onChange={(e)=>setTwoFactorCode(e.target.value)} value={twoFactorCode} type='text' inputMode='numeric' maxLength={6} className='w-full px-3 py-2 border border-line outline-none focus:border-navy text-center tracking-widest' placeholder='Verification code' required/>
+                    <button type='button' onClick={resendTwoFactorCode} disabled={resendCooldown > 0} className='text-sm text-ink-soft hover:text-ink underline disabled:cursor-not-allowed disabled:opacity-50'>
+                        {resendCooldown > 0 ? `Resend code in ${resendCooldown}s` : 'Resend code'}
+                    </button>
                 </>
             )}
 

@@ -5,6 +5,7 @@ import {
     registerService,
     verifyRegistrationService,
     resendRegistrationOtpService,
+    resendLogin2FAService,
     verifyLogin2FAService,
     toggle2FAService,
 } from "../services/authService.js";
@@ -30,6 +31,13 @@ const resendRegistrationOtp = async (req, res) => {
     const { userId } = req.body;
     if (!userId) throw new AppError("userId is required", 400);
     const data = await resendRegistrationOtpService({ userId });
+    return res.status(200).json(data);
+};
+
+const resendLogin2FA = async (req, res) => {
+    const { twoFactorToken } = req.body;
+    if (!twoFactorToken) throw new AppError("twoFactorToken is required", 400);
+    const data = await resendLogin2FAService({ twoFactorToken });
     return res.status(200).json(data);
 };
 
@@ -63,6 +71,7 @@ export const authController = {
     register,
     verifyRegistration,
     resendRegistrationOtp,
+    resendLogin2FA,
     login,
     verifyLogin2FA,
     toggle2FA,

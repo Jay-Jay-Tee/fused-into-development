@@ -29,8 +29,13 @@ export const registerService = async ({ name, userName, email, phone, password }
         isPhoneVerified: false,
     });
 
-    await sendEmailOtp(email);
-    await sendOtp(phone, "sms");
+    try {
+        await sendEmailOtp(email);
+        await sendOtp(phone, "sms");
+    } catch (error) {
+        await User.deleteOne({ _id: user._id }).catch(() => {});
+        throw error;
+    }
 
     return {
         message: "Verification codes sent to your email and phone",
@@ -73,6 +78,32 @@ export const resendRegistrationOtpService = async ({ userId }) => {
     await sendOtp(user.phone, "sms");
 
     return { message: "Verification codes resent" };
+};
+
+// ---- resendLogin2FAService ----------------------
+export const resendLogin2FAService = async ({ twoFactorToken }) => {
+    if (!twoFactorToken) {
+        throw new AppError("2FA token is required", 400);
+    }
+
+    let decoded;
+    try {
+        decoded = jwt.verify(twoFactorToken, process.env.JWT_2FA_SECRET);
+    } catch {
+        throw new AppError("2FA token is invalid or expired", 401);
+    }
+
+    if (decoded.purpose !== "2fa-login") {
+        throw new AppError("Invalid token", 401);
+    }
+
+    if (decoded.channel === "email") {
+        await sendEmailOtp(decoded.to);
+    } else {
+        await sendOtp(decoded.to, "sms");
+    }
+
+    return { message: "Verification code resent" };
 };
 
 // ---- loginService ----------------------------------
