@@ -9,6 +9,7 @@ experience with AI-powered search and recommendations.
 Live:
 - Buyer storefront: https://fused-into-development.vercel.app/
 - Admin panel: https://fused-into-development-ka5w.vercel.app/login
+- Vendor panel: https://fused-into-development-ny39.vercel.app
 - Backend API: https://fused-into-development.onrender.com/api
 
 ---
