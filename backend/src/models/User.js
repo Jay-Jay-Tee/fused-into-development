@@ -39,10 +39,9 @@ const userSchema = new mongoose.Schema(
         },
         phone: {
             type: String,
-            required: true,
+            required: [true, 'Phone number is required'],
             match: [/^\d{10}$/, 'Phone number must be 10 digits'],
-            unique: true,
-            sparse: true
+            unique: true
         },
         addresses: [addressSchema],
 
@@ -52,6 +51,21 @@ const userSchema = new mongoose.Schema(
         },
 
         isBanned: {
+            type: Boolean,
+            default: false
+        },
+
+        isEmailVerified: {
+            type: Boolean,
+            default: true
+        },
+
+        isPhoneVerified: {
+            type: Boolean,
+            default: true
+        },
+
+        twoFactorEnabled: {
             type: Boolean,
             default: false
         }
