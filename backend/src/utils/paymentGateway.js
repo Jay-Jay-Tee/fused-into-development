@@ -35,7 +35,7 @@ export const createGatewaySession = async ({ order, paymentType = "razorpay" }) 
         const cashfreeOrderId = buildCashfreeOrderId(order._id);
         const { data } = await Cashfree.PGCreateOrder(CASHFREE_API_VERSION, {
             order_id: cashfreeOrderId,
-            order_amount: Number((order.totalAmount / 100).toFixed(2)),
+            order_amount: Number(order.totalAmount.toFixed(2)), // already in rupees
             order_currency: "INR",
             customer_details: {
                 customer_id: order.buyer.toString(),
@@ -54,7 +54,7 @@ export const createGatewaySession = async ({ order, paymentType = "razorpay" }) 
     }
 
     const razorpayOrder = await getRazorpay().orders.create({
-        amount: Math.round(order.totalAmount),
+        amount: Math.round(order.totalAmount * 100), // rupees → paise
         currency: "INR",
         receipt: `order_${order._id}`,
     });
@@ -158,7 +158,7 @@ export const createGatewayRefund = async ({ payment, refund, orderId }) => {
             CASHFREE_API_VERSION,
             buildCashfreeOrderId(resolvedOrderId),
             {
-                refund_amount: Number((refund.refundAmount / 100).toFixed(2)),
+                refund_amount: Number(refund.refundAmount.toFixed(2)), // already in rupees
                 refund_id: refundId,
                 refund_note: refund.reason,
             }
@@ -174,7 +174,7 @@ export const createGatewayRefund = async ({ payment, refund, orderId }) => {
 
     const razorpayRefund = await getRazorpay().payments.refund(
         payment.transactionId,
-        { amount: refund.refundAmount }
+        { amount: Math.round(refund.refundAmount * 100) } // rupees → paise
     );
 
     return { gatewayRefundId: razorpayRefund.id };
