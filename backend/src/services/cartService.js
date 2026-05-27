@@ -67,7 +67,7 @@ export const addToCartService = async ({ userId, productId, quantity }) => {
         await cart.save();
     }
 
-    return await cart.populate("items.product", "name images price stock isActive");
+    return cart.populate("items.product", "name images price stock isActive");
 };
 
 export const updateCartItemService = async ({ userId, productId, quantity }) => {
@@ -97,7 +97,7 @@ export const updateCartItemService = async ({ userId, productId, quantity }) => 
     item.quantity = quantity;
     await cart.save();
 
-    return await cart.populate("items.product", "name images price stock isActive");
+    return cart.populate("items.product", "name images price stock isActive");
 };
 
 // removes a single product from the cart entirely
@@ -116,7 +116,7 @@ export const removeCartItemService = async ({ userId, productId }) => {
         throw new AppError("Item not found in cart", 404);
 
     await cart.save();
-    return await cart.populate("items.product", "name images price stock isActive");
+    return cart.populate("items.product", "name images price stock isActive");
 };
 
 export const clearCartService = async ({ userId }) => {

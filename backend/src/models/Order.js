@@ -61,7 +61,6 @@ const orderSchema = new mongoose.Schema(
             type: String,
             enum: [
                 "pending",
-                "payment_pending",
                 "confirmed",
                 "shipped",
                 "delivered",
@@ -84,7 +83,6 @@ const orderSchema = new mongoose.Schema(
             type: Number,
             required: true
         },
-        reservationExpiresAt: Date,
         // createdAt and updatedAt are automatically added by timestamps: true
         deliveredAt: Date
     },

@@ -2,7 +2,6 @@ import {
     getAnalyticsService,
     getPendingVendorsService,
     createCategoryService,
-    getCommissionService,
     updateCommissionService,
     disbursePayoutService,
     getPayoutsService,
@@ -27,11 +26,6 @@ const getPendingVendors = async (req, res) => {
 
 const addCategory = async (req, res) => {
     const data = await createCategoryService(req.body);
-    return res.status(200).json(data);
-};
-
-const getCommission = async (req, res) => {
-    const data = await getCommissionService();
     return res.status(200).json(data);
 };
 
@@ -91,7 +85,6 @@ export const adminController = {
     getAnalytics,
     getPendingVendors,
     addCategory,
-    getCommission,
     updateCommission,
     disbursePayout,
     getPayouts,

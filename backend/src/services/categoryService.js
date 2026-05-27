@@ -3,7 +3,7 @@ import { AppError } from "../utils/appError.js";
 
 export const getActiveCategoriesService = async () => {
     return await Category.find({ isActive: true })
-        .select("name slug icon parentCategory commission")
+        .select("name slug icon parentCategory")
         .lean();
 };
 

@@ -17,13 +17,8 @@ const paymentSchema = new mongoose.Schema(
             required: true
         },
         transactionId: {
-            type: String
-        },
-        gatewayOrderId: {
-            type: String
-        },
-        paymentSessionId: {
-            type: String
+            type: String,
+            required: true
         },
         // payment is either for an order or a refund, but not both
         order: {
@@ -52,14 +47,12 @@ const paymentSchema = new mongoose.Schema(
     }
 );
 paymentSchema.pre("validate", function (next) {
+
     const hasOrder = !!this.order;
     const hasRefund = !!this.refund;
     const hasPayout = this.transactionType === "payout";
-    const hasTransactionId = !!this.transactionId;
-    const hasGatewayOrderId = !!this.gatewayOrderId;
-    const hasPaymentSessionId = !!this.paymentSessionId;
-    const hasGatewayReference = hasGatewayOrderId || hasPaymentSessionId;
 
+    // both order and refund populated, or neither populated (but not payout)
     if (hasOrder && hasRefund)
         return next(
             new Error("Payment cannot reference both an order and a refund")
@@ -80,83 +73,10 @@ paymentSchema.pre("validate", function (next) {
         );
     }
 
-    if (hasGatewayOrderId && hasPaymentSessionId) {
-        return next(
-            new Error("Payment cannot store both gatewayOrderId and paymentSessionId")
-        );
-    }
-
-    if (this.transactionType !== "order" && hasGatewayReference) {
-        return next(
-            new Error("Only order payments can store gateway session details")
-        );
-    }
-
-    if (hasGatewayOrderId && this.method !== "razorpay") {
-        return next(
-            new Error("gatewayOrderId is only valid for Razorpay order payments")
-        );
-    }
-
-    if (hasPaymentSessionId && this.method !== "cashfree") {
-        return next(
-            new Error("paymentSessionId is only valid for Cashfree order payments")
-        );
-    }
-
-    if (this.transactionType === "order" && hasTransactionId && hasGatewayReference) {
-        return next(
-            new Error("Order payment cannot store transactionId with gateway session details")
-        );
-    }
-
-    if (
-        this.transactionType === "order" &&
-        this.status === "pending" &&
-        this.method === "razorpay" &&
-        !hasGatewayOrderId
-    ) {
-        return next(
-            new Error("Pending Razorpay order payment must have gatewayOrderId")
-        );
-    }
-
-    if (
-        this.transactionType === "order" &&
-        this.status === "pending" &&
-        this.method === "cashfree" &&
-        !hasPaymentSessionId
-    ) {
-        return next(
-            new Error("Pending Cashfree order payment must have paymentSessionId")
-        );
-    }
-
-    const requiresTransactionId =
-        this.transactionType === "refund" ||
-        this.transactionType === "payout" ||
-        this.method === "upi" ||
-        this.status === "pending_verification" ||
-        (this.transactionType === "order" && this.status === "paid");
-
-    if (requiresTransactionId && !hasTransactionId) {
-        return next(
-            new Error("Transaction ID is required for this payment state")
-        );
-    }
-
     next();
 });
 
-paymentSchema.index(
-    { method: 1, transactionId: 1 },
-    {
-        unique: true,
-        partialFilterExpression: {
-            transactionId: { $exists: true, $type: "string" }
-        }
-    }
-);
+paymentSchema.index({ method: 1, transactionId: 1 }, { unique: true });
 
 const Payment = mongoose.model("Payment", paymentSchema);
 

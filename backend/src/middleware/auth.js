@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 import { User } from "../models/User.js";
-import { AppError } from "../utils/appError.js";
+import { AppError } from "../utils/appError.js"
 
 const auth = async (req, res, next) => {
     const authHeader = req.headers.authorization;
@@ -22,7 +22,7 @@ const auth = async (req, res, next) => {
     if (!user)           return next(new AppError('User no longer exists', 401));
     if (user.isBanned)   return next(new AppError('Your account has been banned', 403));
 
-    req.user = { id: decoded.userId, role: user.role };
+    req.user = { id: decoded.userId, role: decoded.role };
     next();
 };
 

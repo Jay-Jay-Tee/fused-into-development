@@ -107,11 +107,6 @@ export const createCategoryService = async ({
     return category.toObject();
 };
 
-export const getCommissionService = async () => {
-    const vendor = await Vendor.findOne({}).select('commission').lean();
-    return { commissionPercent: vendor?.commission ?? 10 };
-};
-
 // update commission for everyone
 export const updateCommissionService = async ({
     commissionPercent

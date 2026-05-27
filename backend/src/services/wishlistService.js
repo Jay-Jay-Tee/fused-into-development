@@ -44,7 +44,7 @@ export const addToWishlistService = async ({ userId, productId }) => {
         }
     }
 
-    return await wishlist.populate("items.product", "name images price averageRating totalReviews isActive");
+    return wishlist.populate("items.product", "name images price averageRating totalReviews isActive");
 };
 
 // removes a single product from the wishlist
@@ -63,5 +63,5 @@ export const removeFromWishlistService = async ({ userId, productId }) => {
         throw new AppError("Product not found in wishlist", 404);
 
     await wishlist.save();
-    return await wishlist.populate("items.product", "name images price averageRating totalReviews isActive");
+    return wishlist.populate("items.product", "name images price averageRating totalReviews isActive");
 };
