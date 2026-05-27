@@ -149,6 +149,20 @@ VITE_API_URL=http://localhost:5000/api
 VITE_RAZORPAY_KEY_ID=your_razorpay_key_id
 ```
 
+SMS / Twilio
+-----------
+
+SMS is disabled by default to avoid Twilio trial-account restrictions. To enable SMS verification, set the following in `backend/.env`:
+
+```
+SMS_ENABLED=true
+TWILIO_ACCOUNT_SID=your_twilio_account_sid
+TWILIO_AUTH_TOKEN=your_twilio_auth_token
+TWILIO_VERIFY_SERVICE_SID=your_verify_service_sid
+```
+
+If `SMS_ENABLED` is not set to `true`, SMS send/check calls are skipped and email OTP is used as the primary verification method.
+
 ---
 
 ## Razorpay test details

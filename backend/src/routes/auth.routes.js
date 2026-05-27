@@ -38,6 +38,8 @@ router.post("/register/resend-otp",        resendCooldownLimiter,  asyncHandler(
 router.post("/login",                      authLimiter, asyncHandler(authController.login));
 router.post("/login/verify-2fa",           otpLimiter,  asyncHandler(authController.verifyLogin2FA));
 router.post("/login/resend-2fa",           resendCooldownLimiter,  asyncHandler(authController.resendLogin2FA));
+router.post("/password-reset/request",     resendCooldownLimiter,  asyncHandler(authController.requestPasswordReset));
+router.post("/password-reset/confirm",     otpLimiter,  asyncHandler(authController.confirmPasswordReset));
 router.post("/refresh-token",              asyncHandler(authController.refreshToken));
 router.post("/logout",                     asyncHandler(authController.logout));
 

@@ -2,7 +2,6 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import { User } from "../models/User.js";
 import { AppError } from "../utils/appError.js";
-import { sendOtp, checkOtp } from "./twilioService.js";
 import { sendEmailOtp, checkEmailOtp } from "./emailService.js";
 import { RevokedToken } from "../models/RevokedToken.js";
 
@@ -31,34 +30,31 @@ export const registerService = async ({ name, userName, email, phone, password }
 
     try {
         await sendEmailOtp(email);
-        await sendOtp(phone, "sms");
     } catch (error) {
         await User.deleteOne({ _id: user._id }).catch(() => {});
         throw error;
     }
 
     return {
-        message: "Verification codes sent to your email and phone",
+        message: "Verification code sent to your email",
         userId: user._id,
         requiresVerification: true,
     };
 };
 
 // ---- verifyRegistrationService ----------------
-export const verifyRegistrationService = async ({ userId, emailCode, phoneCode }) => {
+export const verifyRegistrationService = async ({ userId, emailCode }) => {
     const user = await User.findById(userId);
     if (!user) throw new AppError("User not found", 404);
 
-    if (user.isEmailVerified && user.isPhoneVerified) {
+    if (user.isEmailVerified) {
         throw new AppError("Account is already verified", 400);
     }
 
     const emailOk = await checkEmailOtp(user.email, emailCode);
     if (!emailOk) throw new AppError("Invalid email verification code", 400);
 
-    const phoneOk = await checkOtp(user.phone, "sms", phoneCode);
-    if (!phoneOk) throw new AppError("Invalid phone verification code", 400);
-
+    // Mark both email and phone as verified for now since SMS verification is disabled
     user.isEmailVerified = true;
     user.isPhoneVerified = true;
     await user.save();
@@ -70,14 +66,13 @@ export const verifyRegistrationService = async ({ userId, emailCode, phoneCode }
 export const resendRegistrationOtpService = async ({ userId }) => {
     const user = await User.findById(userId);
     if (!user) throw new AppError("User not found", 404);
-    if (user.isEmailVerified && user.isPhoneVerified) {
+    if (user.isEmailVerified) {
         throw new AppError("Account is already verified", 400);
     }
 
     await sendEmailOtp(user.email);
-    await sendOtp(user.phone, "sms");
 
-    return { message: "Verification codes resent" };
+    return { message: "Verification code resent" };
 };
 
 // ---- resendLogin2FAService ----------------------
@@ -97,13 +92,55 @@ export const resendLogin2FAService = async ({ twoFactorToken }) => {
         throw new AppError("Invalid token", 401);
     }
 
-    if (decoded.channel === "email") {
-        await sendEmailOtp(decoded.to);
-    } else {
-        await sendOtp(decoded.to, "sms");
-    }
+    // Always resend via email for now
+    await sendEmailOtp(decoded.to);
 
     return { message: "Verification code resent" };
+};
+
+// ---- requestPasswordResetService ----------------
+export const requestPasswordResetService = async ({ email }) => {
+    if (!email) {
+        throw new AppError("Email is required", 400);
+    }
+
+    const normalizedEmail = email.trim().toLowerCase();
+    const user = await User.findOne({ email: normalizedEmail });
+
+    if (user) {
+        const resetIdentifier = `password-reset:${normalizedEmail}`;
+        await sendEmailOtp(normalizedEmail, {
+            identifier: resetIdentifier,
+            subject: 'Your VendorHub password reset code',
+            intro: 'Your password reset code is:',
+        });
+    }
+
+    return { message: 'If an account exists for that email, a reset code has been sent.' };
+};
+
+// ---- confirmPasswordResetService ----------------
+export const confirmPasswordResetService = async ({ email, code, newPassword }) => {
+    if (!email || !code || !newPassword) {
+        throw new AppError("Email, code and new password are required", 400);
+    }
+
+    const normalizedEmail = email.trim().toLowerCase();
+    const resetIdentifier = `password-reset:${normalizedEmail}`;
+    const approved = await checkEmailOtp(normalizedEmail, code, resetIdentifier);
+    if (!approved) {
+        throw new AppError("Invalid or expired reset code", 400);
+    }
+
+    const user = await User.findOne({ email: normalizedEmail }).select('+password');
+    if (!user) {
+        throw new AppError("User not found", 404);
+    }
+
+    user.password = await bcrypt.hash(newPassword, 10);
+    await user.save();
+
+    return { message: 'Password reset successfully' };
 };
 
 // ---- loginService ----------------------------------
@@ -120,33 +157,28 @@ export const loginService = async ({ email, userName, phone, password }) => {
         throw new AppError("No account found with those credentials", 401);
     }
 
-    if (!user.isEmailVerified) {
-        throw new AppError("Please verify your account before logging in", 403);
-    }
-
+    // Verify password first
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
         throw new AppError("Incorrect password", 401);
     }
 
-    if (user.twoFactorEnabled && user.role !== 'admin') {
-        let otpTo, otpChannel;
-        if (email) {
-            otpTo = user.email;
-            otpChannel = "email";
-        } else if (phone) {
-            otpTo = user.phone;
-            otpChannel = "sms";
-        } else {
-            otpTo = user.email;
-            otpChannel = "email";
-        }
+    // If the account exists but hasn't completed registration verification,
+    // send the registration OTP via email and instruct the client to show the verification UI.
+    if (!user.isEmailVerified) {
+        await sendEmailOtp(user.email);
+        return {
+            requiresVerification: true,
+            userId: user._id,
+            message: "Account exists but is not verified; verification code sent",
+        };
+    }
 
-        if (otpChannel === "email") {
-            await sendEmailOtp(otpTo);
-        } else {
-            await sendOtp(otpTo, "sms");
-        }
+    if (user.twoFactorEnabled && user.role !== 'admin') {
+
+        const otpTo = user.email;
+        const otpChannel = "email";
+        await sendEmailOtp(otpTo);
 
         const twoFactorToken = jwt.sign(
             { userId: user._id, to: otpTo, channel: otpChannel, purpose: "2fa-login" },
@@ -189,9 +221,8 @@ export const verifyLogin2FAService = async ({ twoFactorToken, code }) => {
         throw new AppError("Invalid token", 401);
     }
 
-    const approved = decoded.channel === "email"
-        ? await checkEmailOtp(decoded.to, code)
-        : await checkOtp(decoded.to, "sms", code);
+    // Only email-based 2FA is supported for now
+    const approved = await checkEmailOtp(decoded.to, code);
     if (!approved) throw new AppError("Invalid verification code", 401);
 
     const user = await User.findById(decoded.userId);

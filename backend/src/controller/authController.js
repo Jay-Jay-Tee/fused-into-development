@@ -6,6 +6,8 @@ import {
     verifyRegistrationService,
     resendRegistrationOtpService,
     resendLogin2FAService,
+    requestPasswordResetService,
+    confirmPasswordResetService,
     verifyLogin2FAService,
     toggle2FAService,
 } from "../services/authService.js";
@@ -20,10 +22,10 @@ const register = async (req, res) => {
 };
 
 const verifyRegistration = async (req, res) => {
-    const { userId, emailCode, phoneCode } = req.body;
-    if (!userId || !emailCode || !phoneCode)
-        throw new AppError("userId, emailCode and phoneCode are required", 400);
-    const data = await verifyRegistrationService({ userId, emailCode, phoneCode });
+    const { userId, emailCode } = req.body;
+    if (!userId || !emailCode)
+        throw new AppError("userId and emailCode are required", 400);
+    const data = await verifyRegistrationService({ userId, emailCode });
     return res.status(200).json(data);
 };
 
@@ -38,6 +40,18 @@ const resendLogin2FA = async (req, res) => {
     const { twoFactorToken } = req.body;
     if (!twoFactorToken) throw new AppError("twoFactorToken is required", 400);
     const data = await resendLogin2FAService({ twoFactorToken });
+    return res.status(200).json(data);
+};
+
+const requestPasswordReset = async (req, res) => {
+    const { email } = req.body;
+    const data = await requestPasswordResetService({ email });
+    return res.status(200).json(data);
+};
+
+const confirmPasswordReset = async (req, res) => {
+    const { email, code, newPassword } = req.body;
+    const data = await confirmPasswordResetService({ email, code, newPassword });
     return res.status(200).json(data);
 };
 
@@ -72,6 +86,8 @@ export const authController = {
     verifyRegistration,
     resendRegistrationOtp,
     resendLogin2FA,
+    requestPasswordReset,
+    confirmPasswordReset,
     login,
     verifyLogin2FA,
     toggle2FA,

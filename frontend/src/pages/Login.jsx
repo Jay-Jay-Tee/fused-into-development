@@ -23,10 +23,13 @@ const Login = () => {
 
     const [pendingUserId, setPendingUserId] = useState('');
     const [emailCode, setEmailCode] = useState('');
-    const [phoneCode, setPhoneCode] = useState('');
 
     const [twoFactorToken, setTwoFactorToken] = useState('');
     const [twoFactorCode, setTwoFactorCode] = useState('');
+    const [resetEmail, setResetEmail] = useState('');
+    const [resetCode, setResetCode] = useState('');
+    const [resetNewPassword, setResetNewPassword] = useState('');
+    const [resetConfirmPassword, setResetConfirmPassword] = useState('');
     const [resendCooldown, setResendCooldown] = useState(0);
 
     useEffect(() => {
@@ -60,7 +63,7 @@ const Login = () => {
                 if (res.data.requiresVerification) {
                     setPendingUserId(res.data.userId);
                     setCurrentState('verify-registration');
-                    toast.success('Codes sent to your email and phone');
+                    toast.success('Code sent to your email');
                 } else {
                     toast.success('Account created! Please sign in.');
                     setCurrentState('Login');
@@ -77,7 +80,11 @@ const Login = () => {
 
                 const res = await axios.post(`${API}/auth/login`, loginPayload);
 
-                if (res.data.twoFactorRequired) {
+                if (res.data.requiresVerification) {
+                    setPendingUserId(res.data.userId);
+                    setCurrentState('verify-registration');
+                    toast.info('Account exists but is not verified — code sent to your email');
+                } else if (res.data.twoFactorRequired) {
                     setTwoFactorToken(res.data.twoFactorToken);
                     setCurrentState('verify-2fa');
                     toast.info('Check your email or phone for a verification code');
@@ -92,7 +99,6 @@ const Login = () => {
                 await axios.post(`${API}/auth/register/verify-otp`, {
                     userId: pendingUserId,
                     emailCode,
-                    phoneCode,
                 });
                 toast.success('Account verified! Please sign in.');
                 setCurrentState('Login');
@@ -106,6 +112,37 @@ const Login = () => {
                 localStorage.setItem('refreshToken', res.data.refreshToken);
                 setToken(res.data.accessToken);
                 navigate('/');
+
+            } else if (currentState === 'forgot-password') {
+                if (!email) {
+                    toast.error('Enter your email address');
+                    return;
+                }
+                await axios.post(`${API}/auth/password-reset/request`, { email });
+                setResetEmail(email);
+                setResetCode('');
+                setResetNewPassword('');
+                setResetConfirmPassword('');
+                setResendCooldown(30);
+                setCurrentState('reset-password');
+                toast.success('If an account exists for that email, a reset code has been sent');
+
+            } else if (currentState === 'reset-password') {
+                if (resetNewPassword !== resetConfirmPassword) {
+                    toast.error('Passwords do not match');
+                    return;
+                }
+                await axios.post(`${API}/auth/password-reset/confirm`, {
+                    email: resetEmail,
+                    code: resetCode,
+                    newPassword: resetNewPassword,
+                });
+                toast.success('Password reset successfully. Please sign in.');
+                setCurrentState('Login');
+                setResetEmail('');
+                setResetCode('');
+                setResetNewPassword('');
+                setResetConfirmPassword('');
             }
         } catch (err) {
             toast.error(err.response?.data?.message || 'Something went wrong');
@@ -136,6 +173,17 @@ const Login = () => {
         }
     };
 
+    const resendPasswordResetCode = async () => {
+        try {
+            if (resendCooldown > 0) return;
+            await axios.post(`${API}/auth/password-reset/request`, { email: resetEmail });
+            toast.success('Reset code resent');
+            setResendCooldown(30);
+        } catch (err) {
+            toast.error(err.response?.data?.message || 'Could not resend reset code');
+        }
+    };
+
     return (
         <form onSubmit={onSubmitHandler} className='flex flex-col items-center w-[90%] sm:max-w-96 m-auto mt-14 gap-4 text-ink'>
             <div className='inline-flex items-center gap-2 mb-2 mt-10'>
@@ -144,6 +192,8 @@ const Login = () => {
                     {currentState === 'Sign Up' && 'Sign Up'}
                     {currentState === 'verify-registration' && 'Verify Account'}
                     {currentState === 'verify-2fa' && 'Two-Factor Auth'}
+                    {currentState === 'forgot-password' && 'Reset Password'}
+                    {currentState === 'reset-password' && 'Reset Password'}
                 </p>
                 <hr className='border-none h-[1.5px] w-8 bg-ink'/>
             </div>
@@ -167,6 +217,10 @@ const Login = () => {
                 <input onChange={(e)=>setIdentifier(e.target.value)} value={identifier} type='text' className='w-full px-3 py-2 border border-line outline-none focus:border-navy' placeholder='Email, username or phone' required/>
             )}
 
+            {currentState === 'forgot-password' && (
+                <input onChange={(e)=>setEmail(e.target.value)} value={email} type='email' className='w-full px-3 py-2 border border-line outline-none focus:border-navy' placeholder='Email' required/>
+            )}
+
             {(currentState === 'Login' || currentState === 'Sign Up') && (
                 <div className='w-full'>
                     <input onChange={(e)=>setPassword(e.target.value)} value={password} type='password' className={`w-full px-3 py-2 border outline-none focus:border-navy ${errors.password ? 'border-brick' : 'border-line'}`} placeholder='Password' required/>
@@ -181,13 +235,24 @@ const Login = () => {
                 </div>
             )}
 
+            {currentState === 'reset-password' && (
+                <>
+                    <p className='text-sm text-ink-soft text-center'>Enter the code sent to {resetEmail} and choose a new password.</p>
+                    <input onChange={(e)=>setResetCode(e.target.value)} value={resetCode} type='text' inputMode='numeric' maxLength={6} className='w-full px-3 py-2 border border-line outline-none focus:border-navy text-center tracking-widest' placeholder='Reset code' required/>
+                    <input onChange={(e)=>setResetNewPassword(e.target.value)} value={resetNewPassword} type='password' className='w-full px-3 py-2 border border-line outline-none focus:border-navy' placeholder='New password' required/>
+                    <input onChange={(e)=>setResetConfirmPassword(e.target.value)} value={resetConfirmPassword} type='password' className='w-full px-3 py-2 border border-line outline-none focus:border-navy' placeholder='Confirm new password' required/>
+                    <button type='button' onClick={resendPasswordResetCode} disabled={resendCooldown > 0} className='text-sm text-ink-soft hover:text-ink underline disabled:cursor-not-allowed disabled:opacity-50'>
+                        {resendCooldown > 0 ? `Resend code in ${resendCooldown}s` : 'Resend code'}
+                    </button>
+                </>
+            )}
+
             {currentState === 'verify-registration' && (
                 <>
-                    <p className='text-sm text-ink-soft text-center'>Enter the 6-digit codes sent to your email and phone.</p>
+                    <p className='text-sm text-ink-soft text-center'>Enter the 6-digit code sent to your email.</p>
                     <input onChange={(e)=>setEmailCode(e.target.value)} value={emailCode} type='text' inputMode='numeric' maxLength={6} className='w-full px-3 py-2 border border-line outline-none focus:border-navy text-center tracking-widest' placeholder='Email code' required/>
-                    <input onChange={(e)=>setPhoneCode(e.target.value)} value={phoneCode} type='text' inputMode='numeric' maxLength={6} className='w-full px-3 py-2 border border-line outline-none focus:border-navy text-center tracking-widest' placeholder='Phone code' required/>
                     <button type='button' onClick={resendOtp} disabled={resendCooldown > 0} className='text-sm text-ink-soft hover:text-ink underline disabled:cursor-not-allowed disabled:opacity-50'>
-                        {resendCooldown > 0 ? `Resend codes in ${resendCooldown}s` : 'Resend codes'}
+                        {resendCooldown > 0 ? `Resend code in ${resendCooldown}s` : 'Resend code'}
                     </button>
                 </>
             )}
@@ -204,7 +269,7 @@ const Login = () => {
 
             {(currentState === 'Login' || currentState === 'Sign Up') && (
                 <div className='w-full flex justify-between text-sm mt-[-8px] text-ink-soft'>
-                    <p className='cursor-pointer hover:text-ink'>Forgot password?</p>
+                    <button type='button' onClick={() => { setCurrentState('forgot-password'); setEmail(identifier.includes('@') ? identifier : ''); setErrors({}); }} className='cursor-pointer hover:text-ink'>Forgot password?</button>
                     {currentState === 'Login'
                         ? <p onClick={()=>{ setCurrentState('Sign Up'); setErrors({}); }} className='cursor-pointer hover:text-ink'>Create account</p>
                         : <p onClick={()=>{ setCurrentState('Login'); setErrors({}); }} className='cursor-pointer hover:text-ink'>Login here</p>
@@ -222,6 +287,10 @@ const Login = () => {
 
             {(currentState === 'verify-registration' || currentState === 'verify-2fa') && (
                 <p onClick={()=>setCurrentState('Login')} className='text-sm text-ink-soft cursor-pointer hover:text-ink'>Back to login</p>
+            )}
+
+            {(currentState === 'forgot-password' || currentState === 'reset-password') && (
+                <p onClick={()=>{ setCurrentState('Login'); setResendCooldown(0); }} className='text-sm text-ink-soft cursor-pointer hover:text-ink'>Back to login</p>
             )}
         </form>
     );
